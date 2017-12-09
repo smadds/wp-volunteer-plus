@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:   Volunteer Plus
- * Plugin URI:    https://maddox.co.uk/downloads/volunteer-plus.zip
+ * Plugin Name:   WP Volunteer Plus
+ * Plugin URI:    https://maddox.co.uk/volunteer-plus
  * Description:   A selection of tools for searching the Volunteer Plus Database
- * Version:       0.4.0
- * Author:        Simon Maddox & Pipe Media
- * Author URI:    https://maddox.co.uk/volunteer-plus
+ * Version:       0.4.1
+ * Author:        Simon Maddox
+ * Author URI:    https://maddox.co.uk
  */
 
 //Get the absolute path of the directory that contains the file, with trailing slash.
@@ -33,13 +33,19 @@ require_once MY_PLUGIN_PATH . 'includes/volplus_Opportunities_List_Shortcode.php
 require_once MY_PLUGIN_PATH . 'includes/volplus_Opportunities_Returned_Shortcode.php';
 require_once MY_PLUGIN_PATH . 'includes/volplus_Opportunity_Detail_Shortcode.php';
 require_once MY_PLUGIN_PATH . 'includes/volplus_Settings.php';
-require MY_PLUGIN_PATH . 'includes/plugin-update-checker/plugin-update-checker.php';
+require_once MY_PLUGIN_PATH . 'includes/plugin-update-checker/plugin-update-checker.php';
 
 $myUpdateChecker = Puc_v4p3_Factory::buildUpdateChecker(
-	'https://maddox.co.uk/wp-update-server/?action=get_metadata&slug=volunteer-plus',
+	'https://github.com/smadds/wp-volunteer-plus',
 	__FILE__,
-	'volunteer-plus'
+	'wp-volunteer-plus'
 );
+
+//Optional: If you're using a private repository, specify the access token like this:
+$myUpdateChecker->setAuthentication('4046a82e545bde6ed1c1dc2ad54f4c770cccfa40');
+
+//Optional: Set the branch that contains the stable release.
+//$myUpdateChecker->setBranch('stable-branch-name');
 
 
 function volplus_load_plugin_css() {
