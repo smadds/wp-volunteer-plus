@@ -1,0 +1,49 @@
+<?php
+/**
+ * Plugin Name:   Volunteer Plus
+ * Plugin URI:    https://maddox.co.uk/downloads/volunteer-plus.zip
+ * Description:   A selection of tools for searching the Volunteer Plus Database
+ * Version:       0.4.0
+ * Author:        Simon Maddox & Pipe Media
+ * Author URI:    https://maddox.co.uk/volunteer-plus
+ */
+
+//Get the absolute path of the directory that contains the file, with trailing slash.
+define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__)); 
+define('MY_PLUGIN_URL', plugin_dir_url(__FILE__)); 
+
+//Add Settings option to plugins list page
+function volplus_add_settings_link( $links ) {
+    $settings_link = '<a href="options-general.php?page=volunteer-plus">' . __( 'Settings' ) . '</a>';
+    array_push( $links, $settings_link );
+  	return $links;
+}
+
+$plugin = plugin_basename( __FILE__ );
+add_filter( "plugin_action_links_".$plugin, 'volplus_add_settings_link' );
+
+
+define( "API_URL", get_option('volplus_endpoint') );
+define( "API_KEY", get_option('volplus_api_key') );
+
+
+require_once MY_PLUGIN_PATH . 'includes/volplus_Search_Widget.php';
+require_once MY_PLUGIN_PATH . 'includes/volplus_Opportunities_List_Widget.php';
+require_once MY_PLUGIN_PATH . 'includes/volplus_Opportunities_List_Shortcode.php';
+require_once MY_PLUGIN_PATH . 'includes/volplus_Opportunities_Returned_Shortcode.php';
+require_once MY_PLUGIN_PATH . 'includes/volplus_Opportunity_Detail_Shortcode.php';
+require_once MY_PLUGIN_PATH . 'includes/volplus_Settings.php';
+require MY_PLUGIN_PATH . 'includes/plugin-update-checker/plugin-update-checker.php';
+
+$myUpdateChecker = Puc_v4p3_Factory::buildUpdateChecker(
+	'https://maddox.co.uk/wp-update-server/?action=get_metadata&slug=volunteer-plus',
+	__FILE__,
+	'volunteer-plus'
+);
+
+
+function volplus_load_plugin_css() {
+
+    wp_enqueue_style( 'volplus_frontend', MY_PLUGIN_URL . 'assets/css/frontend.css' );
+}
+add_action( 'wp_enqueue_scripts', 'volplus_load_plugin_css' );

@@ -1,0 +1,91 @@
+<?php
+
+require_once MY_PLUGIN_PATH . 'includes/volplus_Functions.php';
+
+
+// Opportunity List
+function volplus_list_opportunities_func() {
+
+$opportunities = wp_remote_get(API_URL . 'opportunities?'.$_SERVER['QUERY_STRING'], array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+$response_code = wp_remote_retrieve_response_code($opportunities);
+$opportunities = json_decode($opportunities['body'], true);
+$location = ["","No Location","Working from home","Specific Address","Specific Address","Multiple Specific Addresses","Countrywide","Regional"];
+
+
+if($response_code == 200) {
+	
+		foreach($opportunities['data'] as $opportunity) { ?>
+			
+			<div class="volplus-list">
+								
+				<h2><a href="/opportunities/<?php echo $opportunity['id'].'/?'.$querystring; ?>"><?php echo remove_brackets($opportunity['opportunity']); ?></a></h2>
+				
+				<p class="organisation"><?php echo remove_brackets($opportunity['organisation']); ?></p>
+				
+				<?php if(array_key_exists('distance', array_filter($opportunity))) {
+					 echo 'Distance '.round($opportunity['distance'],1).' miles';
+					 }else{ ?>
+				<p class="location"><?php echo $location[$opportunity['location']]; ?> 
+					 	
+				<?php }?>
+				</p>
+				
+				<a class="button" href="/opportunities/<?php echo $opportunity['id'].'/?'.$querystring; ?>">View Opportunity</a>
+				
+			</div>
+			
+		<?php 
+	  }?>
+	  
+	  		<ul class="volplus-pagination">
+			<?php
+				if($opportunities['last_page']!== 1) { //don't bother if just 1 page
+				
+					if($opportunities['current_page'] > 1){ //not on 1st page
+						$querystring['Page'] = $opportunities['current_page']-1;
+						echo "<li><a href='/search?".http_build_query($querystring,'', '&')."'>Previous</a></li>";
+					}
+					
+					foreach (range(max(1,$opportunities['current_page']-5), min($opportunities['current_page']+5,$opportunities['last_page'])) as $number) {
+						$querystring['Page'] = $number;
+						if($opportunities['current_page'] == $number) { // current page
+							echo "<li><a href='/search?".http_build_query($querystring,'', '&')."' class='current'>".$number."</a></li>";
+						} else { //not current page(s))
+							echo "<li><a href='/search?".http_build_query($querystring,'', '&')."'>".$number."</a></li>";
+						}
+					}
+					
+					if($opportunities['current_page'] < $opportunities['last_page']){
+						$querystring['Page'] = $opportunities['current_page']+1;
+						echo "<li><a href='/search?".http_build_query($querystring,'', '&')."'>Next</a></li>";
+					}
+					
+				}
+				
+			?>
+		</ul>
+		
+	
+  <?php } elseif($response_code == 204) { ?>
+		
+		<h2>No opportunities found</h2>
+		
+		<p>Sorry, no opportunities could be found for your search criteria. Please amend your search and try again.</p>
+		
+	<?php 
+	} elseif($response_code == 422) { ?>
+		
+		<ul class="volunteer-plus-error">
+			<li>Sorry, an error occurred. Please try again later.</li>
+		</ul>
+		
+  <?php
+  }
+
+}
+
+// Register the shortcode.
+
+add_shortcode( 'volplus-list-opportunities', 'volplus_list_opportunities_func' );
+
+?>

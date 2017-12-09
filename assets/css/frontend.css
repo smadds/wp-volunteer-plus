@@ -1,0 +1,75 @@
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 400px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+.colcontainer {
+	border:2px solid #ccc; 
+	padding:0.2em 0.5em 0 0.5em; 
+	max-height: 200px; 
+	overflow-y: scroll; 
+	line-height: 1.2em;
+	background-color: #fafafa
+} 
+
+input[type=checkbox] {
+	margin-right: 0.5em;
+}
+
+label.colitem {
+	font-weight: normal; 
+	width: 100%; 
+	cursor: pointer; 
+	display: inline-block; 
+	margin: 0;
+}
+
+label.colitem-selected {
+	font-weight: bold; 
+	width: 100%; 
+	cursor: pointer; 
+	display: inline-block; 
+	margin: 0;
+}
+			
+label:hover {
+	background-color: #e0e0e0;
+} 
+
+label + input[type=checkbox]:checked {
+	background-color: #e0e0e0;
+}
