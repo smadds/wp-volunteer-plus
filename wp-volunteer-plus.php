@@ -3,7 +3,7 @@
  * Plugin Name:   WP Volunteer Plus
  * Plugin URI:    https://maddox.co.uk/volunteer-plus
  * Description:   A selection of tools for searching the Volunteer Plus Database
- * Version:       0.4.1
+ * Version:       0.4.6
  * Author:        Simon Maddox
  * Author URI:    https://maddox.co.uk
  */
@@ -11,6 +11,7 @@
 //Get the absolute path of the directory that contains the file, with trailing slash.
 define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__)); 
 define('MY_PLUGIN_URL', plugin_dir_url(__FILE__)); 
+define('MY_PLUGIN_SLUG', 'wp-volunteer-plus'); 
 
 //Add Settings option to plugins list page
 function volplus_add_settings_link( $links ) {
@@ -41,11 +42,14 @@ $myUpdateChecker = Puc_v4p3_Factory::buildUpdateChecker(
 	'wp-volunteer-plus'
 );
 
+
 //Optional: If you're using a private repository, specify the access token like this:
 $myUpdateChecker->setAuthentication('4046a82e545bde6ed1c1dc2ad54f4c770cccfa40');
 
 //Optional: Set the branch that contains the stable release.
 //$myUpdateChecker->setBranch('stable-branch-name');
+//Optional: Load release assets
+//$myUpdateChecker->getVcsApi()->enableReleaseAssets();
 
 
 function volplus_load_plugin_css() {
