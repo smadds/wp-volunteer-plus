@@ -16,7 +16,7 @@ class volplus_Search_Widget extends WP_Widget {
 
 
 // Create the widget output.
-  public function widget( $args, $instance ) {
+  function widget( $args, $instance ) { 	
     $title = apply_filters( 'widget_title', $instance[ 'title' ] );
 // before and after widget arguments are defined by themes
     echo $args['before_widget'];
@@ -179,14 +179,14 @@ class volplus_Search_Widget extends WP_Widget {
   function form( $instance ) {
 // Check values 
 	if( $instance ) { 
-		$show_title    = esc_attr( $instance['show_title'] ); 
+		$title    = esc_attr( $instance['title'] ); 
 		$show_radius = esc_attr( $instance['show_radius'] );
 		$show_keyword = esc_attr( $instance['show_keyword'] );
 		$show_interests = esc_attr( $instance['show_interests'] );
 		$show_activities = esc_attr( $instance['show_activities'] );
 		$show_availability_full = esc_attr( $instance['show_availability_full'] );
 	} else { 
-		$show_title    = '1'; 
+		$title    = ''; 
 		$show_radius    = '1'; 
 		$show_keyword = '1';
 		$show_interests = '1';
@@ -194,8 +194,8 @@ class volplus_Search_Widget extends WP_Widget {
 		$show_availability_full = '1';
 	} ?>
 	
-	<label for="<?php echo esc_attr( $this->get_field_id( 'show_title' ) ); ?>"><?php _e( 'Title', 'wp_volunteer-plus' ); ?></label>
-	<input class='widefat' id="<?php echo esc_attr( $this->get_field_id( 'show_title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_title' ) ); ?>" type="text" value="<?php echo esc_attr( $show_title ); ?>" />
+	<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php _e( 'Title', 'wp_volunteer-plus' ); ?></label>
+	<input class='widefat' id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
 	</p>
 	<h2><?php _e( 'Show Sections', 'wp-volunteer-plus' ); ?></h2>
 	<p><?php _e( '(Postcode is always shown)', 'wp-volunteer-plus' ); ?></p>
@@ -226,7 +226,7 @@ class volplus_Search_Widget extends WP_Widget {
 //  public function update( $new_instance, $old_instance ) {
   function update( $new_instance, $old_instance ) {
     $instance = $old_instance;
-    $instance[ 'show_title' ] = strip_tags( $new_instance[ 'show_title' ] );
+    $instance[ 'title' ] = strip_tags( $new_instance[ 'title' ] );
     $instance[ 'show_radius' ] = strip_tags( $new_instance[ 'show_radius' ] );
     $instance[ 'show_keyword' ] = strip_tags( $new_instance[ 'show_keyword' ] );
     $instance[ 'show_interests' ] = strip_tags( $new_instance[ 'show_interests' ] );

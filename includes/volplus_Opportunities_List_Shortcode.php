@@ -4,15 +4,24 @@ require_once MY_PLUGIN_PATH . 'includes/volplus_Functions.php';
 
 
 // Opportunity List
-function volplus_list_opportunities_func() {
+function volplus_list_opportunities_func($atts = [], $content = null, $tag = '') {
 
-$opportunities = wp_remote_get(API_URL . 'opportunities?'.$_SERVER['QUERY_STRING'], array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
-$response_code = wp_remote_retrieve_response_code($opportunities);
-$opportunities = json_decode($opportunities['body'], true);
-$location = ["","No Location","Working from home","Specific Address","Specific Address","Multiple Specific Addresses","Countrywide","Regional"];
+// normalize attribute keys, lowercase
+	$atts = array_change_key_case((array)$atts, CASE_LOWER);
 
+// override default attributes with user attributes
+	$volplus_atts = shortcode_atts([
+		'org' => 1,
+		'location' => 1,
+		'button' => 1,
+	], $atts, $tag);
 
-if($response_code == 200) {
+	$opportunities = wp_remote_get(API_URL . 'opportunities?'.$_SERVER['QUERY_STRING'], array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+	$response_code = wp_remote_retrieve_response_code($opportunities);
+	$opportunities = json_decode($opportunities['body'], true);
+	$location = ["","No Location","Working from home","Specific Address","Specific Address","Multiple Specific Addresses","Countrywide","Regional"];
+
+	if($response_code == 200) {
 	
 		foreach($opportunities['data'] as $opportunity) { ?>
 			
@@ -20,18 +29,21 @@ if($response_code == 200) {
 								
 				<h2><a href="/opportunities/<?php echo $opportunity['id'].'/?'.$querystring; ?>"><?php echo remove_brackets($opportunity['opportunity']); ?></a></h2>
 				
-				<p class="organisation"><?php echo remove_brackets($opportunity['organisation']); ?></p>
+				<?php if($volplus_atts['org']){?>
+					<p class="organisation"><?php echo remove_brackets($opportunity['organisation']); ?></p>
+				<?php }
 				
-				<?php if(array_key_exists('distance', array_filter($opportunity))) {
-					 echo 'Distance '.round($opportunity['distance'],1).' miles';
-					 }else{ ?>
-				<p class="location"><?php echo $location[$opportunity['location']]; ?> 
-					 	
-				<?php }?>
-				</p>
-				
-				<a class="button" href="/opportunities/<?php echo $opportunity['id'].'/?'.$querystring; ?>">View Opportunity</a>
-				
+				if($volplus_atts['location']) {
+					if(array_key_exists('distance', array_filter($opportunity))) {
+						 echo 'Distance '.round($opportunity['distance'],1).' miles';
+					 }else{
+						echo '<p class="location">'.$location[$opportunity['location']].'</p>';
+					}
+				}
+						
+				if($volplus_atts['button']){?>
+					</p><a class="button" href="/opportunities/<?php echo $opportunity['id'].'/?'.$querystring; ?>">View Opportunity</a></p>
+				<?php }?>				
 			</div>
 			
 		<?php 

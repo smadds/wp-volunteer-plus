@@ -12,6 +12,7 @@
 define('MY_PLUGIN_PATH', plugin_dir_path(__FILE__)); 
 define('MY_PLUGIN_URL', plugin_dir_url(__FILE__)); 
 define('MY_PLUGIN_SLUG', 'wp-volunteer-plus'); 
+define('GOOD_RESPONSE', 'HTTP/1.1 200 OK');
 
 //Add Settings option to plugins list page
 function volplus_add_settings_link( $links ) {
