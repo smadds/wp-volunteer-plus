@@ -41,11 +41,3 @@ function postcodeFormat($postcode)
     return $postcode;
 }
 
-class availability {
- function availability() {
- 	$this -> period = 'mor';
- 	function availability() {
- 		$this -> day = 'mon';
- 		}
- 	}
-}
