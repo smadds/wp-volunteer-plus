@@ -1,7 +1,7 @@
 <?php
 
-require_once MY_PLUGIN_PATH . 'includes/volplus_Functions.php';
-require_once MY_PLUGIN_PATH . 'includes/volplus_License.php';
+require_once VOLPLUS_PATH . 'includes/volplus_Functions.php';
+require_once VOLPLUS_PATH . 'includes/volplus_License.php';
 
 
 class volplus_Search_Widget extends WP_Widget {

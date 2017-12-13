@@ -1,5 +1,5 @@
 <?php
-require_once MY_PLUGIN_PATH . 'includes/volplus_Functions.php';
+require_once VOLPLUS_PATH . 'includes/volplus_Functions.php';
 
 // Opportunity Detail
 function volplus_opportunity_detail_func($atts) {

@@ -1,6 +1,6 @@
 <?php
 
-require_once MY_PLUGIN_PATH . 'includes/volplus_Functions.php';
+require_once VOLPLUS_PATH . 'includes/volplus_Functions.php';
 
 class volplus_Opportunities_List_Widget extends WP_Widget {
 
