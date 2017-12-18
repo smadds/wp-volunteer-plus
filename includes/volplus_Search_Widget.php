@@ -43,7 +43,6 @@ class volplus_Search_Widget extends WP_Widget {
 				<?php $radius = 5;if(isset($_GET['radius'])) $radius = $_GET['radius'] ?>
 				<label for="radius"><?php _e( 'Radius', 'wp_volunteer-plus' )?></label>
 				<select name="radius">
-					<option value="5"<?php if($radius == 5) { echo ' selected'; } ?>>5 miles</option>
 					<option value="10"<?php if($radius == 10) { echo ' selected'; } ?>>10 miles</option>
 					<option value="15"<?php if($radius == 15) { echo ' selected'; } ?>>15 miles</option>
 					<option value="20"<?php if($radius == 20) { echo ' selected'; } ?>>20 miles</option>
@@ -51,7 +50,7 @@ class volplus_Search_Widget extends WP_Widget {
 					<option value="50"<?php if($radius == 30) { echo ' selected'; } ?>>50 miles</option>
 				</select>
 			</div>
-		<?php } ELSE { $radius = 5;}}?>
+		<?php } ELSE { $radius = 10;}}?>
 
 		<?php if(isset($instance[ 'show_keyword' ])){if($instance[ 'show_keyword' ]){?>
 			<div class="form-col">
