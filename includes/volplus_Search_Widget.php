@@ -29,6 +29,15 @@ class volplus_Search_Widget extends WP_Widget {
 
 	if(! volplus_licensed()) echo '<h3>'._e( 'Unlicensed Volunteer Plus Plugin', 'wp_volunteer-plus' ).'</h3>';
 
+	if(!isset($instance[ 'show_5m' ])) {$instance['show_5m'] = 1; $show_5m = 1;}
+	if(!isset($instance[ 'show_10m' ])) {$instance['show_10m'] = 1; $show_10m = 1;}
+	if(!isset($instance[ 'show_15m' ])) {$instance['show_15m'] = 1; $show_15m = 1;}
+	if(!isset($instance[ 'show_20m' ])) {$instance['show_20m'] = 1; $show_20m = 1;}
+	if(!isset($instance[ 'show_25m' ])) {$instance['show_25m'] = 1; $show_25m = 1;}
+	if(!isset($instance[ 'show_50m' ])) {$instance['show_50m'] = 1; $show_50m = 1;}
+
+//var_dump($instance);
+
 	?>
 
 	<form method="GET" action="/search">
@@ -37,17 +46,36 @@ class volplus_Search_Widget extends WP_Widget {
 			<label for="postcode"><?php _e( 'Postcode', 'wp_volunteer-plus' )?></label>
 			<input type="text" name="postcode" placeholder="Your Postcode" onblur= "javascript:{this.value = this.value.toUpperCase();}" value="<?php echo postcodeFormat(isset($_GET["postcode"]) ? $_GET["postcode"] : ''); ?>" autocomplete="off" required />
 		</div>
-
-		<?php if(isset($instance[ 'show_radius' ])){if($instance[ 'show_radius' ]){?>
+		
+		<?php
+		if(isset($instance[ 'show_radius' ])){if($instance[ 'show_radius' ]){?>
 			<div class="form-col">
-				<?php $radius = 5;if(isset($_GET['radius'])) $radius = $_GET['radius'] ?>
+				<?php 
+				if($instance['show_5m']) {
+					$radius = 5;
+				} elseif($instance['show_10m']) {
+					$radius = 10;
+				} elseif($instance['show_15m']) {
+					$radius = 15;
+				} elseif($instance['show_20m']) {
+					$radius = 20;
+				} elseif($instance['show_25m']) {
+					$radius = 25;
+				} else {
+					$radius = 50;
+				}
+				
+				if(isset($_GET['radius'])) $radius = $_GET['radius'] ?>
 				<label for="radius"><?php _e( 'Radius', 'wp_volunteer-plus' )?></label>
 				<select name="radius">
-					<option value="10"<?php if($radius == 10) { echo ' selected'; } ?>>10 miles</option>
-					<option value="15"<?php if($radius == 15) { echo ' selected'; } ?>>15 miles</option>
-					<option value="20"<?php if($radius == 20) { echo ' selected'; } ?>>20 miles</option>
-					<option value="25"<?php if($radius == 25) { echo ' selected'; } ?>>25 miles</option>
-					<option value="50"<?php if($radius == 30) { echo ' selected'; } ?>>50 miles</option>
+					<?php
+					if($instance['show_5m']) {echo '<option value="5"'; if($radius == 5) { echo ' selected'; } echo '>5 miles</option>';}
+					if($instance['show_10m']) {echo '<option value="10"'; if($radius == 10) { echo ' selected'; } echo '>10 miles</option>';}
+					if($instance['show_15m']) {echo '<option value="15"'; if($radius == 15) { echo ' selected'; } echo '>15 miles</option>';}
+					if($instance['show_20m']) {echo '<option value="20"'; if($radius == 20) { echo ' selected'; } echo '>20 miles</option>';}
+					if($instance['show_25m']) {echo '<option value="25"'; if($radius == 25) { echo ' selected'; } echo '>25 miles</option>';}
+					if($instance['show_50m']) {echo '<option value="50"'; if($radius == 50) { echo ' selected'; } echo '>50 miles</option>';}
+					?>
 				</select>
 			</div>
 		<?php } ELSE { $radius = 10;}}?>
@@ -180,6 +208,12 @@ class volplus_Search_Widget extends WP_Widget {
 	if( $instance ) { 
 		$title    = esc_attr( $instance['title'] ); 
 		$show_radius = esc_attr( $instance['show_radius'] );
+		$show_5m = esc_attr( $instance['show_5m'] );
+		$show_10m = esc_attr( $instance['show_10m'] );
+		$show_15m = esc_attr( $instance['show_15m'] );
+		$show_20m = esc_attr( $instance['show_20m'] );
+		$show_25m = esc_attr( $instance['show_25m'] );
+		$show_50m = esc_attr( $instance['show_50m'] );
 		$show_keyword = esc_attr( $instance['show_keyword'] );
 		$show_interests = esc_attr( $instance['show_interests'] );
 		$show_activities = esc_attr( $instance['show_activities'] );
@@ -187,6 +221,12 @@ class volplus_Search_Widget extends WP_Widget {
 	} else { 
 		$title    = ''; 
 		$show_radius    = '1'; 
+		$show_5m    = '1'; 
+		$show_10m    = '1'; 
+		$show_15m    = '1'; 
+		$show_20m    = '1'; 
+		$show_25m    = '1'; 
+		$show_50m    = '1'; 
 		$show_keyword = '1';
 		$show_interests = '1';
 		$show_activities = '1';
@@ -218,6 +258,33 @@ class volplus_Search_Widget extends WP_Widget {
 	<input id="<?php echo esc_attr( $this->get_field_id( 'show_availability_full' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_availability_full' ) ); ?>" type="checkbox" value="1" <?php checked( '1', $show_availability_full ); ?> />
 	<label for="<?php echo esc_attr( $this->get_field_id( 'show_availability_full' ) ); ?>"><?php _e( 'Availability (full matrix)', 'wp-volunteer-plus' ); ?></label>
 	</p>
+	<h2><?php _e( 'Show Radius Options', 'wp-volunteer-plus' ); ?></h2>
+	<p>
+	<input id="<?php echo esc_attr( $this->get_field_id( 'show_5m' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_5m' ) ); ?>" type="checkbox" value="1" <?php checked( '1', $show_5m ); ?> />
+	<label for="<?php echo esc_attr( $this->get_field_id( 'show_5m' ) ); ?>"><?php _e( '5 miles', 'wp-volunteer-plus' ); ?></label>
+	</p>
+	<p>
+	<input id="<?php echo esc_attr( $this->get_field_id( 'show_10m' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_10m' ) ); ?>" type="checkbox" value="1" <?php checked( '1', $show_10m ); ?> />
+	<label for="<?php echo esc_attr( $this->get_field_id( 'show_10m' ) ); ?>"><?php _e( '10 miles', 'wp-volunteer-plus' ); ?></label>
+	</p>
+	<p>
+	<input id="<?php echo esc_attr( $this->get_field_id( 'show_15m' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_15m' ) ); ?>" type="checkbox" value="1" <?php checked( '1', $show_15m ); ?> />
+	<label for="<?php echo esc_attr( $this->get_field_id( 'show_15m' ) ); ?>"><?php _e( '15 miles', 'wp-volunteer-plus' ); ?></label>
+	</p>
+	<p>
+	<input id="<?php echo esc_attr( $this->get_field_id( 'show_20m' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_20m' ) ); ?>" type="checkbox" value="1" <?php checked( '1', $show_20m ); ?> />
+	<label for="<?php echo esc_attr( $this->get_field_id( 'show_20m' ) ); ?>"><?php _e( '20 miles', 'wp-volunteer-plus' ); ?></label>
+	</p>
+	<p>
+	<input id="<?php echo esc_attr( $this->get_field_id( 'show_25m' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_25m' ) ); ?>" type="checkbox" value="1" <?php checked( '1', $show_25m ); ?> />
+	<label for="<?php echo esc_attr( $this->get_field_id( 'show_25m' ) ); ?>"><?php _e( '25 miles', 'wp-volunteer-plus' ); ?></label>
+	</p>
+	<p>
+	<input id="<?php echo esc_attr( $this->get_field_id( 'show_50m' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_50m' ) ); ?>" type="checkbox" value="1" <?php checked( '1', $show_50m ); ?> />
+	<label for="<?php echo esc_attr( $this->get_field_id( 'show_50m' ) ); ?>"><?php _e( '50 miles', 'wp-volunteer-plus' ); ?></label>
+	</p>
+	
+
 	<?php
 }
 
@@ -227,6 +294,12 @@ class volplus_Search_Widget extends WP_Widget {
     $instance = $old_instance;
     $instance[ 'title' ] = strip_tags( $new_instance[ 'title' ] );
     $instance[ 'show_radius' ] = strip_tags( $new_instance[ 'show_radius' ] );
+    $instance[ 'show_5m' ] = strip_tags( $new_instance[ 'show_5m' ] );
+    $instance[ 'show_10m' ] = strip_tags( $new_instance[ 'show_10m' ] );
+    $instance[ 'show_15m' ] = strip_tags( $new_instance[ 'show_15m' ] );
+    $instance[ 'show_20m' ] = strip_tags( $new_instance[ 'show_20m' ] );
+    $instance[ 'show_25m' ] = strip_tags( $new_instance[ 'show_25m' ] );
+    $instance[ 'show_50m' ] = strip_tags( $new_instance[ 'show_50m' ] );
     $instance[ 'show_keyword' ] = strip_tags( $new_instance[ 'show_keyword' ] );
     $instance[ 'show_interests' ] = strip_tags( $new_instance[ 'show_interests' ] );
     $instance[ 'show_activities' ] = strip_tags( $new_instance[ 'show_activities' ] );

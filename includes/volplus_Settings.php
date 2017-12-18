@@ -63,15 +63,15 @@ function volplus_plugin_settings_page() {
 	$authresponse = volplus_checkauth();
 //	print_r($authresponse);
 	if($authresponse == 200) { 
-		echo '<br>API credentials Working.<br>';
+		echo '<div class="updated notice"><p>The Volunteer Plus API credentials are working</p></div>';
 	} else {
-		echo '<br><strong>API credentials failure. Error code'.$authresponse.'</strong><br>';
+		echo '<div class="error notice"><p><strong>The Volunteer Plus API credentials failure. Error code'.$authresponse.'</strong></p></div>';
 	}
 	
 	if(volplus_licensed()) {
-		echo 'Plugin Licensed<br>';
+		echo '<div class="updated notice"><p>The WP Volunteer Plus plugin is licensed</p></div>';
 	}else {
-		echo '<br><strong>Unlicensed plugin. Please contact <a href:"mail:info@maddox.co.uk">info@maddox.co.uk</a> quoting your organisation name and your Domain as shown above.</strong><br>';
+		echo '<div class="error notice"><p><strong><strong>Unlicensed WP Volunteer Plus plugin. Please contact <a href:"mail:info@maddox.co.uk">info@maddox.co.uk</a> quoting your organisation name and your Domain as shown above.</strong></p></div>';
 	}
 
 ?>
