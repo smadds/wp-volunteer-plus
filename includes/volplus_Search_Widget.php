@@ -22,6 +22,13 @@ class volplus_Search_Widget extends WP_Widget {
     echo $args['before_widget'];
     if ( ! empty( $title ) )
     echo $args['before_title'] . $title . $args['after_title'];
+    
+    if(isset($instance['intro_text'])) {
+    	$intro_text = apply_filters('widget_title',$instance['intro_text']);
+	    if(!empty($intro_text)) {
+		    echo $intro_text;
+		 }
+	}
 
 
 	$interests = wp_remote_get(API_URL . 'interests', array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
@@ -207,6 +214,7 @@ class volplus_Search_Widget extends WP_Widget {
 // Check values 
 	if( $instance ) { 
 		$title    = esc_attr( $instance['title'] ); 
+		$intro_text    = esc_attr( $instance['intro_text'] ); 
 		$show_radius = esc_attr( $instance['show_radius'] );
 		$show_5m = esc_attr( $instance['show_5m'] );
 		$show_10m = esc_attr( $instance['show_10m'] );
@@ -220,6 +228,7 @@ class volplus_Search_Widget extends WP_Widget {
 		$show_availability_full = esc_attr( $instance['show_availability_full'] );
 	} else { 
 		$title    = ''; 
+		$intro_text    = ''; 
 		$show_radius    = '1'; 
 		$show_5m    = '1'; 
 		$show_10m    = '1'; 
@@ -233,9 +242,16 @@ class volplus_Search_Widget extends WP_Widget {
 		$show_availability_full = '1';
 	} ?>
 	
-	<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php _e( 'Title', 'wp_volunteer-plus' ); ?></label>
+	
+	<p><label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php _e( 'Title', 'wp_volunteer-plus' ); ?></label>
 	<input class='widefat' id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
 	</p>
+	<p>
+	<label for="<?php echo esc_attr( $this->get_field_id( 'intro_text' ) ); ?>"><?php _e( 'Intro Text', 'wp_volunteer-plus' ); ?></label><br>
+	<textarea id="<?php echo esc_attr( $this->get_field_id( 'intro_text' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'intro_text' ) ); ?>" rows = "5" cols = "40"><?php echo esc_attr( $intro_text ); ?> </textarea>
+	</p>
+	
+	
 	<h2><?php _e( 'Show Sections', 'wp-volunteer-plus' ); ?></h2>
 	<p><?php _e( '(Postcode is always shown)', 'wp-volunteer-plus' ); ?></p>
 	<p>
@@ -293,6 +309,7 @@ class volplus_Search_Widget extends WP_Widget {
   function update( $new_instance, $old_instance ) {
     $instance = $old_instance;
     $instance[ 'title' ] = strip_tags( $new_instance[ 'title' ] );
+    $instance[ 'intro_text' ] = strip_tags( $new_instance[ 'intro_text' ] );
     $instance[ 'show_radius' ] = strip_tags( $new_instance[ 'show_radius' ] );
     $instance[ 'show_5m' ] = strip_tags( $new_instance[ 'show_5m' ] );
     $instance[ 'show_10m' ] = strip_tags( $new_instance[ 'show_10m' ] );
