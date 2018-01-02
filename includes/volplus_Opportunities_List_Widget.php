@@ -50,7 +50,7 @@ if($response_code == 200) {
 			
 			<div class="volplus-list">
 								
-				<h2><a href="/opportunities/<?php echo $opportunity['id'].'/?'.$querystring; ?>"><?php echo remove_brackets($opportunity['opportunity']); ?></a></h2>
+				<h2><a href="/opportunities/<?php echo $opportunity['id'].'/?'.$returnstring; ?>"><?php echo remove_brackets($opportunity['opportunity']); ?></a></h2>
 				
 				<?php if(isset($instance[ 'show_organisation' ])){if($instance[ 'show_organisation' ]){?>
 					<p class="organisation"><?php echo remove_brackets($opportunity['organisation']); ?></p>
@@ -64,9 +64,9 @@ if($response_code == 200) {
 					<?php }?>
 					</p>
 				<?php }}?>
-				
+<?php// var_dump($returnstring);?>				
 				<?php if(isset($instance[ 'show_button' ])){if($instance[ 'show_button' ]){?>
-					<a class="button" href="/opportunities/<?php echo $opportunity['id'].'/?'.$querystring; ?>">View Opportunity</a>
+					<a class="button" href="/opportunities/<?php echo $opportunity['id'].'/?'.$returnstring; ?>">View Opportunity</a>
 				<?php }}?>
 				
 			</div>
