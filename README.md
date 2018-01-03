@@ -73,6 +73,7 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
+= 0.4.5 = Initial map tests
 = 0.4.4 = Fixed array error in opp list widget
 
 

@@ -30,80 +30,68 @@ function volplus_opportunity_detail_func($atts) {
 				
 	<?php if($opportunity['interests']) { ?>
 	
-		<h3>Interests</h3>
+		<div class="volplus-col-6">
+			<h2>Interests</h2>
 	
-		<ul>
-			<?php foreach($opportunity['interests'] as $interests) { ?>
-			<li><?php echo $interests['interest']; ?></li>
-			<?php } ?>
-		</ul>
+			<ul>
+				<?php foreach($opportunity['interests'] as $interests) { ?>
+				<li><?php echo $interests['interest']; ?></li>
+				<?php } ?>
+			</ul>
+	</div>
 	
 	<?php } ?>
 
 	<?php if($opportunity['activities']) { ?>
 	
-		<h3>Activities</h3>
+		<div class="volplus-col-6">
+			<h2>Activities</h2>
 	
-		<ul>
-			<?php foreach($opportunity['activities'] as $activities) { ?>
-			<li><?php echo $activities['activity']; ?></li>
-			<?php } ?>
-		</ul>
-	
-	<?php } ?>
-
-	<h2>Details</h2>
-	
-	<?php if($opportunity['quality_control']) { ?>
-		
-		<ul>
-			<?php foreach($opportunity['quality_control'] as $quality_control) { ?>
-			<li class="status_<?php echo $quality_control['status']; ?>">
-				<?php echo $quality_control['title']; ?>
-				<?php if($quality_control['notes']) { ?>
-					<br /><small><?php echo $quality_control['notes']; ?></small>
+			<ul>
+				<?php foreach($opportunity['activities'] as $activities) { ?>
+				<li><?php echo $activities['activity']; ?></li>
 				<?php } ?>
-			</li>
-			<?php } ?>
-		</ul>
-		
-	<?php } else { ?>
-		
-		<p>No additional details are recorded for this opportunity.</p>
-		
+			</ul>
+		</div>
+	
 	<?php } ?>
-					
-	<?php if($opportunity['location']['location'] == 1) { ?>
-	
-		<h3>Location</h3>
-	
-		<p>This opportunity has <strong>no specific location</strong>.</p>
-	
-	<?php } elseif($opportunity['location']['location'] == 2) { ?>
-	
-		<h3>Location</h3>
-	
-		<p>This opportunity can be carried out whilst <strong>working from home</strong>.</p>
 
-	<?php } elseif($opportunity['location']['location'] == 6) { ?>
+	<div class="volplus-col-6">
+		<h2>Details</h2>
 	
-		<h3>Location</h3>
-	
-		<p>This opportunity is available <strong>Countywide</strong>.</p>
-	
-	<?php } ?>
-	
+		<?php if($opportunity['quality_control']) { ?>
+		
+			<ul>
+				<?php foreach($opportunity['quality_control'] as $quality_control) { ?>
+				<li class="status_<?php echo $quality_control['status']; ?>">
+					<?php echo $quality_control['title']; ?>
+					<?php if($quality_control['notes']) { ?>
+						<br /><small><?php echo $quality_control['notes']; ?></small>
+					<?php } ?>
+				</li>
+				<?php } ?>
+			</ul>
+			
+		<?php } else { ?>
+		
+			<p>No additional details are recorded for this opportunity.</p>
+		
+		<?php } ?>
+	</div>
+
+					
+<div class="volplus-col-6">
 	<h2>Availability</h2>
 	
 	<?php if(!empty($opportunity['availability']['start_date'])) { ?>
 	
-		<p><strong>Start Date:</strong> <?php echo date("d/m/Y", strtotime($opportunity['availability']['start_date'])); ?></p>
+		<strong>Start Date:</strong> <?php echo date("d/m/Y", strtotime($opportunity['availability']['start_date'])); ?>
 	
 	<?php }?>
 	
 	<?php if(!empty($opportunity['availability']['end_date'])) { ?>
 	
-		<p><strong>End Date:</strong> <?php echo date("d/m/Y", strtotime($opportunity['availability']['end_date'])); ?></p>
+		<strong>&nbsp;&nbsp;&nbsp; End Date:</strong> <?php echo date("d/m/Y", strtotime($opportunity['availability']['end_date'])); ?>
 	
 	<?php }?>
 	
@@ -167,33 +155,87 @@ function volplus_opportunity_detail_func($atts) {
 		<p><?php echo $opportunity['availability']['information']; ?></p>
 	
 	<?php } ?>
+	</div>
 
-	<?php if($opportunity['location']['location'] == 3 || $opportunity['location']['location'] == 4 || $opportunity['location']['location'] == 5) { ?>
-		
-		<?php if($opportunity['location']['address']) {
+	<?php if(isset($opportunity['location']['location'])){
+		echo "<div class='volplus-col-6'>";
+		switch($opportunity['location']['location']) {
+			case 1:
+				echo "<h2>Location</h2>";
+				echo "<p>This opportunity has <strong>no specific location</strong>.</p>";
+				break;
+			case 2:
+				echo "<h2>Location</h2>";
+				echo "<p>This opportunity can be carried out whilst <strong>working from home</strong>.</p>";
+				break;
+			case 6:
+				echo "<h2>Location</h2>";
+				echo "<p>This opportunity is available <strong>Countywide</strong>.</p>";
+				break;
+			case 3: case 4: case 5:
+				if($opportunity['location']['address']) {
+					if(count($opportunity['location']['address']) == 1) {
+						echo "<h2>Address</h2>";
+					} else {
+						echo "<h2>Addresses</h2>";
+					}
+				}
+				foreach($opportunity['location']['address'] as $address) {
+					echo "<p>";
+					if(!empty($address['address_line_1'])) { echo $address['address_line_1']."<br />"; }
+					if(!empty($address['address_line_2'])) { echo $address['address_line_2']."<br />"; }
+					if(!empty($address['address_line_3'])) { echo $address['address_line_3']."<br />"; }
+					if(!empty($address['town'])) { echo $address['town']."<br />"; }
+					if(!empty($address['county'])) { echo $address['county']."<br />"; }
+					if(!empty($address['postcode'])) { echo $address['postcode']; }
+					echo "</p>";
+				}
+				break;
+			case 7:
+				if(count($opportunity['location']['regions']) == 1) {
+					echo "<h2>Location</h2>";
+				} else {
+					echo "<h2>Locations</h2>";
+				}
+				echo "<ul>";
+				foreach($opportunity['location']['regions'] as $region) {
+					echo "<li>".$region['region']."</li>";
+				}
+				echo "</ul>";
+				break;
+		}
+	echo "</div>";
+	}
 
-			if(count($opportunity['location']['address']) == 1) {
-				echo "<h2>Address</h2>";
-			} else {
-				echo "<h2>Addresses</h2>";
-			} ?>
+//google map
+?>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 300px;
+      }
+    </style>
+
+<?php	$mapcentre = geocode(get_option('volplus_googlemapcentre'));?>
+<!--<pre><?php var_dump($mapcentre);?></pre>-->
 	
-			<?php foreach($opportunity['location']['address'] as $address) { ?>
-		
-				<p>
-					<?php if(!empty($address['address_line_1'])) { echo $address['address_line_1']."<br />"; } ?>
-					<?php if(!empty($address['address_line_2'])) { echo $address['address_line_2']."<br />"; } ?>
-					<?php if(!empty($address['address_line_3'])) { echo $address['address_line_3']."<br />"; } ?>
-					<?php if(!empty($address['town'])) { echo $address['town']."<br />"; } ?>
-					<?php if(!empty($address['county'])) { echo $address['county']."<br />"; } ?>
-					<?php if(!empty($address['postcode'])) { echo $address['postcode']; } ?>
-				</p>
-		
-			<?php } ?>
+    <div id="map" class="volplus-col-6"></div>
+    <script>
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: <?php echo $mapcentre[0];?>, lng: <?php echo $mapcentre[1];?>},
+          zoom: <?php echo get_option('volplus_googlemapzoom');?>
+        });
+      }
+    </script>
 
-		<?php } ?>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<?php echo get_option('volplus_googlemapkey');?>&callback=initMap" async defer>
+</script>
+
 	
-	<?php } ?>
+<!-- <pre><?php print_r($opportunity);?></pre>-->
 			
 	<?php if($opportunity['organisation_opportunities']) { ?>
 	
