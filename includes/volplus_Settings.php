@@ -46,11 +46,16 @@ function volplus_plugin_settings_page() {
         </tr>
 
         <tr valign="top">
-        <th scope="row"><h3>Google Maps API Key</h3></th>
+        <th scope="row"><h3>Google Maps</h3></th>
         </tr>
         
         <tr valign="top">
-        <th scope="row">Google Maps key</th>
+        <th scope="row">Show Google Map on Opportunity Detail page</th>
+        <td><input type="checkbox" name="volplus_showmap" <?php if(get_option('volplus_showmap') == 'on') echo 'checked'; ?> /></td>
+        </tr>
+
+        <tr valign="top">
+        <th scope="row">Google Maps API key</th>
         <td><input type="text" name="volplus_googlemapkey" size="40" value="<?php echo esc_attr( get_option('volplus_googlemapkey') ); ?>" /></td>
         </tr>
 
@@ -68,7 +73,12 @@ function volplus_plugin_settings_page() {
         <th scope="row"><h3>Other Settings</h3></th>
         </tr>
  
-         <tr valign="top">
+        <tr valign="top">
+        <th scope="row">Response Form Content</th>
+        <td><input type="text" name="volplus_responseformcontent" size="40" value="<?php echo esc_attr(get_option('volplus_responseformcontent')); ?>" /></td>
+        </tr>
+
+       <tr valign="top">
         <th scope="row">Hide bracketed text in Opportunity titles & Organisation names</th>
         <td><input type="checkbox" name="volplus_hidebrackets" <?php if(get_option('volplus_hidebrackets') == 'on') echo 'checked'; ?> /></td>
         </tr>
@@ -103,10 +113,12 @@ add_action( 'admin_init', 'volplus_plugin_settings' );
 function volplus_plugin_settings() {
 	register_setting( 'volplus-plugin-settings-group', 'volplus_endpoint' );
 	register_setting( 'volplus-plugin-settings-group', 'volplus_api_key' );
+	register_setting( 'volplus-plugin-settings-group', 'volplus_showmap' );
 	register_setting( 'volplus-plugin-settings-group', 'volplus_googlemapkey' );
 	register_setting( 'volplus-plugin-settings-group', 'volplus_googlemapcentre' );
 	register_setting( 'volplus-plugin-settings-group', 'volplus_googlemapzoom' );
 	register_setting( 'volplus-plugin-settings-group', 'volplus_license_code' );
+	register_setting( 'volplus-plugin-settings-group', 'volplus_responseformcontent' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_hidebrackets' );	
 }
 

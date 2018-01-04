@@ -3,11 +3,13 @@ require_once VOLPLUS_PATH . 'includes/volplus_Functions.php';
 
 // Opportunity Detail
 function volplus_opportunity_detail_func($atts) {
-
-	$uriarray = (explode("/",$_SERVER["REQUEST_URI"]));
-	$id = $uriarray[2];
+	parse_str($_SERVER['QUERY_STRING'],$querystring);
+	$id = $querystring['id'];
 	$opportunity = wp_remote_get(API_URL . 'opportunities/'.$id, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
 	$response_code = wp_remote_retrieve_response_code($opportunity);
+
+//echo 'id'.$id;
+//return;
 	
 	if($response_code == 200) {
 		$opportunity = json_decode($opportunity['body'], true);
@@ -18,8 +20,50 @@ function volplus_opportunity_detail_func($atts) {
 
 ?>
 
-	<h1><?php echo remove_brackets($opportunity['opportunity']); ?></h1>
+	<h1><?php echo remove_brackets($opportunity['opportunity']); ?>
 	
+<button type="button" id="volplus_respondButton" style="cursor:pointer;float:right">I'm Interested</button></h1>
+
+<div id="volplus_response" hidden="hidden" style="z-index:1000;">
+	<?php echo get_option('volplus_responseformcontent');?>
+</div>	
+
+<style type="text/css">
+	.ui-dialog {
+		z-index: 9999 !important;
+	}
+	.ui-widget-overlay {
+		position: fixed !important;
+	}
+</style>
+<script>
+	<?php
+	wp_enqueue_style (  'wp-jquery-ui-dialog'); 
+//   wp_register_style( 'jquery-style', 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.1/themes/smoothness/jquery-ui.css', true);
+//	wp_enqueue_style( 'jquery-style' );
+	wp_enqueue_script("jquery-ui-dialog");
+	wp_enqueue_script("jquery-effects-core");
+	wp_enqueue_style('volplus_frontend_css');
+	?>
+	jQuery(document).ready(function($) {
+		$( "#volplus_response" ).dialog({
+			dialogClass: 'wp-dialog',
+			modal: true,
+			autoOpen: false,
+			show: {effect: "fade", duration: 500},
+			closeOnEscape: true,      
+			buttons: {
+            "Close": function() {
+                $(this).dialog('close');
+				}
+			}
+		});
+		$( "#volplus_respondButton" ).click(function() {
+			$( "#volplus_response" ).dialog( "open" );
+		});
+	});
+</script>
+
 	<p><?php echo $opportunity['description']; ?></p>
 
 	<h2>Skills</h2>
@@ -79,84 +123,6 @@ function volplus_opportunity_detail_func($atts) {
 		<?php } ?>
 	</div>
 
-					
-<div class="volplus-col-6">
-	<h2>Availability</h2>
-	
-	<?php if(!empty($opportunity['availability']['start_date'])) { ?>
-	
-		<strong>Start Date:</strong> <?php echo date("d/m/Y", strtotime($opportunity['availability']['start_date'])); ?>
-	
-	<?php }?>
-	
-	<?php if(!empty($opportunity['availability']['end_date'])) { ?>
-	
-		<strong>&nbsp;&nbsp;&nbsp; End Date:</strong> <?php echo date("d/m/Y", strtotime($opportunity['availability']['end_date'])); ?>
-	
-	<?php }?>
-	
-	 <?php
-	    $availability = $opportunity['availability']['availability'];
-		$available = '<span class="available">Yes</span>';
-		$not_available = '<span class="not_available">No</span>';
-	 ?>
-
-	<p><table>
-		<thead>
-			<tr>
-				<th></th>
-				<th>Mon</th>
-				<th>Tue</th>
-				<th>Wed</th>
-				<th>Thu</th>
-				<th>Fri</th>
-				<th>Sat</th>
-				<th>Sun</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr>
-				<td>Morning</td>
-				<td><?php if($availability['mon_mor'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['tue_mor'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['wed_mor'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['thu_mor'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['fri_mor'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['sat_mor'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['sun_mor'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-			</tr>
-			<tr>
-				<td>Afternoon</td>
-				<td><?php if($availability['mon_aft'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['tue_aft'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['wed_aft'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['thu_aft'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['fri_aft'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['sat_aft'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['sun_aft'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-			</tr>
-			<tr>
-				<td>Evening</td>
-				<td><?php if($availability['mon_eve'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['tue_eve'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['wed_eve'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['thu_eve'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['fri_eve'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['sat_eve'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-				<td><?php if($availability['sun_eve'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
-			</tr>
-		</tbody>
-	</table></p>
-	
-	<?php if(!empty($opportunity['availability']['information'])) { ?>
-	
-		<h4>Availability Details</h4>
-	
-		<p><?php echo $opportunity['availability']['information']; ?></p>
-	
-	<?php } ?>
-	</div>
-
 	<?php if(isset($opportunity['location']['location'])){
 		echo "<div class='volplus-col-6'>";
 		switch($opportunity['location']['location']) {
@@ -193,9 +159,9 @@ function volplus_opportunity_detail_func($atts) {
 				break;
 			case 7:
 				if(count($opportunity['location']['regions']) == 1) {
-					echo "<h2>Location</h2>";
+					echo "<h2>District</h2>";
 				} else {
-					echo "<h2>Locations</h2>";
+					echo "<h2>Districts</h2>";
 				}
 				echo "<ul>";
 				foreach($opportunity['location']['regions'] as $region) {
@@ -206,78 +172,156 @@ function volplus_opportunity_detail_func($atts) {
 		}
 	echo "</div>";
 	}
-
-//google map
 ?>
-    <style>
-      /* Always set the map height explicitly to define the size of the div
-       * element that contains the map. */
-      #map {
-        height: 300px;
-      }
-    </style>
 
-<?php	$mapcentre = geocode(get_option('volplus_googlemapcentre'));?>
-<!--<pre><?php var_dump($mapcentre);?></pre>-->
+					
+<div class="volplus-col-6">
+	<h2>Availability</h2>
 	
-    <div id="map" class="volplus-col-6"></div>
-    <script>
-      var map;
-      function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: <?php echo $mapcentre[0];?>, lng: <?php echo $mapcentre[1];?>},
-          zoom: <?php echo get_option('volplus_googlemapzoom');?>
-        });
-      }
-    </script>
+	<?php if(!empty($opportunity['availability']['start_date'])) { ?>
+	
+		<strong>Start Date:</strong> <?php echo date("d/m/Y", strtotime($opportunity['availability']['start_date'])); ?>
+	
+	<?php }?>
+	
+	<?php if(!empty($opportunity['availability']['end_date'])) { ?>
+	
+		<strong>&nbsp;&nbsp;&nbsp; End Date:</strong> <?php echo date("d/m/Y", strtotime($opportunity['availability']['end_date'])); ?>
+	
+	<?php }?>
+	
+	 <?php
+	    $availability = $opportunity['availability']['availability'];
+		$available = '<span class="available">Yes</span>';
+		$not_available = '<span class="not_available">No</span>';
+	 ?>
 
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<?php echo get_option('volplus_googlemapkey');?>&callback=initMap" async defer>
-</script>
+		<table>
+		<thead>
+			<tr>
+				<th></th>
+				<th>AM</th>
+				<th>PM</th>
+				<th>Eve</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>Monday</td>
+				<td><?php if($availability['mon_mor'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+				<td><?php if($availability['mon_aft'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+				<td><?php if($availability['mon_eve'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+			</tr><tr>
+				<td>Tuesday</td>
+				<td><?php if($availability['tue_mor'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+				<td><?php if($availability['tue_aft'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+				<td><?php if($availability['tue_eve'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+			</tr><tr>
+				<td>Wednesday</td>
+				<td><?php if($availability['wed_mor'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+				<td><?php if($availability['wed_aft'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+				<td><?php if($availability['wed_eve'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+			</tr><tr>
+				<td>Thursday</td>
+				<td><?php if($availability['thu_mor'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+				<td><?php if($availability['thu_aft'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+				<td><?php if($availability['thu_eve'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+			</tr><tr>
+				<td>Friday</td>
+				<td><?php if($availability['fri_mor'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+				<td><?php if($availability['fri_aft'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+				<td><?php if($availability['fri_eve'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+			</tr><tr>
+				<td>Saturday</td>
+				<td><?php if($availability['sat_mor'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+				<td><?php if($availability['sat_aft'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+				<td><?php if($availability['sat_eve'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+			</tr><tr>
+				<td>Sunday</td>
+				<td><?php if($availability['sun_mor'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+				<td><?php if($availability['sun_aft'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+				<td><?php if($availability['sun_eve'] == "1") { echo $available; } else { echo $not_available; }; ?></td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<?php if(!empty($opportunity['availability']['information'])) { ?>
+	
+		<h4>Availability Details</h4>
+	
+		<p><?php echo $opportunity['availability']['information']; ?></p>
+	
+	<?php } ?>
+	</div>
+
+	<div class="volplus-col-12"><hr></div>
+
+<!-- google map -->
+	<?php if(get_option('volplus_showmap')) {?>
+		<div class="volplus-col-12"><hr></div>
+		<div id="map" class="volplus-col-12" style="height: 300px;"></div>
+		<div class="volplus-col-12"><hr></div>
+
+		<script type="text/javascript">
+			function initMap() {
+			  	var map = new google.maps.Map(document.getElementById('map'), {zoom: 8});
+			  	var geocoder = new google.maps.Geocoder;
+			  	geocoder.geocode({'address': <?php echo get_option('volplus_googlemapcentre')?>}, function(results, status) {
+			   	if (status === 'OK') {
+			      	map.setCenter(results[0].geometry.location);
+						new google.maps.Marker({
+							map: map,
+							position: results[0].geometry.location
+						});
+					} else {
+						window.alert('Geocode was not successful for the following reason: ' + status);
+					}
+				});  
+			}
+		</script>
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<?php echo get_option('volplus_googlemapkey');?>&callback=initMap" async defer>
+	</script>
+	<?php } ?>
 
 	
 <!-- <pre><?php print_r($opportunity);?></pre>-->
 			
-	<?php if($opportunity['organisation_opportunities']) { ?>
-	
-		<h2>More Opportunities from <?php echo remove_brackets($opportunity['organisation']['organisation']); ?></h2>
-		
-		<?php foreach($opportunity['organisation_opportunities'] as $opp) { ?>
-			
-			<div class="volunteer-plus-opportunity-list">
-				
-				<h2><a href="/opportunities/<?php echo $opp['id'].'/?'.$_SERVER['QUERY_STRING']; ?>"><?php echo remove_brackets($opp['opportunity']); ?></a></h2>
-				
-				<p><a class="button" href="/opportunities/<?php echo $opp['id'].'/?'.$_SERVER['QUERY_STRING']; ?>">View Opportunity</a></p>
-				
-			</div>
-			
-		<?php } ?>
-		
+	<div class="volplus-col-6">
+		<?php if($opportunity['organisation_opportunities']) { ?>
+			<h2>More Opportunities from <?php echo remove_brackets($opportunity['organisation']['organisation']); ?></h2>
+			<?php foreach($opportunity['organisation_opportunities'] as $opp) {
+				$querystring['id'] = $opp['id'];
+				$returnstring = http_build_query($querystring,'', '&');?>
+				<div class="volunteer-plus-opportunity-list">				
+					<h2><a href="/opportunities/?<?php echo $returnstring; ?>"><?php echo remove_brackets($opp['opportunity']); ?></a></h2>
+					<p><a class="button" href="/opportunities/?<?php echo $returnstring; ?>">View Opportunity</a></p>
+				</div>
+			<?php } ?>
 	<?php } ?>
+	</div>
 					
-	<?php if($opportunity['similar_opportunities']) { ?>
-	
+	<div class="volplus-col-6">
+	<?php if($opportunity['similar_opportunities']) { ?>	
 		<h2>Similar Opportunities</h2>
-		
-		<?php foreach($opportunity['similar_opportunities'] as $opp) { ?>
-			
-			<div class="volunteer-plus-opportunity-list">
-				
-				<h2><a href="/opportunities/<?php echo $opp['id'].'/?'.$_SERVER['QUERY_STRING']; ?>"><?php echo remove_brackets($opp['opportunity']); ?></a></h2>
-				
-				<p class="organisation"><?php echo remove_brackets($opp['organisation']); ?></p>
-				
-				<p><a class="button" href="/opportunities/<?php echo $opp['id'].'/?'.$_SERVER['QUERY_STRING']; ?>">View Opportunity</a></p>
-				
-			</div>
-			
-		<?php }
-		
-	}
+		<?php foreach($opportunity['similar_opportunities'] as $opp) {
+				$querystring['id'] = $opp['id'];
+				$returnstring = http_build_query($querystring,'', '&');?>
+				<div class="volunteer-plus-opportunity-list">
+					<h2><a href="/opportunities/?<?php echo $returnstring; ?>"><?php echo remove_brackets($opp['opportunity']); ?></a></h2>
+					<p class="organisation"><?php echo remove_brackets($opp['organisation']); ?></p>
+					<p><a class="button" href="/opportunities/?<?php echo $returnstring; ?>">View Opportunity</a></p>
+				</div>			
+			<?php } ?>
+		<?php } ?>
+	</div>
 
-}
+<?php } ?>
 
-// Register the shortcode.
 
+<?php
+// Register jquery dependency and the shortcode.
+
+//wp_enqueue_script('volplus-opportunity-detail', VOLPLUS_PATH .'/includes/volplus_Opportunity_Detail_Shortcode.php', array('jquery'), null, true);
 add_shortcode( 'volplus-opportunity-detail', 'volplus_opportunity_detail_func' );
+
 ?>

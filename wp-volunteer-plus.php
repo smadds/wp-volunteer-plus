@@ -3,7 +3,7 @@
  * Plugin Name:   WP Volunteer Plus
  * Plugin URI:    https://maddox.co.uk/volunteer-plus
  * Description:   A selection of tools for searching the Volunteer Plus Database
- * Version:       0.4.5
+ * Version:       0.4.6
  * Author:        Simon Maddox
  * Author URI:    https://maddox.co.uk
  */
@@ -28,6 +28,16 @@ define( "API_URL", get_option('volplus_endpoint') );
 define( "API_KEY", get_option('volplus_api_key') );
 
 
+function volplus_scripts() {
+	wp_register_style( 'volplus_frontend_css', VOLPLUS_URL . 'assets/css/frontend.css' );
+	wp_enqueue_style('volplus_frontend_css');
+	wp_enqueue_style (  'wp-jquery-ui-dialog');
+	wp_enqueue_script( 'jquery-ui-core' );
+	wp_enqueue_script( 'jquery-effects-fade' );
+}
+add_action( 'admin_init', 'volplus_scripts' );
+add_action('wp_enqueue_scripts', 'volplus_scripts');
+
 require_once VOLPLUS_PATH . 'includes/volplus_Search_Widget.php';
 require_once VOLPLUS_PATH . 'includes/volplus_Opportunities_List_Widget.php';
 require_once VOLPLUS_PATH . 'includes/volplus_Opportunities_List_Shortcode.php';
@@ -41,8 +51,6 @@ $myUpdateChecker = Puc_v4p3_Factory::buildUpdateChecker(
 	__FILE__,
 	'wp-volunteer-plus'
 );
-
-
 //Optional: If you're using a private repository, specify the access token like this:
 $myUpdateChecker->setAuthentication('4046a82e545bde6ed1c1dc2ad54f4c770cccfa40');
 
@@ -52,8 +60,3 @@ $myUpdateChecker->setAuthentication('4046a82e545bde6ed1c1dc2ad54f4c770cccfa40');
 //$myUpdateChecker->getVcsApi()->enableReleaseAssets();
 
 
-function volplus_load_plugin_css() {
-
-    wp_enqueue_style( 'volplus_frontend', VOLPLUS_URL . 'assets/css/frontend.css' );
-}
-add_action( 'wp_enqueue_scripts', 'volplus_load_plugin_css' );

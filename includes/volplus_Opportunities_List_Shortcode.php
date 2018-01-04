@@ -21,13 +21,17 @@ function volplus_list_opportunities_func($atts = [], $content = null, $tag = '')
 	$opportunities = json_decode($opportunities['body'], true);
 	$location = ["","No Location","Working from home","Specific Address","Specific Address","Multiple Specific Addresses","Countrywide","Regional"];
 
+// split query string to array
+	parse_str($_SERVER['QUERY_STRING'],$querystring);
+
 	if($response_code == 200) {
 	
 		foreach($opportunities['data'] as $opportunity) { ?>
+			<?php $querystring['id'] = $opportunity['id'];$returnstring = http_build_query($querystring,'', '&');?>			
 			
 			<div class="volplus-list">
 								
-				<h2><a href="/opportunities/<?php echo $opportunity['id'].'/?'.$querystring; ?>"><?php echo remove_brackets($opportunity['opportunity']); ?></a></h2>
+				<h2><a href="/opportunities/?<?php echo $returnstring; ?>"><?php echo remove_brackets($opportunity['opportunity']); ?></a></h2>
 				
 				<?php if($volplus_atts['org']){?>
 					<p class="organisation"><?php echo remove_brackets($opportunity['organisation']); ?></p>
@@ -42,7 +46,7 @@ function volplus_list_opportunities_func($atts = [], $content = null, $tag = '')
 				}
 						
 				if($volplus_atts['button']){?>
-					</p><a class="button" href="/opportunities/<?php echo $opportunity['id'].'/?'.$querystring; ?>">View Opportunity</a></p>
+					</p><a class="button" href="/opportunities/?<?php echo $returnstring; ?>">View Opportunity</a></p>
 				<?php }?>				
 			</div>
 			

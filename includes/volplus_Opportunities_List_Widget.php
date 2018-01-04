@@ -27,16 +27,6 @@ $opportunities = wp_remote_get(API_URL . 'opportunities?'.strtolower($_SERVER['Q
 
 //echo $_SERVER['QUERY_STRING'].'<br/>';
 parse_str($_SERVER['QUERY_STRING'],$querystring);
-//print_r($querystring);
-$returnstring = http_build_query($querystring,'', '&');
-//echo '<br>Rebuilt:<br>'.$querystring;
-//echo '<br>';
-//echo '<br>';
-//echo $_SERVER['QUERY_STRING'].'<br/>';
-//$querystring = explode('&',$_SERVER['QUERY_STRING']);
-//print_r($querystring);
-//echo '<br>Rebuilt:'.http_build_query($querystring,'', '&');
-//echo '<br/>';
 
 $response_code = wp_remote_retrieve_response_code($opportunities);
 $opportunities = json_decode($opportunities['body'], true);
@@ -47,10 +37,9 @@ $location = ["","No Location","Working from home","Organisational Address","Spec
 if($response_code == 200) {
 	
 		foreach($opportunities['data'] as $opportunity) { ?>
-			
+			<?php $querystring['id'] = $opportunity['id'];$returnstring = http_build_query($querystring,'', '&');?>			
 			<div class="volplus-list">
-								
-				<h2><a href="/opportunities/<?php echo $opportunity['id'].'/?'.$returnstring; ?>"><?php echo remove_brackets($opportunity['opportunity']); ?></a></h2>
+				<h2><a href="/opportunities/?<?php echo $returnstring; ?>"><?php echo remove_brackets($opportunity['opportunity']); ?></a></h2>
 				
 				<?php if(isset($instance[ 'show_organisation' ])){if($instance[ 'show_organisation' ]){?>
 					<p class="organisation"><?php echo remove_brackets($opportunity['organisation']); ?></p>
@@ -64,9 +53,9 @@ if($response_code == 200) {
 					<?php }?>
 					</p>
 				<?php }}?>
-<?php// var_dump($returnstring);?>				
+
 				<?php if(isset($instance[ 'show_button' ])){if($instance[ 'show_button' ]){?>
-					<a class="button" href="/opportunities/<?php echo $opportunity['id'].'/?'.$returnstring; ?>">View Opportunity</a>
+					<a class="button" href="/opportunities/?<?php echo $returnstring; ?>">View Opportunity</a>
 				<?php }}?>
 				
 			</div>
