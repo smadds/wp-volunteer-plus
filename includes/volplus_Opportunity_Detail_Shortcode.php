@@ -4,8 +4,8 @@ require_once VOLPLUS_PATH . 'includes/volplus_Functions.php';
 // Opportunity Detail
 function volplus_opportunity_detail_func($atts) {
 	parse_str($_SERVER['QUERY_STRING'],$querystring);
-	$id = $querystring['id'];
-	$opportunity = wp_remote_get(API_URL . 'opportunities/'.$id, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+	$opp = $querystring['opp-id'];
+	$opportunity = wp_remote_get(API_URL . 'opportunities/'.$opp, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
 	$response_code = wp_remote_retrieve_response_code($opportunity);
 
 //echo 'id'.$id;
@@ -24,11 +24,14 @@ function volplus_opportunity_detail_func($atts) {
 	
 <button type="button" class="volplus_respondButton button">I'm Interested</button>
 
-<div id="volplus_response" hidden="hidden" style="z-index:1000;">
+<div id="volplus_response" hidden="hidden" style="z-index:1000;display: inline-block;">
 	<?php echo do_shortcode(get_option('volplus_responseformcontent'));?>
 </div>	
 
 <style type="text/css">
+	.ui-dialog-titlebar-close:before {
+		
+	}	
 	.ui-dialog {
 		z-index: 9999 !important;
 	}
@@ -39,6 +42,8 @@ function volplus_opportunity_detail_func($atts) {
 		cursor: pointer;
 		float:right;
 		display: inline;
+		padding: 1.5rem 1rem;
+		margin: 0 0 1rem 1rem;
 	}
 </style>
 <script>
@@ -56,9 +61,12 @@ function volplus_opportunity_detail_func($atts) {
 			show: {effect: "fade", duration: 500},
 			closeOnEscape: true,
 			title: "Contact Us",
-			width: 500,
+			width: 400,
 			buttons: {
-            "Close": function() {
+				"Become a registered volunteer": function() {
+					window.location.assign("volunteer-registration/?opp-id=" + <?php echo $querystring['opp-id'];?>);
+				},
+            "Cancel": function() {
                 $(this).dialog('close');
 				}
 			},
@@ -301,7 +309,7 @@ function volplus_opportunity_detail_func($atts) {
 		<?php if($opportunity['organisation_opportunities']) { ?>
 			<h2>More Opportunities from <?php echo remove_brackets($opportunity['organisation']['organisation']); ?></h2>
 			<?php foreach($opportunity['organisation_opportunities'] as $opp) {
-				$querystring['id'] = $opp['id'];
+				$querystring['opp-id'] = $opp['id'];
 				$returnstring = http_build_query($querystring,'', '&');?>
 				<div class="volunteer-plus-opportunity-list">				
 					<h2><a href="/opportunities/?<?php echo $returnstring; ?>"><?php echo remove_brackets($opp['opportunity']); ?></a></h2>
@@ -315,7 +323,7 @@ function volplus_opportunity_detail_func($atts) {
 	<?php if($opportunity['similar_opportunities']) { ?>	
 		<h2>Similar Opportunities</h2>
 		<?php foreach($opportunity['similar_opportunities'] as $opp) {
-				$querystring['id'] = $opp['id'];
+				$querystring['opp-id'] = $opp['id'];
 				$returnstring = http_build_query($querystring,'', '&');?>
 				<div class="volunteer-plus-opportunity-list">
 					<h2><a href="/opportunities/?<?php echo $returnstring; ?>"><?php echo remove_brackets($opp['opportunity']); ?></a></h2>

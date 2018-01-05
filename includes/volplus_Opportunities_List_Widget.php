@@ -37,7 +37,7 @@ $location = ["","No Location","Working from home","Organisational Address","Spec
 if($response_code == 200) {
 	
 		foreach($opportunities['data'] as $opportunity) { ?>
-			<?php $querystring['id'] = $opportunity['id'];$returnstring = http_build_query($querystring,'', '&');?>			
+			<?php $querystring['opp-id'] = $opportunity['id'];$returnstring = http_build_query($querystring,'', '&');?>			
 			<div class="volplus-list">
 				<h2><a href="/opportunities/?<?php echo $returnstring; ?>"><?php echo remove_brackets($opportunity['opportunity']); ?></a></h2>
 				
