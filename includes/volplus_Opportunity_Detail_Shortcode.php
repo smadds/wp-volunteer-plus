@@ -20,12 +20,12 @@ function volplus_opportunity_detail_func($atts) {
 
 ?>
 
-	<h1><?php echo remove_brackets($opportunity['opportunity']); ?>
+	<h1><?php echo remove_brackets($opportunity['opportunity']); ?></h1>
 	
-<button type="button" id="volplus_respondButton" style="cursor:pointer;float:right">I'm Interested</button></h1>
+<button type="button" class="volplus_respondButton button">I'm Interested</button>
 
 <div id="volplus_response" hidden="hidden" style="z-index:1000;">
-	<?php echo get_option('volplus_responseformcontent');?>
+	<?php echo do_shortcode(get_option('volplus_responseformcontent'));?>
 </div>	
 
 <style type="text/css">
@@ -35,15 +35,18 @@ function volplus_opportunity_detail_func($atts) {
 	.ui-widget-overlay {
 		position: fixed !important;
 	}
+	.volplus_respondButton {
+		cursor: pointer;
+		float:right;
+		display: inline;
+	}
 </style>
 <script>
 	<?php
-	wp_enqueue_style (  'wp-jquery-ui-dialog'); 
-//   wp_register_style( 'jquery-style', 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.1/themes/smoothness/jquery-ui.css', true);
-//	wp_enqueue_style( 'jquery-style' );
+	wp_enqueue_style ("wp-jquery-ui-dialog"); 
 	wp_enqueue_script("jquery-ui-dialog");
 	wp_enqueue_script("jquery-effects-core");
-	wp_enqueue_style('volplus_frontend_css');
+	wp_enqueue_style("volplus_frontend_css");
 	?>
 	jQuery(document).ready(function($) {
 		$( "#volplus_response" ).dialog({
@@ -51,14 +54,22 @@ function volplus_opportunity_detail_func($atts) {
 			modal: true,
 			autoOpen: false,
 			show: {effect: "fade", duration: 500},
-			closeOnEscape: true,      
+			closeOnEscape: true,
+			title: "Contact Us",
+			width: 500,
 			buttons: {
             "Close": function() {
                 $(this).dialog('close');
 				}
-			}
+			},
+			open: function (event, ui) {
+				$(".ui-widget-overlay").click(function () {
+					$("#volplus_response").dialog('close');
+				});
+			},
+
 		});
-		$( "#volplus_respondButton" ).click(function() {
+		$( ".volplus_respondButton" ).click(function() {
 			$( "#volplus_response" ).dialog( "open" );
 		});
 	});
