@@ -2,8 +2,8 @@
 /**
  * Plugin Name:   WP Volunteer Plus
  * Plugin URI:    https://maddox.co.uk/volunteer-plus
- * Description:   A selection of tools for searching the Volunteer Plus Database
- * Version:       0.4.8
+ * Description:   A selection of tools for interacting with the Volunteer Plus Database
+ * Version:       0.4.9
  * Author:        Simon Maddox
  * Author URI:    https://maddox.co.uk
  */
@@ -59,4 +59,40 @@ $myUpdateChecker->setAuthentication('4046a82e545bde6ed1c1dc2ad54f4c770cccfa40');
 //Optional: Load release assets
 //$myUpdateChecker->getVcsApi()->enableReleaseAssets();
 
+
+// function to create necessary pages if they do not exist when activated
+register_activation_hook(__FILE__, 'volplus_activate');
+
+function volplus_activate() {
+	if( get_page_by_path('volunteer-registration') === null ) { // page doesn't exist
+		wp_insert_post(array(
+			'post_type' => 'page',
+			'post_title' => 'Volunteer Registration',
+			'post_content' => '',
+			'post_name' => 'volunteer-registration',
+			'post_status' => 'publish',
+			'post_author' => 1,
+    ));
+	}
+	if( get_page_by_path('search') === null ) { // page doesn't exist
+		wp_insert_post(array(
+			'post_type' => 'page',
+			'post_title' => 'Opportunity Search',
+			'post_content' => '[volplus-list-opportunities]',
+			'post_name' => 'search',
+			'post_status' => 'publish',
+			'post_author' => 1,
+    ));
+	}
+	if( get_page_by_path('opportunities') === null ) { // page doesn't exist
+		wp_insert_post(array(
+			'post_type' => 'page',
+			'post_title' => 'Opportunities',
+			'post_content' => '[volplus-opportunity-detail]',
+			'post_name' => 'opportunities',
+			'post_status' => 'publish',
+			'post_author' => 1,
+    ));
+	}
+}
 

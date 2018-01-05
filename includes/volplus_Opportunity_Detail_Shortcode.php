@@ -302,8 +302,6 @@ function volplus_opportunity_detail_func($atts) {
 	</script>
 	<?php } ?>
 
-	
-<!-- <pre><?php print_r($opportunity);?></pre>-->
 			
 	<div class="volplus-col-6">
 		<?php if($opportunity['organisation_opportunities']) { ?>
@@ -333,11 +331,11 @@ function volplus_opportunity_detail_func($atts) {
 			<?php } ?>
 		<?php } ?>
 	</div>
+	<!-- --><?php var_dump_safe($opportunity);?>
 
-<?php } ?>
+<?php }
 
 
-<?php
 // Register jquery dependency and the shortcode.
 
 //wp_enqueue_script('volplus-opportunity-detail', VOLPLUS_PATH .'/includes/volplus_Opportunity_Detail_Shortcode.php', array('jquery'), null, true);

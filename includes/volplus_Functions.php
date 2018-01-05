@@ -1,5 +1,24 @@
 <?php
 
+
+// safe printing of array
+// needs to be in debug mode (WP_DEBUG = true in wp-config.php) AND logged in as an admin
+function print_r_safe ($a){
+	if(defined('WP_DEBUG') && WP_DEBUG === true && current_user_can('administrator')) {
+		echo "<pre style='white-space:pre-wrap;'>";
+		print_r($a);
+		echo "</pre>";
+	}
+}
+function var_dump_safe ($a){
+	if(defined('WP_DEBUG') && WP_DEBUG === true && current_user_can('administrator')) {
+		echo "<pre style='white-space:pre-wrap;'>";
+		var_dump($a);
+		echo "</pre>";
+	}
+}
+
+
 // Remove ALL bracketed text from string if setting configured
 function remove_brackets($fstring) {
 	if(get_option('volplus_hidebrackets') == 'on') {
@@ -25,7 +44,7 @@ function postcodeFormat($postcode)
         $postcode = substr($cleanPostcode,0,2) . " " . substr($cleanPostcode,2,3);
     }
  
-    //if 6 charcters, insert space after the 3rd character
+    //if 6 characters, insert space after the 3rd character
     elseif(strlen($cleanPostcode) == 6)
     {
         $postcode = substr($cleanPostcode,0,3) . " " . substr($cleanPostcode,3,3);
@@ -40,7 +59,6 @@ function postcodeFormat($postcode)
  
     return $postcode;
 }
-
 
 
 // function to geocode address, it will return false if unable to geocode address

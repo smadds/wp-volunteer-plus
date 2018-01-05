@@ -57,7 +57,7 @@ if($response_code == 200) {
 				<?php if(isset($instance[ 'show_button' ])){if($instance[ 'show_button' ]){?>
 					<a class="button" href="/opportunities/?<?php echo $returnstring; ?>">View Opportunity</a>
 				<?php }}?>
-				
+				<!-- <?php var_dump_safe($opportunity);?>	-->
 			</div>
 			
 		<?php 
