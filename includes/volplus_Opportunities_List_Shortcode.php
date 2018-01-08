@@ -37,17 +37,22 @@ function volplus_list_opportunities_func($atts = [], $content = null, $tag = '')
 					<p class="organisation"><?php echo remove_brackets($opportunity['organisation']); ?></p>
 				<?php }
 				
-				if($volplus_atts['location']) {
-					if(array_key_exists('distance', array_filter($opportunity))) {
-						 echo 'Distance '.round($opportunity['distance'],1).' miles';
-					 }else{
-						echo '<p class="location">'.$location[$opportunity['location']].'</p>';
-					}
-				}
+				if($volplus_atts['location']){?>
+					<?php if(array_key_exists('regions', array_filter($opportunity))) {
+						 echo '<p>Districts: ' . $opportunity['regions'] . "&nbsp;&nbsp;</p>";
+					 }
+					 if(array_key_exists('distance', array_filter($opportunity))) {
+						 echo '<p>Distance ~ '.round($opportunity['distance'],1).' miles</p>';
+					 }else{ ?>
+					<p class="location"><?php echo $location[$opportunity['location']]; ?> 
+					<?php }?>
+					</p>
+				<?php }
 						
 				if($volplus_atts['button']){?>
 					</p><a class="button" href="/opportunities/?<?php echo $returnstring; ?>">View Opportunity</a></p>
 				<?php }?>				
+				<!-- --><?php var_dump_safe($opportunity);?>	
 			</div>
 			
 		<?php 
@@ -58,12 +63,12 @@ function volplus_list_opportunities_func($atts = [], $content = null, $tag = '')
 				if($opportunities['last_page']!== 1) { //don't bother if just 1 page
 				
 					if($opportunities['current_page'] > 1){ //not on 1st page
-						$querystring['Page'] = $opportunities['current_page']-1;
+						$querystring['page'] = $opportunities['current_page']-1;
 						echo "<li><a href='/search?".http_build_query($querystring,'', '&')."'>Previous</a></li>";
 					}
 					
 					foreach (range(max(1,$opportunities['current_page']-5), min($opportunities['current_page']+5,$opportunities['last_page'])) as $number) {
-						$querystring['Page'] = $number;
+						$querystring['page'] = $number;
 						if($opportunities['current_page'] == $number) { // current page
 							echo "<li><a href='/search?".http_build_query($querystring,'', '&')."' class='current'>".$number."</a></li>";
 						} else { //not current page(s))
@@ -72,7 +77,7 @@ function volplus_list_opportunities_func($atts = [], $content = null, $tag = '')
 					}
 					
 					if($opportunities['current_page'] < $opportunities['last_page']){
-						$querystring['Page'] = $opportunities['current_page']+1;
+						$querystring['page'] = $opportunities['current_page']+1;
 						echo "<li><a href='/search?".http_build_query($querystring,'', '&')."'>Next</a></li>";
 					}
 					
