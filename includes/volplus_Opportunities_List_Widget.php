@@ -47,7 +47,9 @@ if($response_code == 200) {
 				
 				<?php if(isset($instance[ 'show_location' ])){if($instance[ 'show_location' ]){?>
 					<?php if(array_key_exists('regions', array_filter($opportunity))) {
-						 echo '<p>Districts: ' . $opportunity['regions'] . "&nbsp;&nbsp;</p>";
+						 echo '<p>District';
+						 if (strchr($opportunity['regions'],',')) echo 's';
+						 echo ' : ' . $opportunity['regions'] . "&nbsp;&nbsp;</p>";
 					 }
 					 if(array_key_exists('distance', array_filter($opportunity))) {
 						 echo '<p>Distance ~ '.round($opportunity['distance'],1).' miles</p>';

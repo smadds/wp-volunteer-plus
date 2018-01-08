@@ -39,7 +39,9 @@ function volplus_list_opportunities_func($atts = [], $content = null, $tag = '')
 				
 				if($volplus_atts['location']){?>
 					<?php if(array_key_exists('regions', array_filter($opportunity))) {
-						 echo '<p>Districts: ' . $opportunity['regions'] . "&nbsp;&nbsp;</p>";
+						 echo '<p>District';
+						 if (strchr($opportunity['regions'],',')) echo 's';
+						 echo ' : ' . $opportunity['regions'] . "&nbsp;&nbsp;</p>";
 					 }
 					 if(array_key_exists('distance', array_filter($opportunity))) {
 						 echo '<p>Distance ~ '.round($opportunity['distance'],1).' miles</p>';
