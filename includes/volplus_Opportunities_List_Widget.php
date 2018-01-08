@@ -71,12 +71,12 @@ if($response_code == 200) {
 				if($opportunities['last_page']!== 1) { //don't bother if just 1 page
 				
 					if($opportunities['current_page'] > 1){ //not on 1st page
-						$querystring['page'] = $opportunities['current_page']-1;
+						$querystring['Page'] = $opportunities['current_page']-1;
 						echo "<li><a href='/search?".http_build_query($querystring,'', '&')."'>Previous</a></li>";
 					}
 					
 					foreach (range(max(1,$opportunities['current_page']-5), min($opportunities['current_page']+5,$opportunities['last_page'])) as $number) {
-						$querystring['page'] = $number;
+						$querystring['Page'] = $number;
 						if($opportunities['current_page'] == $number) { // current page
 							echo "<li><a href='/search?".http_build_query($querystring,'', '&')."' class='current'>".$number."</a></li>";
 						} else { //not current page(s))
@@ -85,7 +85,7 @@ if($response_code == 200) {
 					}
 					
 					if($opportunities['current_page'] < $opportunities['last_page']){
-						$querystring['page'] = $opportunities['current_page']+1;
+						$querystring['Page'] = $opportunities['current_page']+1;
 						echo "<li><a href='/search?".http_build_query($querystring,'', '&')."'>Next</a></li>";
 					}
 					
