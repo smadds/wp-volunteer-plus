@@ -3,7 +3,7 @@
  * Plugin Name:   WP Volunteer Plus
  * Plugin URI:    https://maddox.co.uk/volunteer-plus
  * Description:   A selection of tools for interacting with the Volunteer Plus Database
- * Version:       0.4.12
+ * Version:       0.4.13
  * Author:        Simon Maddox
  * Author URI:    https://maddox.co.uk
  */
@@ -45,6 +45,7 @@ require_once VOLPLUS_PATH . 'includes/volplus_Opportunities_Returned_Shortcode.p
 require_once VOLPLUS_PATH . 'includes/volplus_Opportunity_Detail_Shortcode.php';
 require_once VOLPLUS_PATH . 'includes/volplus_Settings.php';
 require_once VOLPLUS_PATH . 'includes/plugin-update-checker/plugin-update-checker.php';
+require_once VOLPLUS_PATH . 'includes/volplus_Volunteer_Register_Shortcode.php';
 
 $myUpdateChecker = Puc_v4p3_Factory::buildUpdateChecker(
 	'https://github.com/smadds/wp-volunteer-plus',
@@ -59,16 +60,25 @@ $myUpdateChecker->setAuthentication('4046a82e545bde6ed1c1dc2ad54f4c770cccfa40');
 //Optional: Load release assets
 //$myUpdateChecker->getVcsApi()->enableReleaseAssets();
 
+//get static lists
+$volunteer_fields = wp_remote_get(API_URL . 'volunteer_fields', array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+$response_code = wp_remote_retrieve_response_code($volunteer_fields);
+if($response_code == 200) {
+	$GLOBALS['volunteer_fields'] = $volunteer_fields;
+} else {
+	echo '(Error code '.$response_code.')';
+}
 
-// function to create necessary pages if they do not exist when activated
+// function called when plugin activated
 register_activation_hook(__FILE__, 'volplus_activate');
 
 function volplus_activate() {
+// create necessary pages if they do not exist
 	if( get_page_by_path('volunteer-registration') === null ) { // page doesn't exist
 		wp_insert_post(array(
 			'post_type' => 'page',
 			'post_title' => 'Volunteer Registration',
-			'post_content' => '',
+			'post_content' => '[volplus-volunteer-register]',
 			'post_name' => 'volunteer-registration',
 			'post_status' => 'publish',
 			'post_author' => 1,
@@ -94,5 +104,7 @@ function volplus_activate() {
 			'post_author' => 1,
     ));
 	}
+// create custom user role
+	add_role( 'volunteer', 'Volunteer', array( 'read' => true, 'level_0' => true ) );
 }
 

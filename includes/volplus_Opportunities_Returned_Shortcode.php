@@ -48,4 +48,3 @@ add_shortcode( 'volplus-opportunities-returned', 'volplus_return_opportunities_f
 
 // Enable shortcodes in widgets
 add_filter('widget_text','do_shortcode');
-?>

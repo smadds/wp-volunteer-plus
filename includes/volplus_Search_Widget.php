@@ -31,9 +31,6 @@ class volplus_Search_Widget extends WP_Widget {
 	}
 
 
-	$interests = wp_remote_get(API_URL . 'interests', array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
-	$activities = wp_remote_get(API_URL . 'activities', array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
-
 	if(! volplus_licensed()) echo '<h3>'._e( 'Unlicensed Volunteer Plus Plugin', 'wp_volunteer-plus' ).'</h3>';
 
 	if(!isset($instance[ 'show_5m' ])) {$instance['show_5m'] = 1; $show_5m = 1;}
@@ -98,101 +95,21 @@ class volplus_Search_Widget extends WP_Widget {
 
 		<?php if(isset($instance[ 'show_interests' ])){if($instance[ 'show_interests' ]){?>
 			<div class="form-col">
-				<label for="interests"><?php _e( 'Interests', 'wp_volunteer-plus' )?></label>
-				<?php
-					$response_code = wp_remote_retrieve_response_code($interests);
-					if($response_code == 200) {
-						$interests = json_decode($interests['body'], true);
-						echo '<div class="colcontainer">';             
-						foreach($interests as $interest) {
-							if(isset($_GET['interests'])) {
-								if(in_array($interest['id'], $_GET['interests'])) {
-									echo"<label class='colitem-selected'><input type='checkbox' name='interests[".$interest['id']."]' value='".$interest['id']."' checked />".$interest['interest']."</label><br />";
-								} else {
-									// not filtered when page returned
-									echo"<label class='colitem'><input type='checkbox' name='interests[".$interest['id']."]' value='".$interest['id']."' />".$interest['interest']."</label><br />";
-								}
-							} else {
-									echo"<label class='colitem'><input type='checkbox' name='interests[".$interest['id']."]' value='".$interest['id']."' />".$interest['interest']."</label><br />";
-							}
-						}
-						echo '</div>';
-					} else {
-						echo '(Error code '.$response_code.')';
-					}
-				?>
+				<?php display_interests();?>
 			</div>
 		<?php }}?>
 
 
 		<?php if(isset($instance[ 'show_activities' ])){if($instance[ 'show_activities' ]){?>
 			<div class="form-col">
-				<label for="activities"><?php _e( 'Activities', 'wp_volunteer-plus' )?></label>
-				<?php
-					$response_code = wp_remote_retrieve_response_code($activities);
-					if($response_code == 200) {
-						$activities = json_decode($activities['body'], true);
-						echo '<div class="colcontainer">';             
-						foreach($activities as $activity) {
-							if(isset($_GET['activities'])) {
-								if(in_array($activity['id'], $_GET['activities'])) {
-									echo"<label class='colitem-selected'><input type='checkbox' name='activities[".$activity['id']."]' value='".$activity['id']."' checked />".$activity['activity']."</label><br />";
-								} else {
-									echo"<label class='colitem'><input type='checkbox' name='activities[".$activity['id']."]' value='".$activity['id']."' />".$activity['activity']."</label><br />";
-								}
-							} else {
-									echo"<label class='colitem'><input type='checkbox' name='activities[".$activity['id']."]' value='".$activity['id']."' />".$activity['activity']."</label><br />";
-							}
-						}
-						echo '</div>';
-					} else {
-						echo '(Error code '.$response_code.')';
-					}
-				?>
+				<?php display_activities();?>
 			</div>
 		<?php }}?>
 
 		
-		<?php if(isset($instance[ 'show_availability_full' ])){if($instance[ 'show_availability_full' ]){?>
-			<div class="form-col">
-				<label for="availability"><?php _e( 'When are you available?', 'wp_widget_plugin' )?></label>
-	
-				<?php 
-
-				$periods = array(
-				'mon_mor','mon_aft','mon_eve',
-				'tue_mor','tue_aft','tue_eve',
-				'wed_mor','wed_aft','wed_eve',
-				'thu_mor','thu_aft','thu_eve',
-				'fri_mor','fri_aft','fri_eve',
-				'sat_mor','sat_aft','sat_eve',
-				'sun_mor','sun_aft','sun_eve'
-				);
-
-				$days = array('mon','tue','wed','thu','fri','sat','sun');
-				$dayperiods = array('AM','PM','Eve');
-
-				echo '<table><tr><th>&nbsp;</th><th>AM</th><th>PM</th><th>Eve</th></tr>';
-	
-				$index = 0;
-				foreach($days as $day) {
-					echo '<tr>';
-					echo '<th>'.ucfirst($day).'</th>';
-					foreach($dayperiods as $dayperiod) {
-						echo '<td><input class="volplus-checkbox" type="checkbox" name="'.$periods[$index].'" value="1"';
-						if(isset($_GET[$periods[$index]])){
-							if($_GET[$periods[$index]]) {
-								echo ' checked';
-							} 
-						}
-						echo '/></td>';
-						$index++;
-					}
-					echo '</tr>';
-				}
-				echo '</table>';
-		
-				?>
+		<?php if(isset($instance[ 'show_availability_full' ])) {if($instance[ 'show_availability_full' ]){?>
+			<div class='form-col'>
+				<?php display_availability_table();?>
 			</div>
 		<?php }}?>
 		
