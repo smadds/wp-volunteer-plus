@@ -13,6 +13,7 @@ define('VOLPLUS_PATH', plugin_dir_path(__FILE__));
 define('VOLPLUS_URL', plugin_dir_url(__FILE__)); 
 define('VOLPLUS_SLUG', 'wp-volunteer-plus'); 
 
+
 //Add Settings option to plugins list page
 function volplus_add_settings_link( $links ) {
     $settings_link = '<a href="options-general.php?page=volunteer-plus">' . __( 'Settings' ) . '</a>';

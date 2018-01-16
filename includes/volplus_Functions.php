@@ -1,16 +1,92 @@
 <?php
 
-// display disability options
-function disability() {
+// get post variable if it exists
+function get($key,  $default_value = '')
+{
+    return isset($_GET[$key]) ? esc_attr($_GET[$key]) : $default_value;
+}
+
+class volplus_volunteer {
+			var $title;
+			var $first_name;		// required
+			var $last_name;		// required
+			var $address_line_1;	// required
+			var $address_line_2;
+			var $address_line_3;
+			var $town;				// required
+			var $county;			// required
+			var $postcode;			// required
+			var $telephone;		// required
+			var $mobile;
+			var $email_address;	// required
+			var $interests;		// required
+			var $activities;	// required
+			var $mon_mor, $mon_aft, $mon_eve;
+			var $tue_mor, $tue_aft, $tue_eve;
+			var $wed_mor, $wed_aft, $wed_eve;
+			var $thu_mor, $thu_aft, $thu_eve;
+			var $fri_mor, $fri_aft, $fri_eve;
+			var $sat_mor, $sat_aft, $sat_eve;
+			var $sun_mor, $sun_aft, $sun_eve;
+			var $availability_details;
+			var $volunteering_experience;
+			var $reasons;
+			var $volunteering_reason_info;
+			var $date_birth;		// required unless prefer not say
+			var $date_birth_prefer_not_say;
+			var $gender;			// required 1:male, 2:female, 3:prefer not to say, 4:not known
+			var $employment;		//required specific integer from Volunteer fields
+			var $ethnicity;		//required specific integer from Volunteer fields
+			var $disability;		// required 1:yes, 2:no, 3:prefer not to say
+			var $disabilities;	// required if disability=1. list of objects that each represent a single disability. see volunteer fields
+			var $password;			// required
+			var $password_confirmation; // required
+}
+
+
+// display disability types
+function disability_type($vol){
 	$volunteer_fields = $GLOBALS['volunteer_fields'];
 	$volunteer_fields = json_decode($volunteer_fields['body'], true);
 	$disabilities = $volunteer_fields['disabilities'];
-	echo "<select name='disability'/>";
-		echo "<option value='' disabled selected hidden>Select</option>";
-		foreach ($disabilities as $disability) {
-			echo "<option value=" . $disability['id'] . ">" . $disability['value'] . "</option>";
+	echo '<div class="colcontainer"  id="disability-type">';             
+	foreach($disabilities as $disability) {
+		if(isset($_GET['disabilities'])) {
+			if(in_array($disability['id'], $vol->disabilities)) {
+				echo"<label class='colitem-selected'><input type='checkbox' name='disabilities[".$disability['id']."]' value=1 checked />".$disability['value']."</label><br />";
+			} else {
+				echo"<label class='colitem'><input type='checkbox' name='disabilities[".$disability['id']."]' value=0 />".$disability['value']."</label><br />";
+			}
+		} else {
+			echo"<label class='colitem'><input type='checkbox' name='disabilities[".$disability['id']."]' value=0 />".$disability['value']."</label><br />";
+		}
+	}
+	echo '</div>';
+	return $vol;
+}
+
+
+// display disability options
+function disability($vol) {
+	$thedisabilities = array( 
+		['id'=>1, 'value'=>'Prefer not to say'], 
+		['id'=>2, 'value'=> 'Yes'],
+		['id'=>3, 'value'=> 'No'],
+		['id'=>4, 'value'=> 'Not known']
+	);
+//	var_dump_safe($disabilities);
+	$selected = $vol->disability;
+	echo "<select name='disability' id='disability-type'>";
+		echo "<option value='' ";
+		if($selected=="") echo 'selected';
+		echo ">Select</option>";
+		foreach ($thedisabilities as $thedisability) {
+			echo "<option value=" . $thedisability['id'];
+			if($thedisability['id'] == $selected) echo " selected";
+			echo ">" . $thedisability['value'] . "</option>";
 		}
 	echo "</select>";
+	return $vol;
 }
 
 // display ethnicity options
@@ -18,10 +94,15 @@ function ethnicity() {
 	$volunteer_fields = $GLOBALS['volunteer_fields'];
 	$volunteer_fields = json_decode($volunteer_fields['body'], true);
 	$ethnic_groups = $volunteer_fields['ethnic_groups'];
-	echo "<select name='ethnicity'/>";
-		echo "<option value='' disabled selected hidden>Select</option>";
+	$selected = get('ethnicity');
+	echo "<select name='ethnicity'>";
+		echo "<option value='' ";
+		if($selected=="") echo 'selected';
+		echo ">Select</option>";
 		foreach ($ethnic_groups as $ethnic_group) {
-			echo "<option value=" . $ethnic_group['id'] . ">" . $ethnic_group['value'] . "</option>";
+			echo "<option value=" . $ethnic_group['id'];
+			if($ethnic_group['id'] == $selected) echo " selected";
+			echo ">" . $ethnic_group['value'] . "</option>";
 		}
 	echo "</select>";
 }
@@ -31,12 +112,18 @@ function employment_status() {
 	$volunteer_fields = $GLOBALS['volunteer_fields'];
 	$volunteer_fields = json_decode($volunteer_fields['body'], true);
 	$employment_statuses = $volunteer_fields['employment_statuses'];
-	echo "<select name='gender'/>";
-		echo "<option value='' disabled selected hidden>Select</option>";
+	$selected = get('employment');
+	echo "<select name='employment'>";
+		echo "<option value='' ";
+		if($selected=="") echo 'selected';
+		echo ">Select</option>";
 		foreach ($employment_statuses as $employment_status) {
-			echo "<option value=" . $employment_status['id'] . ">" . $employment_status['value'] . "</option>";
+			echo "<option value=" . $employment_status['id'];
+			if($employment_status['id'] == $selected) echo " selected";
+			echo ">" . $employment_status['value'] . "</option>";
 		}
 	echo "</select>";
+	return $employment_status;
 }
 
 
@@ -44,22 +131,23 @@ function employment_status() {
 function display_reasons() {
 	$volunteer_fields = $GLOBALS['volunteer_fields'];
 	$volunteer_fields = json_decode($volunteer_fields['body'], true);
-	$reasons = $volunteer_fields['volunteering_reasons'];
 //	print_r_safe($volunteer_fields);
+	$reasons = $volunteer_fields['volunteering_reasons'];
+//	print_r_safe($reasons);
 	echo '<div class="colcontainer">';             
 		foreach($reasons as $reason) {
 			if(isset($_GET['reasons'])) {
 				if(in_array($reason['id'], $_GET['reasons'])) {
-					echo"<label class='colitem-selected'><input type='checkbox' name='reasons[".$reason['id']."]' value='".$reason['id']."' checked />".$reason['value']."</label><br />";
+					echo"<label class='colitem-selected'><input type='checkbox' name='why_volunteer[".$reason['id']."]' value='".$reason['id']."' checked />".$reason['value']."</label><br />";
 				} else {
 				// not filtered when page returned
-					echo"<label class='colitem'><input type='checkbox' name='reasons[".$reason['id']."]' value='".$reason['id']."' />".$reason['value']."</label><br />";
+					echo"<label class='colitem'><input type='checkbox' name='why_volunteer[".$reason['id']."]' value='".$reason['id']."' />".$reason['value']."</label><br />";
 				}
 			} else {
-				echo"<label class='colitem'><input type='checkbox' name='reasons[".$reason['id']."]' value='".$reason['id']."' />".$reason['value']."</label><br />";
+				echo"<label class='colitem'><input type='checkbox' name='why_volunteer[".$reason['id']."]' value='".$reason['id']."' />".$reason['value']."</label><br />";
 			}
 		}
-		echo '</div>';
+	echo '</div>';
 }
 
 
