@@ -65,7 +65,23 @@ $myUpdateChecker->setAuthentication('4046a82e545bde6ed1c1dc2ad54f4c770cccfa40');
 $volunteer_fields = wp_remote_get(API_URL . 'volunteer_fields', array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
 $response_code = wp_remote_retrieve_response_code($volunteer_fields);
 if($response_code == 200) {
-	$GLOBALS['volunteer_fields'] = $volunteer_fields;
+	$GLOBALS['volunteer_fields'] = json_decode($volunteer_fields['body'], true);
+} else {
+	echo '(Error code '.$response_code.')';
+}
+
+$activities = wp_remote_get(API_URL . 'activities', array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+$response_code = wp_remote_retrieve_response_code($activities);
+if($response_code == 200) {
+	$GLOBALS['volunteer_activities'] = json_decode($activities['body'], true);
+} else {
+	echo '(Error code '.$response_code.')';
+}
+
+$interests = wp_remote_get(API_URL . 'interests', array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+$response_code = wp_remote_retrieve_response_code($interests);
+if($response_code == 200) {
+	$GLOBALS['volunteer_interests'] = json_decode($interests['body'], true);
 } else {
 	echo '(Error code '.$response_code.')';
 }

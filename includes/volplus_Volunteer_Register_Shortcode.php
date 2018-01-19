@@ -10,13 +10,11 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 
 // override default attributes with user attributes
 	$volplus_atts = shortcode_atts([
-//		'rounddown' => 1,
+		'wordpress-account' => 1,
 //		'roundup' => 1,
 	], $atts, $tag);
 
-
-
-	
+//	var_dump_safe($GLOBALS['volunteer_activities']);
 	
 	
 	$wpuserid = null;
@@ -27,26 +25,48 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		// sanitize user form input
 
 
-		$volunteer->first_name = ucfirst(strtolower(sanitize_user( $_POST['first_name'] )));
-		$volunteer->last_name = ucfirst(strtolower(sanitize_user( $_POST['last_name'] )));
+		if(isset($_POST['title']))$volunteer->title = stripslashes(esc_html( $_POST['title']));
+		if(isset($_POST['first_name']))$volunteer->first_name = ucfirst(strtolower(sanitize_user( $_POST['first_name'] )));
+		if(isset($_POST['last_name']))$volunteer->last_name = ucfirst(strtolower(sanitize_user( $_POST['last_name'] )));
 		$volunteer->username = strtolower($volunteer->first_name . '-' . $volunteer->last_name);
-		$volunteer->email_address = strtolower(sanitize_email( $_POST['email_address'] ));
-		$volunteer->password = esc_attr( $_POST['password'] );
-		$volunteer->password_confirmation = esc_attr( $_POST['password_confirmation'] );
-		$volunteer->address_line_1 = esc_attr( $_POST['address_line_1']);
-		$volunteer->address_line_2 = esc_attr( $_POST['address_line_2']);
-		$volunteer->address_line_3 = esc_attr( $_POST['address_line_3']);
-		$volunteer->town = esc_attr( $_POST['town']);
-		$volunteer->county = esc_attr( $_POST['county']);
-		$volunteer->postcode = esc_attr( $_POST['postcode']);
-		$volunteer->telephone = esc_attr( $_POST['telephone']);
-		$volunteer->mobile = esc_attr( $_POST['mobile']);
-		$volunteer->date_birth = esc_attr( $_POST['date_birth']);
-		$volunteer->gender = esc_attr( $_POST['gender']);
-		$volunteer->ethnicity = esc_attr( $_POST['ethnicity']);
-		$volunteer->disability = esc_attr( $_POST['disability']);
-		$volunteer->employment = esc_attr( $_POST['employment']);
+		if(isset($_POST['email_address']))$volunteer->email_address = strtolower(sanitize_email( $_POST['email_address'] ));
+		if(isset($_POST['password']))$volunteer->password = esc_html( $_POST['password'] );
+		if(isset($_POST['password_confirmation']))$volunteer->password_confirmation = esc_html( $_POST['password_confirmation'] );
+		if(isset($_POST['address_line_1']))$volunteer->address_line_1 = stripslashes(esc_html( $_POST['address_line_1']));
+		if(isset($_POST['address_line_2']))$volunteer->address_line_2 = stripslashes(esc_html( $_POST['address_line_2']));
+		if(isset($_POST['address_line_3']))$volunteer->address_line_3 = stripslashes(esc_html( $_POST['address_line_3']));
+		if(isset($_POST['town']))$volunteer->town = stripslashes(esc_html( $_POST['town']));
+		if(isset($_POST['county']))$volunteer->county = stripslashes(esc_html( $_POST['county']));
+		if(isset($_POST['postcode']))$volunteer->postcode = stripslashes(esc_html( $_POST['postcode']));
+		if(isset($_POST['telephone']))$volunteer->telephone = stripslashes(esc_html( $_POST['telephone']));
+		if(isset($_POST['mobile']))$volunteer->mobile = stripslashes(esc_html( $_POST['mobile']));
+		if(isset($_POST['interests'])) $volunteer->interests = $_POST['interests'];
+		if(isset($_POST['activities'])) $volunteer->activities = $_POST['activities'];
+		if(isset($_POST['availability_details']))$volunteer->availability_details = stripslashes(esc_html( $_POST['availability_details']));
+		if(isset($_POST['volunteering_experience']))$volunteer->volunteering_experience = stripslashes(esc_html($_POST['volunteering_experience']));
+		if(isset($_POST['reasons'])) $volunteer->reasons = $_POST['reasons'];
+		if(isset($_POST['volunteering_reason_info']))$volunteer->volunteering_reason_info = stripslashes(esc_html($_POST['volunteering_reason_info']));
+		if(isset($_POST['date_birth']))$volunteer->date_birth = esc_html( $_POST['date_birth']);
+		if(isset($_POST['date_birth_prefer_not_say']))$volunteer->date_birth_prefer_not_say = esc_html( $_POST['date_birth_prefer_not_say']);
+		if(isset($_POST['gender']))$volunteer->gender = esc_html( $_POST['gender']);
+		if(isset($_POST['employment']))$volunteer->employment = esc_html( $_POST['employment']);
+		if(isset($_POST['ethnicity']))$volunteer->ethnicity = esc_html( $_POST['ethnicity']);
+		if(isset($_POST['disability']))$volunteer->disability = esc_html( $_POST['disability']);
+		if(isset($_POST['disabilities'])) $volunteer->disabilities = $_POST['disabilities'];
 
+
+		$periods = array(
+			'mon_mor','mon_aft','mon_eve',
+			'tue_mor','tue_aft','tue_eve',
+			'wed_mor','wed_aft','wed_eve',
+			'thu_mor','thu_aft','thu_eve',
+			'fri_mor','fri_aft','fri_eve',
+			'sat_mor','sat_aft','sat_eve',
+			'sun_mor','sun_aft','sun_eve'
+		);
+		foreach($periods as $period){
+			if(isset($_POST[$period])) $volunteer->$period = 1;		
+		}
         
 		//change username if already exists
 		$vol = $volunteer->username;
@@ -59,7 +79,11 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		}
 		
 		// flag if age not given
-		$volunteer->date_birth_prefer_not_say = ($volunteer->date_of_birth = null);
+		if($volunteer->date_birth == null){
+			$volunteer->date_birth_prefer_not_say = "1";
+		} else {
+			$volunteer->date_birth = implode('-', array_reverse(explode('-', $volunteer->date_birth))); // put into UK date order dd-MM-yyyy
+		}
 		
 //	var_dump_safe($volunteer);
         
@@ -85,32 +109,36 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
     
     
 		if ( 1 > count( $reg_errors->get_error_messages() ) ) {
-			$wpuser = array(
-				'user_login'	=>	$volunteer->username,
-				'first_name'	=>	$volunteer->first_name,
-				'last_name'		=>	$volunteer->last_name,
-	         'user_email'	=>	$volunteer->email_address,
-	         'user_pass'		=>	$volunteer->password,
-	         'role'			=>	'volunteer',
-	         );
-			$wpuserid = wp_insert_user($wpuser);
+			//add VolPlus account
+			$volplus_volunteer = json_encode($volunteer);
+			var_dump_safe($volplus_volunteer);
+			
+			if ($volplus_atts['wordpress-account']){ // create WP account enabled
+				$wpuser = array(
+					'user_login'	=>	$volunteer->username,
+					'first_name'	=>	$volunteer->first_name,
+					'last_name'		=>	$volunteer->last_name,
+	         	'user_email'	=>	$volunteer->email_address,
+		         'user_pass'		=>	$volunteer->password,
+		         'role'			=>	'volunteer',
+	   	      );
+				$wpuserid = wp_insert_user($wpuser);
 //			var_dump_safe($user);
 
-			$wplogin = array(
-				'user_login'	=>	$volunteer->username,
-				'user_password'=>	$volunteer->password,
-				'remember'		=>	true
-			);
+				$wplogin = array(
+					'user_login'	=>	$volunteer->username,
+					'user_password'=>	$volunteer->password,
+					'remember'		=>	true
+				);
 			
-			$user = wp_signon( $wplogin, is_ssl());
-			if ( is_wp_error( $user ) ) {
-				echo $user->get_error_message();
-			}
+				$user = wp_signon( $wplogin, is_ssl());
+				if ( is_wp_error( $user ) ) {
+					echo $user->get_error_message();
+				}
 //			var_dump_safe($user);			
-       
-			echo "<h2>Your account has been created with your username:" . $username . ".</h2>";
-			echo "<p>You have been logged in with the password you set.</p>";        
-
+       		echo "<h2>Your account has been created.<br/>Your username is: " . $volunteer->username . ".</h2>";
+				echo "<p>You have been logged in with the password you set.</p>";        
+       	}
 		}
 	}
 
@@ -119,19 +147,19 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		?>
 		<div class="volplus-col-12">
 			<h2>Create your account</h2>
+			<?php if(isset($signUpError)) echo '<div>'.$signUpError.'</div>'?>
 			<form action="" method="post" name="user_registration">
 
 				<p><label class="volplus-col-2">Title (optional)  
-					<?php $selected = get('title')?>
 					<select name="title" class="text">
-						<option value="" <?php if($selected=="") echo 'selected';?> >Select</option>
-						<option value="Mr" <?php if($selected=="Mr") echo 'selected';?> >Mr</option>
-						<option value="Master" <?php if($selected=="Master") echo 'selected';?> >Master</option>
-						<option value="Mrs" <?php if($selected=="Mrs") echo 'selected';?> >Mrs</option>
-						<option value="Miss" <?php if($selected=="Miss") echo 'selected';?> >Miss</option>
-						<option value="Ms" <?php if($selected=="Ms") echo 'selected';?> >Ms</option>
-						<option value="Dr" <?php if($selected=="Dr") echo 'selected';?> >Dr</option>
-						<option value="Prof" <?php if($selected=="Prof") echo 'selected';?> >Prof</option>
+						<option value="" <?php if($volunteer->title=="") echo 'selected';?> >Select</option>
+						<option value="Mr" <?php if($volunteer->title=="Mr") echo 'selected';?> >Mr</option>
+						<option value="Master" <?php if($volunteer->title=="Master") echo 'selected';?> >Master</option>
+						<option value="Mrs" <?php if($volunteer->title=="Mrs") echo 'selected';?> >Mrs</option>
+						<option value="Miss" <?php if($volunteer->title=="Miss") echo 'selected';?> >Miss</option>
+						<option value="Ms" <?php if($volunteer->title=="Ms") echo 'selected';?> >Ms</option>
+						<option value="Dr" <?php if($volunteer->title=="Dr") echo 'selected';?> >Dr</option>
+						<option value="Prof" <?php if($volunteer->title=="Prof") echo 'selected';?> >Prof</option>
 					</select>
 				</label>
 
@@ -166,60 +194,44 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 				<label class="volplus-col-6">Mobile  
 					<input type="text" name="mobile" placeholder="Mobile number" value="<?php echo $volunteer->mobile?>"/></label>
 				<h2 class="volplus-col-12"><br/>Interests & Activities</h2>
-				<div class="volplus-col-6"><?php display_interests();?></div>
-				<div class="volplus-col-6"><?php display_activities();?></div>				
-				<div class="volplus-col-4"><?php display_availability_table();?></div>
-
+				<label class="volplus-col-6">Interests
+					<?php display_interests($volunteer->interests);?></label>
+				<label class="volplus-col-6">Activities
+					<?php display_activities($volunteer->activities);?></label>				
 				<h2 class="volplus-col-12"><br/>Availability</h2>
+				<div class="volplus-col-4"><?php $volunteer = display_availability_table($volunteer);?></div>
 				<label class="volplus-col-8">Availability Details (specific details regarding your availability e.g. shift worker)  
-					<textarea name="availability_details" rows="10">
-					<?php echo get('availability_details')?></textarea></label>
-
+					<textarea name="availability_details" rows="10"><?php if(isset($volunteer->availability_details)) echo $volunteer->availability_details?></textarea></label>
 				<h2 class="volplus-col-12"><br/>Volunteering</h2>
 				<label class="volplus-col-12">Volunteering Experience  
-					<textarea name="volunteering_experience" rows="10">
-					<?php echo get('volunteering_experience')?></textarea></label>
+					<textarea name="volunteering_experience" rows="10"><?php if(isset($volunteer->volunteering_experience)) echo $volunteer->volunteering_experience?></textarea></label>
 				<label class="volplus-col-4">Why volunteer?  
-					<?php display_reasons();?></label>				
+					<?php display_reasons($volunteer->reasons);?></label>				
 				<label class="volplus-col-8">Further details on why volunteering  
-					<textarea name="volunteering_reason_info" rows="10">
-					<?php echo get('volunteering_reason_info')?></textarea></label>
-
+					<textarea name="volunteering_reason_info" rows="10"><?php if(isset($volunteer->volunteering_reason_info)) echo $volunteer->volunteering_reason_info?></textarea></label>
 				<h2 class="volplus-col-12"><br/>About</h2>
-				<label class="volplus-col-3">Date of birth 
-					<input type="date" name="date_birth" value="<?php echo $volunteer->date_birth;?>"/></label>
+				<label class="volplus-col-3">Date of birth (optional) 
+					<input type="date" name="date_birth" format= "dd/MM/yyyy" value="<?php echo $volunteer->date_birth;?>"/></label>
 				<input type="hidden" name="date_birth_prefer_not_say" value="1"/>
 				<label class="volplus-col-2">Gender<span class="error">*</span>   
-					<?php $selected = $volunteer->gender?>
-					<select name="gender">
-						<option value="" <?php if($selected=="") echo 'selected';?> >Select</option>
-						<option value=1 <?php if($selected==1) echo 'selected';?> >Male</option>
-						<option value=2 <?php if($selected==2) echo 'selected';?> >Female</option>
-						<option value=3 <?php if($selected==3) echo 'selected';?> >Prefer not to say</option>
-						<option value=4 <?php if($selected==4) echo 'selected';?> >Not Known</option>
-					</select>
-				</label>
+					<?php gender($volunteer->gender);?></label>				
 				<label class="volplus-col-3">Employment Status<span class="error" >*</span>   
-					<?php employment_status();?></label>				
+					<?php employment_status($volunteer->employment);?></label>				
 				<label class="volplus-col-4">Ethnicity 
-					<?php ethnicity();?></label>				
+					<?php ethnicity($volunteer->ethnicity);?></label>				
 				<label class="volplus-col-3">Disability 
-					<?php disability($volunteer);?></label>				
-				<label class="volplus-col-3" id="display-details-label" <?php if($volunteer->disability !== 2){echo " style='display:none;'";} ?> >Details
-					<?php $volunteer = disability_type($volunteer);?></label>				
+					<?php disability($volunteer->disability);?></label>				
+				<label class="volplus-col-3" id="display-details-label" <?php if($volunteer->disability !== "2") echo " style='display:none;'"?>>Details
+					<?php disability_type($volunteer->disabilities);?></label>				
 
 
 				<div class="volplus-col-12"><input type="submit" name="user_registration" value="SignUp" /></div>
 
-<!--<?php $a=$GLOBALS['volunteer_fields'];$a=json_decode($a['body'], true);print_r_safe($a);?>-->
 			</form>
 		</div>
-		<?php if(isset($signUpError)){echo '<div>'.$signUpError.'</div>';}
-//	}
 
-	?>
-<div class="volplus-col-6"><?php var_dump_safe($_POST) ?></div>;
-<div class="volplus-col-6"><?php var_dump_safe($volunteer) ?></div>;
+<div class="volplus-col-6"><?php var_dump_safe($_POST) ?></div>
+<div class="volplus-col-6"><?php var_dump_safe($volunteer) ?></div>
 
 	<script type="text/javascript" >
 			document.getElementById('disability-type').onchange = function(e) {
