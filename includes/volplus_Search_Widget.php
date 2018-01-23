@@ -94,25 +94,52 @@ class volplus_Search_Widget extends WP_Widget {
 
 
 		<?php if(isset($instance[ 'show_interests' ])){if($instance[ 'show_interests' ]){?>
-			<div class="form-col">
-				<?php display_interests();?>
-			</div>
+			<label class="form-col">Interests
+				<?php $interests=array(); 
+				if(isset($_GET['interests'])) $interests = $_GET['interests']; 
+				display_interests($interests);?>
+			</label>
 		<?php }}?>
 
 
 		<?php if(isset($instance[ 'show_activities' ])){if($instance[ 'show_activities' ]){?>
-			<div class="form-col">
-				<?php display_activities();?>
-			</div>
+			<label class="form-col">Activities
+				<?php $activities=array(); 
+				if(isset($_GET['activities'])) $activities = $_GET['activities'];
+				display_activities($activities);?>
+			</label>
 		<?php }}?>
 
 		
 		<?php if(isset($instance[ 'show_availability_full' ])) {if($instance[ 'show_availability_full' ]){?>
-			<div class='form-col'>
-				<?php display_availability_table();?>
-			</div>
+			<label class="form-col">When are you available?
+				<?php 
+				$periods = array(
+					'mon_mor','mon_aft','mon_eve',
+					'tue_mor','tue_aft','tue_eve',
+					'wed_mor','wed_aft','wed_eve',
+					'thu_mor','thu_aft','thu_eve',
+					'fri_mor','fri_aft','fri_eve',
+					'sat_mor','sat_aft','sat_eve',
+					'sun_mor','sun_aft','sun_eve'
+				);
+				$availability=array(); 
+				foreach($periods as $period){
+					if(isset($_GET[$period])) array_push($availability,$period);
+				}
+//var_dump_safe($availability);
+				display_availability_table($availability);?>
+			</label>
 		<?php }}?>
 		
+
+		<?php if(isset($instance[ 'show_availability_simple' ])) {if($instance[ 'show_availability_simple' ]){?>
+			<label class="form-col">When are you available?
+				<?php $availability=array(); 
+				if(isset($_GET['availability'])) $availability = $_GET['availability'];
+				display_availability_simple($availability);?>
+			</label>
+		<?php }}?>
 		
 		
 	<button type="submit">Search</button>
@@ -142,6 +169,7 @@ class volplus_Search_Widget extends WP_Widget {
 		$show_keyword = esc_attr( $instance['show_keyword'] );
 		$show_interests = esc_attr( $instance['show_interests'] );
 		$show_activities = esc_attr( $instance['show_activities'] );
+		$show_availability_simple = esc_attr( $instance['show_availability_simple'] );
 		$show_availability_full = esc_attr( $instance['show_availability_full'] );
 	} else { 
 		$title    = ''; 
@@ -156,7 +184,8 @@ class volplus_Search_Widget extends WP_Widget {
 		$show_keyword = '1';
 		$show_interests = '1';
 		$show_activities = '1';
-		$show_availability_full = '1';
+		$show_availability_simple = '1';
+		$show_availability_full = '0';
 	} ?>
 	
 	
@@ -186,6 +215,10 @@ class volplus_Search_Widget extends WP_Widget {
 	<p>
 	<input id="<?php echo esc_attr( $this->get_field_id( 'show_activities' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_activities' ) ); ?>" type="checkbox" value="1" <?php checked( '1', $show_activities ); ?> />
 	<label for="<?php echo esc_attr( $this->get_field_id( 'show_activities' ) ); ?>"><?php _e( 'Activities', 'wp-volunteer-plus' ); ?></label>
+	</p>
+	<p>
+	<input id="<?php echo esc_attr( $this->get_field_id( 'show_availability_simple' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_availability_simple' ) ); ?>" type="checkbox" value="1" <?php checked( '1', $show_availability_simple ); ?> />
+	<label for="<?php echo esc_attr( $this->get_field_id( 'show_availability_simple' ) ); ?>"><?php _e( 'Availability (simplified drop-down)', 'wp-volunteer-plus' ); ?></label>
 	</p>
 	<p>
 	<input id="<?php echo esc_attr( $this->get_field_id( 'show_availability_full' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'show_availability_full' ) ); ?>" type="checkbox" value="1" <?php checked( '1', $show_availability_full ); ?> />
@@ -237,6 +270,7 @@ class volplus_Search_Widget extends WP_Widget {
     $instance[ 'show_keyword' ] = strip_tags( $new_instance[ 'show_keyword' ] );
     $instance[ 'show_interests' ] = strip_tags( $new_instance[ 'show_interests' ] );
     $instance[ 'show_activities' ] = strip_tags( $new_instance[ 'show_activities' ] );
+    $instance[ 'show_availability_simple' ] = strip_tags( $new_instance[ 'show_availability_simple' ] );
     $instance[ 'show_availability_full' ] = strip_tags( $new_instance[ 'show_availability_full' ] );
     return $instance;
   }

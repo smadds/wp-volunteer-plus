@@ -39,6 +39,7 @@ function volplus_scripts() {
 add_action( 'admin_init', 'volplus_scripts' );
 add_action('wp_enqueue_scripts', 'volplus_scripts');
 
+require_once VOLPLUS_PATH . 'includes/volplus_Functions.php';
 require_once VOLPLUS_PATH . 'includes/volplus_Search_Widget.php';
 require_once VOLPLUS_PATH . 'includes/volplus_Opportunities_List_Widget.php';
 require_once VOLPLUS_PATH . 'includes/volplus_Opportunities_List_Shortcode.php';
@@ -67,7 +68,7 @@ $response_code = wp_remote_retrieve_response_code($volunteer_fields);
 if($response_code == 200) {
 	$GLOBALS['volunteer_fields'] = json_decode($volunteer_fields['body'], true);
 } else {
-	echo '(Error code '.$response_code.')';
+	alert_safe ('(Error code '.$response_code.')');
 }
 
 $activities = wp_remote_get(API_URL . 'activities', array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
@@ -124,4 +125,5 @@ function volplus_activate() {
 // create custom user role
 	add_role( 'volunteer', 'Volunteer', array( 'read' => true, 'level_0' => true ) );
 }
+
 

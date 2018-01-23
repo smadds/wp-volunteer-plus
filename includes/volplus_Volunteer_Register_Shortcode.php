@@ -15,6 +15,17 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 	], $atts, $tag);
 
 //	var_dump_safe($GLOBALS['volunteer_activities']);
+
+
+// remove magic quotes
+
+//	if (get_magic_quotes_gpc()) {
+//		echo_safe ("<h1>MAGIC QUOTES ENABLED</H1>");
+		$_GET    = remove_magic_quotes($_GET);
+		$_POST   = remove_magic_quotes($_POST);
+		$_COOKIE = remove_magic_quotes($_COOKIE);
+//	}
+
 	
 	
 	$wpuserid = null;
@@ -40,19 +51,30 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		if(isset($_POST['postcode']))$volunteer->postcode = stripslashes(esc_html( $_POST['postcode']));
 		if(isset($_POST['telephone']))$volunteer->telephone = stripslashes(esc_html( $_POST['telephone']));
 		if(isset($_POST['mobile']))$volunteer->mobile = stripslashes(esc_html( $_POST['mobile']));
-		if(isset($_POST['interests'])) $volunteer->interests = $_POST['interests'];
-		if(isset($_POST['activities'])) $volunteer->activities = $_POST['activities'];
+		if(isset($_POST['interests'])){
+			foreach($_POST['interests'] as $key=>$value){
+				$_POST['interests'][$key] = array_map('intval', $value);}
+			$volunteer->interests = $_POST['interests'];}
+		if(isset($_POST['activities'])){
+			foreach($_POST['activities'] as $key=>$value){
+				$_POST['activities'][$key] = array_map('intval', $value);}
+			$volunteer->activities = $_POST['activities'];}
 		if(isset($_POST['availability_details']))$volunteer->availability_details = stripslashes(esc_html( $_POST['availability_details']));
 		if(isset($_POST['volunteering_experience']))$volunteer->volunteering_experience = stripslashes(esc_html($_POST['volunteering_experience']));
-		if(isset($_POST['reasons'])) $volunteer->reasons = $_POST['reasons'];
+		if(isset($_POST['reasons'])){
+			foreach($_POST['reasons'] as $key=>$value){
+				$_POST['reasons'][$key] = array_map('intval', $value);}
+			$volunteer->reasons = $_POST['reasons'];}
 		if(isset($_POST['volunteering_reason_info']))$volunteer->volunteering_reason_info = stripslashes(esc_html($_POST['volunteering_reason_info']));
 		if(isset($_POST['date_birth']))$volunteer->date_birth = esc_html( $_POST['date_birth']);
-		if(isset($_POST['date_birth_prefer_not_say']))$volunteer->date_birth_prefer_not_say = esc_html( $_POST['date_birth_prefer_not_say']);
-		if(isset($_POST['gender']))$volunteer->gender = esc_html( $_POST['gender']);
-		if(isset($_POST['employment']))$volunteer->employment = esc_html( $_POST['employment']);
-		if(isset($_POST['ethnicity']))$volunteer->ethnicity = esc_html( $_POST['ethnicity']);
-		if(isset($_POST['disability']))$volunteer->disability = esc_html( $_POST['disability']);
-		if(isset($_POST['disabilities'])) $volunteer->disabilities = $_POST['disabilities'];
+		if(isset($_POST['gender']))$volunteer->gender = (int) $_POST['gender'];$_POST['gender'] = $volunteer->gender;
+		if(isset($_POST['employment']))$volunteer->employment = (int) $_POST['employment'];$_POST['employment'] = $volunteer->employment;
+		if(isset($_POST['ethnicity']))$volunteer->ethnicity = (int) $_POST['ethnicity'];$_POST['ethnicity'] = $volunteer->ethnicity;
+		if(isset($_POST['disability']))$volunteer->disability = (int) $_POST['disability'];$_POST['disability'] = $volunteer->disability;
+		if(isset($_POST['disabilities'])){
+			foreach($_POST['disabilities'] as $key=>$value){
+				$_POST['disabilities'][$key] = array_map('intval', $value);}
+			$volunteer->disabilities = $_POST['disabilities'];}
 
 
 		$periods = array(
@@ -65,7 +87,10 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 			'sun_mor','sun_aft','sun_eve'
 		);
 		foreach($periods as $period){
-			if(isset($_POST[$period])) $volunteer->$period = 1;		
+			if(isset($_POST[$period]) && $_POST[$period]=="on"){
+				$volunteer->availability[$period]=1;
+				$_POST[$period]=1;
+			}		
 		}
         
 		//change username if already exists
@@ -79,10 +104,14 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		}
 		
 		// flag if age not given
-		if($volunteer->date_birth == null){
-			$volunteer->date_birth_prefer_not_say = "1";
+		if(isset($_POST['date_birth']) && $_POST['date_birth']!==""){
+			$volunteer->date_birth = implode('/', array_reverse(explode('-', $volunteer->date_birth))); // put into UK date order dd-MM-yyyy
+ 			$volunteer->date_birth_prefer_not_say = NULL;
+			$_POST['date_birth'] = $volunteer->date_birth;
+			$_POST['date_birth_prefer_not_say'] = NULL;
 		} else {
-			$volunteer->date_birth = implode('-', array_reverse(explode('-', $volunteer->date_birth))); // put into UK date order dd-MM-yyyy
+			$volunteer->date_birth_prefer_not_say = 1;
+			$_POST['date_birth_prefer_not_say'] = 1;
 		}
 		
 //	var_dump_safe($volunteer);
@@ -95,7 +124,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 			$reg_errors->add('username_length', 'Your username would be too short. Please make sure your the length of your First name + Last name are at least 5 characters' );}
 		if ( !is_email( $volunteer->email_address ) ) {
 			$reg_errors->add( 'email_invalid', 'We can\'t make out your email address. Please check it\'s correct' ); }
-		if ( email_exists( $volunteer->email_address ) ) {
+		if ( $volplus_atts['wordpress-account'] && email_exists( $volunteer->email_address ) ) {
 			$reg_errors->add( 'email', 'This email address is already in our system. Have you already registered?' ); }
 		if ( 7 > strlen( $volunteer->password ) ) {
 			$reg_errors->add( 'password', 'Your password too short. It must be at least 8 characters' ); }
@@ -103,15 +132,31 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 			$reg_errors->add( 'password_confirmation', 'Your passwords do not match' ); }    
 		if (is_wp_error( $reg_errors )) { 
 			foreach ( $reg_errors->get_error_messages() as $error ) {
-				$signUpError='<p style="color:#FF0000; text-aling:left;"><strong>We have a problem </strong>: '.$error . '<br /></p>';
+				$signUpError='<p style="color:#FF0000; text-align:left;"><strong>We have a problem </strong>: '.$error . '<br /></p>';
 			} 
 		}
     
     
 		if ( 1 > count( $reg_errors->get_error_messages() ) ) {
 			//add VolPlus account
-			$volplus_volunteer = json_encode($volunteer);
-			var_dump_safe($volplus_volunteer);
+			print_r_safe($_POST);
+			$response = wp_remote_post(API_URL . 'volunteers', array(
+				'timeout' => 45,
+				'redirection' => 5,
+				'httpversion' => '1.0',
+				'blocking' => true,
+				'headers' => array('Authorization' => 'Bearer '.API_KEY),
+				'body' => (array) $_POST,
+//				'cookies' => array()
+				)
+			);
+
+			if ( is_wp_error( $response ) ) {
+				$error_message = $response->get_error_message();
+				echo "Something went wrong: $error_message";
+			} else {
+				print_r_safe( $response );
+			}
 			
 			if ($volplus_atts['wordpress-account']){ // create WP account enabled
 				$wpuser = array(
@@ -199,7 +244,8 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 				<label class="volplus-col-6">Activities
 					<?php display_activities($volunteer->activities);?></label>				
 				<h2 class="volplus-col-12"><br/>Availability</h2>
-				<div class="volplus-col-4"><?php $volunteer = display_availability_table($volunteer);?></div>
+				<label class="volplus-col-4">When are you available?
+					<?php display_availability_table($volunteer->availability);?></label>
 				<label class="volplus-col-8">Availability Details (specific details regarding your availability e.g. shift worker)  
 					<textarea name="availability_details" rows="10"><?php if(isset($volunteer->availability_details)) echo $volunteer->availability_details?></textarea></label>
 				<h2 class="volplus-col-12"><br/>Volunteering</h2>
@@ -230,6 +276,8 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 			</form>
 		</div>
 
+<?php echo "POST:<br/>" . json_encode($_POST)?><br/>
+<?php echo "volunteer:<br/>" . json_encode($volunteer)?><br/>
 <div class="volplus-col-6"><?php var_dump_safe($_POST) ?></div>
 <div class="volplus-col-6"><?php var_dump_safe($volunteer) ?></div>
 

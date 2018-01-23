@@ -1,5 +1,28 @@
 <?php
 
+// remove magic quotes
+function remove_magic_quotes($array) {
+    foreach ($array as $k => $v) {
+        if (is_array($v)) {
+            $array[$k] = remove_magic_quotes($v);
+        } else {
+            $array[$k] = stripslashes($v);
+        }
+    }
+    return $array;
+}
+
+//search in sub arrays for item
+function array_multi_search($needle,$haystack){
+//	echo_safe($needle);
+//	var_dump_safe($haystack);
+	foreach($haystack as $key=>$data){
+		if(in_array($needle,$data)) return $needle;
+	}
+return false;
+}
+
+
 // get post variable if it exists
 function get($key,  $default_value = '')
 {
@@ -21,23 +44,24 @@ class volplus_volunteer {
 			var $email_address;	// required
 			var $interests = array();		// required
 			var $activities = array();	// required
-			var $mon_mor, $mon_aft, $mon_eve;
-			var $tue_mor, $tue_aft, $tue_eve;
-			var $wed_mor, $wed_aft, $wed_eve;
-			var $thu_mor, $thu_aft, $thu_eve;
-			var $fri_mor, $fri_aft, $fri_eve;
-			var $sat_mor, $sat_aft, $sat_eve;
-			var $sun_mor, $sun_aft, $sun_eve;
+//			var $mon_mor, $mon_aft, $mon_eve;
+//			var $tue_mor, $tue_aft, $tue_eve;
+//			var $wed_mor, $wed_aft, $wed_eve;
+//			var $thu_mor, $thu_aft, $thu_eve;
+//			var $fri_mor, $fri_aft, $fri_eve;
+//			var $sat_mor, $sat_aft, $sat_eve;
+//			var $sun_mor, $sun_aft, $sun_eve;
+			var $availability = array();
 			var $availability_details;
 			var $volunteering_experience;
 			var $reasons = array();
 			var $volunteering_reason_info;
 			var $date_birth;		// required unless prefer not say
-			var $date_birth_prefer_not_say;
-			var $gender;			// required 1:male, 2:female, 3:prefer not to say, 4:not known
-			var $employment;		//required specific integer from Volunteer fields
-			var $ethnicity;		//required specific integer from Volunteer fields
-			var $disability;		// required 1:yes, 2:no, 3:prefer not to say
+			var $date_birth_prefer_not_say=0;
+			var $gender=0;			// required 1:male, 2:female, 3:prefer not to say, 4:not known
+			var $employment=0;		//required specific integer from Volunteer fields
+			var $ethnicity=0;		//required specific integer from Volunteer fields
+			var $disability=0;		// required 1:yes, 2:no, 3:prefer not to say
 			var $disabilities = array();	// required if disability=1. list of objects that each represent a single disability. see volunteer fields
 			var $password;			// required
 			var $password_confirmation; // required
@@ -48,8 +72,8 @@ class volplus_volunteer {
 function disability_type($selected){
 	echo '<div class="colcontainer"  id="disability-type">';             
 		foreach($GLOBALS['volunteer_fields']['disabilities'] as $disability) {
-			echo"<label class='colitem'><input type='checkbox' name='disabilities[".$disability['id']."]' value=1";
-			if(array_key_exists($disability['id'], $selected)) echo " checked";
+			echo"<label class='colitem'><input type='checkbox' name='disabilities[][id]' value=".$disability['id'];
+			if(array_multi_search($disability['id'], $selected)) echo " checked";
 			echo ">".$disability['value']."</label><br />";
 		}
 	echo '</div>';
@@ -128,40 +152,57 @@ function employment_status($selected) {
 function display_reasons($selected) {
 	echo '<div class="colcontainer">';             
 		foreach($GLOBALS['volunteer_fields']['volunteering_reasons'] as $reason) {
-			echo"<label class='colitem'><input type='checkbox' name='reasons[".$reason['id']."]' value=1";
-			if(array_key_exists($reason['id'], $selected)) echo " checked";
+			echo"<label class='colitem'><input type='checkbox' name='reasons[][id]' value='".$reason['id']."'";
+			if(array_multi_search($reason['id'], $selected)) echo " checked";
 			echo ">".$reason['value']."</label><br />";
 		}
 	echo '</div>';
 }
 
 
-// display interests
+// display interests (multi-select)
 function display_interests($selected) {
 	echo '<div class="colcontainer">';             
 	foreach($GLOBALS['volunteer_interests'] as $interest) {
-		echo"<label class='colitem-selected'><input type='checkbox' name='interests[".$interest['id']."]' value=1";
-		if(array_key_exists($interest['id'], $selected)) echo " checked";
-		echo " />".$interest['interest']."</label><br />";
+		echo"<label class='colitem-selected'><input type='checkbox' name='interests[][id]' value='".$interest['id']."'";
+		if(array_multi_search($interest['id'], $selected)) echo " checked";
+		echo ">".$interest['interest']."</label><br />";
 	}
 	echo '</div>';
 }
 
-//display activities
+//display activities (multi-select)
 function display_activities($selected){
 	echo '<div class="colcontainer">';             
 	foreach($GLOBALS['volunteer_activities'] as $activity) {
-		echo"<label class='colitem-selected'><input type='checkbox' name='activities[".$activity['id']."]' value=1";
-		if(array_key_exists($activity['id'], $selected)) echo " checked";
-		echo " />".$activity['activity']."</label><br />";
+//		var_dump_safe($activity);
+		echo"<label class='colitem-selected'><input type='checkbox' name='activities[][id]' value='".$activity['id']."'";
+		if(array_multi_search($activity['id'], $selected)) echo " checked";
+		echo ">".$activity['activity']."</label><br />";
 	}
 	echo '</div>';
 }
 
+// display availability options (multi-select)
+function display_availability_simple($selected) {
+	$availabilities = array( 
+		['id'=>1, 'value'=> 'Weekdays (During the day)'], 
+		['id'=>2, 'value'=> 'Weekdays (Evenings)'],
+		['id'=>3, 'value'=> 'Weekends (During the day)'],
+		['id'=>4, 'value'=> 'Weekends (Evenings)']
+	);
+	echo '<div class="colcontainer">';             
+		foreach($availabilities as $availability) {
+			echo"<label class='colitem'><input type='checkbox' name='availability[".$availability['id']."]' value=".$availability['id'];
+			if(array_key_exists($availability['id'], $selected)) echo " checked";
+			echo ">".$availability['value']."</label><br />";
+		}
+	echo '</div>';
+}
+
+
 // display availability table
-function display_availability_table($vol){
-	echo "<label for='availability'>When are you available?</label>";
-	
+function display_availability_table($selected){
 	$periods = array(
 		'mon_mor','mon_aft','mon_eve',
 		'tue_mor','tue_aft','tue_eve',
@@ -183,16 +224,16 @@ function display_availability_table($vol){
 		echo '<th>'.ucfirst($day).'</th>';
 		foreach($dayperiods as $dayperiod) {
 			$period = $periods[$index];
-			echo '<td><input class="volplus-checkbox" type="checkbox" name="'.$periods[$index].'" value="1"';
-			if(isset($vol->$period)) echo ' checked';
+// var_dump_safe($period);
+// var_dump_safe($selected);
+			echo '<td><input class="volplus-checkbox" type="checkbox" name="'.$period.'"';
+			if(array_key_exists($period, $selected)) echo ' checked';
 			echo '/></td>';
 			$index++;
 		}
 		echo '</tr>';
 	}
-	echo '</table>';
-	return $vol;
-	
+	echo '</table>';	
 }
 
 
@@ -213,6 +254,21 @@ function var_dump_safe ($a){
 		echo "</pre>";
 	}
 }
+
+function echo_safe ($a){
+	if(defined('WP_DEBUG') && WP_DEBUG === true && current_user_can('administrator')) {
+		echo $a;
+	}
+}
+
+function alert_safe ($a){
+	if(defined('WP_DEBUG') && WP_DEBUG === true && current_user_can('administrator')) {
+		echo '<script type="text/javascript">window.alert("'.$a.'")</script>';
+	}
+}
+	
+	
+	
 
 
 // Remove ALL bracketed text from string if setting configured
