@@ -46,8 +46,9 @@ require_once VOLPLUS_PATH . 'includes/volplus_Opportunities_List_Shortcode.php';
 require_once VOLPLUS_PATH . 'includes/volplus_Opportunities_Returned_Shortcode.php';
 require_once VOLPLUS_PATH . 'includes/volplus_Opportunity_Detail_Shortcode.php';
 require_once VOLPLUS_PATH . 'includes/volplus_Settings.php';
-require_once VOLPLUS_PATH . 'includes/plugin-update-checker/plugin-update-checker.php';
 require_once VOLPLUS_PATH . 'includes/volplus_Volunteer_Register_Shortcode.php';
+require_once VOLPLUS_PATH . 'includes/volplus_Login_Widget.php';
+require_once VOLPLUS_PATH . 'includes/plugin-update-checker/plugin-update-checker.php';
 
 $myUpdateChecker = Puc_v4p3_Factory::buildUpdateChecker(
 	'https://github.com/smadds/wp-volunteer-plus',

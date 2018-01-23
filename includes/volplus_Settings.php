@@ -66,7 +66,7 @@ function volplus_plugin_settings_page() {
 
         <tr valign="top">
         <th scope="row">Google Maps Zoom</th>
-        <td><input type="text" name="volplus_googlemapzoom" size="5" value="<?php echo esc_attr( get_option('volplus_googlemapzoom') ); ?>" /></td>
+        <td><input type="number" name="volplus_googlemapzoom" min="0" max="20" value="<?php echo esc_attr( get_option('volplus_googlemapzoom', 10) ); ?>" /></td>
         </tr>
 
         <tr valign="top">
@@ -74,13 +74,18 @@ function volplus_plugin_settings_page() {
         </tr>
  
         <tr valign="top">
-        <th scope="row">Response Form Content</th>
+        <th scope="row">Response Form Content (e.g. shortcode to contact form)</th>
         <td><input type="text" name="volplus_responseformcontent" size="40" value="<?php echo esc_attr(get_option('volplus_responseformcontent')); ?>" /></td>
         </tr>
 
        <tr valign="top">
         <th scope="row">Hide bracketed text in Opportunity titles & Organisation names</th>
         <td><input type="checkbox" name="volplus_hidebrackets" <?php if(get_option('volplus_hidebrackets') == 'on') echo 'checked'; ?> /></td>
+        </tr>
+
+        <tr valign="top">
+        <th scope="row">Volunteer login timeout (minutes)</th>
+        <td><input type="number" name="volplus_voltimeout" min="5" max="3600" value="<?php echo esc_attr(get_option('volplus_voltimeout', 60)); ?>" /></td>
         </tr>
 
     </table>
@@ -120,6 +125,7 @@ function volplus_plugin_settings() {
 	register_setting( 'volplus-plugin-settings-group', 'volplus_license_code' );
 	register_setting( 'volplus-plugin-settings-group', 'volplus_responseformcontent' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_hidebrackets' );	
+	register_setting( 'volplus-plugin-settings-group', 'volplus_voltimeout' );	
 }
 
 function volplus_checkauth(){

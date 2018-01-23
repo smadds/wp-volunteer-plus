@@ -72,8 +72,8 @@ class volplus_volunteer {
 function disability_type($selected){
 	echo '<div class="colcontainer"  id="disability-type">';             
 		foreach($GLOBALS['volunteer_fields']['disabilities'] as $disability) {
-			echo"<label class='colitem'><input type='checkbox' name='disabilities[][id]' value=".$disability['id'];
-			if(array_multi_search($disability['id'], $selected)) echo " checked";
+			echo"<label class='colitem'><input type='checkbox' name='disabilities[]' value=".$disability['id'];
+			if(array_key_exists($disability['id'], $selected)) echo " checked";
 			echo ">".$disability['value']."</label><br />";
 		}
 	echo '</div>';
@@ -102,9 +102,9 @@ function gender($selected) {
 // display disability options
 function disability($selected) {
 	$thedisabilities = array( 
-		['id'=>1, 'value'=>'Prefer not to say'], 
-		['id'=>2, 'value'=> 'Yes'],
-		['id'=>3, 'value'=> 'No'],
+		['id'=>1, 'value'=>'Yes'], 
+		['id'=>2, 'value'=> 'No'],
+		['id'=>3, 'value'=> 'Prefer not to say'],
 //		['id'=>4, 'value'=> 'Not known'] // option not shown for web form
 	);
 	echo "<select name='disability' id='disability-type'>";
@@ -152,8 +152,8 @@ function employment_status($selected) {
 function display_reasons($selected) {
 	echo '<div class="colcontainer">';             
 		foreach($GLOBALS['volunteer_fields']['volunteering_reasons'] as $reason) {
-			echo"<label class='colitem'><input type='checkbox' name='reasons[][id]' value='".$reason['id']."'";
-			if(array_multi_search($reason['id'], $selected)) echo " checked";
+			echo"<label class='colitem'><input type='checkbox' name='reasons[]' value='".$reason['id']."'";
+			if(array_key_exists($reason['id'], $selected)) echo " checked";
 			echo ">".$reason['value']."</label><br />";
 		}
 	echo '</div>';
@@ -164,8 +164,8 @@ function display_reasons($selected) {
 function display_interests($selected) {
 	echo '<div class="colcontainer">';             
 	foreach($GLOBALS['volunteer_interests'] as $interest) {
-		echo"<label class='colitem-selected'><input type='checkbox' name='interests[][id]' value='".$interest['id']."'";
-		if(array_multi_search($interest['id'], $selected)) echo " checked";
+		echo"<label class='colitem-selected'><input type='checkbox' name='interests[]' value='".$interest['id']."'";
+		if(array_key_exists($interest['id'], $selected)) echo " checked";
 		echo ">".$interest['interest']."</label><br />";
 	}
 	echo '</div>';
@@ -176,8 +176,8 @@ function display_activities($selected){
 	echo '<div class="colcontainer">';             
 	foreach($GLOBALS['volunteer_activities'] as $activity) {
 //		var_dump_safe($activity);
-		echo"<label class='colitem-selected'><input type='checkbox' name='activities[][id]' value='".$activity['id']."'";
-		if(array_multi_search($activity['id'], $selected)) echo " checked";
+		echo"<label class='colitem-selected'><input type='checkbox' name='activities[]' value='".$activity['id']."'";
+		if(array_key_exists($activity['id'], $selected)) echo " checked";
 		echo ">".$activity['activity']."</label><br />";
 	}
 	echo '</div>';
