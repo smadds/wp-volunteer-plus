@@ -84,8 +84,8 @@ function volplus_plugin_settings_page() {
         </tr>
 
         <tr valign="top">
-        <th scope="row">Volunteer login timeout (minutes)</th>
-        <td><input type="number" name="volplus_voltimeout" min="5" max="3600" value="<?php echo esc_attr(get_option('volplus_voltimeout', 60)); ?>" /></td>
+        <th scope="row">Volunteer login timeout (hours)</th>
+        <td><input type="number" name="volplus_voltimeout" min="1" max="72" value="<?php echo esc_attr(get_option('volplus_voltimeout', 1)); ?>" /></td>
         </tr>
 
     </table>

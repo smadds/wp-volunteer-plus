@@ -106,6 +106,7 @@ class volplus_Search_Widget extends WP_Widget {
 			<label class="form-col">Activities
 				<?php $activities=array(); 
 				if(isset($_GET['activities'])) $activities = $_GET['activities'];
+//var_dump_safe($activities);
 				display_activities($activities);?>
 			</label>
 		<?php }}?>

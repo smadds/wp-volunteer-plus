@@ -1,5 +1,17 @@
 <?php
 
+
+// check logged in cookie & reset the countdown if already set
+function is_volplus_user_logged_in(){
+	if(isset($_COOKIE['volplus_user_id'])){
+		setcookie('volplus_user_id', $_COOKIE['volplus_user_id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
 // remove magic quotes
 function remove_magic_quotes($array) {
     foreach ($array as $k => $v) {
@@ -71,11 +83,11 @@ class volplus_volunteer {
 // display disability types (multi-select)
 function disability_type($selected){
 	echo '<div class="colcontainer"  id="disability-type">';             
-		foreach($GLOBALS['volunteer_fields']['disabilities'] as $disability) {
-			echo"<label class='colitem'><input type='checkbox' name='disabilities[]' value=".$disability['id'];
-			if(array_key_exists($disability['id'], $selected)) echo " checked";
-			echo ">".$disability['value']."</label><br />";
-		}
+	foreach($GLOBALS['volunteer_fields']['disabilities'] as $disability) {
+		if(in_array($disability['id'], $selected, true)) echo"<label class='colitem-selected'><input type='checkbox' name='disabilities[]' value='".$disability['id']."' checked";
+		else echo"<label class='colitem'><input type='checkbox' name='disabilities[]' value='".$disability['id']."'";
+		echo ">".$disability['value']."</label><br />";
+	}
 	echo '</div>';
 }
 
@@ -151,11 +163,11 @@ function employment_status($selected) {
 // display volunteering reasons (multi-select)
 function display_reasons($selected) {
 	echo '<div class="colcontainer">';             
-		foreach($GLOBALS['volunteer_fields']['volunteering_reasons'] as $reason) {
-			echo"<label class='colitem'><input type='checkbox' name='reasons[]' value='".$reason['id']."'";
-			if(array_key_exists($reason['id'], $selected)) echo " checked";
-			echo ">".$reason['value']."</label><br />";
-		}
+	foreach($GLOBALS['volunteer_fields']['volunteering_reasons'] as $reason) {
+		if(in_array($reason['id'], $selected, true)) echo"<label class='colitem-selected'><input type='checkbox' name='reasons[]' value='".$reason['id']."' checked";
+		else echo"<label class='colitem'><input type='checkbox' name='reasons[]' value='".$reason['id']."'";
+		echo ">".$reason['value']."</label><br />";
+	}
 	echo '</div>';
 }
 
@@ -164,8 +176,8 @@ function display_reasons($selected) {
 function display_interests($selected) {
 	echo '<div class="colcontainer">';             
 	foreach($GLOBALS['volunteer_interests'] as $interest) {
-		echo"<label class='colitem-selected'><input type='checkbox' name='interests[]' value='".$interest['id']."'";
-		if(array_key_exists($interest['id'], $selected)) echo " checked";
+		if(in_array($interest['id'], $selected, true)) echo"<label class='colitem-selected'><input type='checkbox' name='interests[]' value='".$interest['id']."' checked";
+		else echo"<label class='colitem'><input type='checkbox' name='interests[]' value='".$interest['id']."'";
 		echo ">".$interest['interest']."</label><br />";
 	}
 	echo '</div>';
@@ -175,9 +187,8 @@ function display_interests($selected) {
 function display_activities($selected){
 	echo '<div class="colcontainer">';             
 	foreach($GLOBALS['volunteer_activities'] as $activity) {
-//		var_dump_safe($activity);
-		echo"<label class='colitem-selected'><input type='checkbox' name='activities[]' value='".$activity['id']."'";
-		if(array_key_exists($activity['id'], $selected)) echo " checked";
+		if(in_array($activity['id'], $selected, true)) echo"<label class='colitem-selected'><input type='checkbox' name='activities[]' value='".$activity['id']."' checked";
+		else echo"<label class='colitem'><input type='checkbox' name='activities[]' value='".$activity['id']."'";
 		echo ">".$activity['activity']."</label><br />";
 	}
 	echo '</div>';
@@ -194,7 +205,7 @@ function display_availability_simple($selected) {
 	echo '<div class="colcontainer">';             
 		foreach($availabilities as $availability) {
 			echo"<label class='colitem'><input type='checkbox' name='availability[".$availability['id']."]' value=".$availability['id'];
-			if(array_key_exists($availability['id'], $selected)) echo " checked";
+			if(in_array($availability['id'], $selected, true)) echo " checked";
 			echo ">".$availability['value']."</label><br />";
 		}
 	echo '</div>';

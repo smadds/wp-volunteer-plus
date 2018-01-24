@@ -63,7 +63,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		if(isset($_POST['volunteering_experience']))$volunteer->volunteering_experience = stripslashes(esc_html($_POST['volunteering_experience']));
 		if(isset($_POST['reasons'])){
 			foreach($_POST['reasons'] as $key=>$value){
-				$_POST['interests'][$key] = intval($value);}
+				$_POST['reasons'][$key] = intval($value);}
 			$volunteer->reasons = $_POST['reasons'];}
 		if(isset($_POST['volunteering_reason_info']))$volunteer->volunteering_reason_info = stripslashes(esc_html($_POST['volunteering_reason_info']));
 		if(isset($_POST['date_birth']))$volunteer->date_birth = esc_html( $_POST['date_birth']);
@@ -166,12 +166,12 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 				unset($volunteer->volplus_id);
 			} else {
 				$volunteer->volplus_id = $responsebody['id'];
-				echo "Your Volunteer Plus ID number is: ".$volunteer->volplus_id;
+//				echo "Your Volunteer Plus ID number is: ".$volunteer->volplus_id;
 				//VolPlus Login
 				$volpluslogin = array(
 					'email_address' => $volunteer->email_address,
-//					'password' => $volunteer->password,
-					'password' => '123456',
+					'password' => $volunteer->password,
+//					'password' => '123456',
 					'type' => 1 // 1=volunteer, 2=organisation
 				);
 				$response = wp_remote_post(API_URL . 'login', array(
@@ -184,6 +184,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 					'cookies' => array()
 					)
 				);
+				var_dump_safe( $response );
 			
 				$responsebody = (array) json_decode($response['body']);
 				if ( $response['response']['code'] !== 200) {
@@ -197,11 +198,11 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 					}
 					unset($volunteer->volplus_id);
 				} else {
-				var_dump_safe( $responsebody );			
+					setcookie('volplus_user_id', $volunteer->volplus_id, time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+//				var_dump_safe( $responsebody );			
 				}
 			
 			
-				var_dump_safe( $response );
 			
 				if ($volplus_atts['wordpress-account']){ // create WP account enabled
 					$wpuser = array(
