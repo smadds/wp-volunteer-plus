@@ -5,6 +5,8 @@
 function is_volplus_user_logged_in(){
 	if(isset($_COOKIE['volplus_user_id'])){
 		setcookie('volplus_user_id', $_COOKIE['volplus_user_id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+		setcookie('volplus_user_first_name', $_COOKIE['volplus_user_first_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+		setcookie('volplus_user_last_name', $_COOKIE['volplus_user_last_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 		return true;
 	} else {
 		return false;
@@ -77,6 +79,7 @@ class volplus_volunteer {
 			var $disabilities = array();	// required if disability=1. list of objects that each represent a single disability. see volunteer fields
 			var $password;			// required
 			var $password_confirmation; // required
+			var $how_heard=0;		//required specific integer from Volunteer fields
 }
 
 
@@ -84,7 +87,7 @@ class volplus_volunteer {
 function disability_type($selected){
 	echo '<div class="colcontainer"  id="disability-type">';             
 	foreach($GLOBALS['volunteer_fields']['disabilities'] as $disability) {
-		if(in_array($disability['id'], $selected, true)) echo"<label class='colitem-selected'><input type='checkbox' name='disabilities[]' value='".$disability['id']."' checked";
+		if(in_array($disability['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='disabilities[]' value='".$disability['id']."' checked";
 		else echo"<label class='colitem'><input type='checkbox' name='disabilities[]' value='".$disability['id']."'";
 		echo ">".$disability['value']."</label><br />";
 	}
@@ -131,6 +134,20 @@ function disability($selected) {
 	echo "</select>";
 }
 
+// display how_heard options
+function how_heard($selected) {
+	echo "<select name='how_heard'>";
+		echo "<option value='' ";
+		if($selected=="") echo 'selected';
+		echo ">Select</option>";
+		foreach ($GLOBALS['volunteer_fields']['how_heard'] as $how_heard) {
+			echo "<option value=" . $how_heard['id'];
+			if($how_heard['id'] == $selected) echo " selected";
+			echo ">" . $how_heard['value'] . "</option>";
+		}
+	echo "</select>";
+}
+
 // display ethnicity options
 function ethnicity($selected) {
 	echo "<select name='ethnicity'>";
@@ -164,7 +181,7 @@ function employment_status($selected) {
 function display_reasons($selected) {
 	echo '<div class="colcontainer">';             
 	foreach($GLOBALS['volunteer_fields']['volunteering_reasons'] as $reason) {
-		if(in_array($reason['id'], $selected, true)) echo"<label class='colitem-selected'><input type='checkbox' name='reasons[]' value='".$reason['id']."' checked";
+		if(in_array($reason['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='reasons[]' value='".$reason['id']."' checked";
 		else echo"<label class='colitem'><input type='checkbox' name='reasons[]' value='".$reason['id']."'";
 		echo ">".$reason['value']."</label><br />";
 	}
@@ -176,7 +193,7 @@ function display_reasons($selected) {
 function display_interests($selected) {
 	echo '<div class="colcontainer">';             
 	foreach($GLOBALS['volunteer_interests'] as $interest) {
-		if(in_array($interest['id'], $selected, true)) echo"<label class='colitem-selected'><input type='checkbox' name='interests[]' value='".$interest['id']."' checked";
+		if(in_array($interest['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='interests[]' value='".$interest['id']."' checked";
 		else echo"<label class='colitem'><input type='checkbox' name='interests[]' value='".$interest['id']."'";
 		echo ">".$interest['interest']."</label><br />";
 	}
@@ -187,7 +204,7 @@ function display_interests($selected) {
 function display_activities($selected){
 	echo '<div class="colcontainer">';             
 	foreach($GLOBALS['volunteer_activities'] as $activity) {
-		if(in_array($activity['id'], $selected, true)) echo"<label class='colitem-selected'><input type='checkbox' name='activities[]' value='".$activity['id']."' checked";
+		if(in_array($activity['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='activities[]' value='".$activity['id']."' checked";
 		else echo"<label class='colitem'><input type='checkbox' name='activities[]' value='".$activity['id']."'";
 		echo ">".$activity['activity']."</label><br />";
 	}
@@ -203,11 +220,11 @@ function display_availability_simple($selected) {
 		['id'=>4, 'value'=> 'Weekends (Evenings)']
 	);
 	echo '<div class="colcontainer">';             
-		foreach($availabilities as $availability) {
-			echo"<label class='colitem'><input type='checkbox' name='availability[".$availability['id']."]' value=".$availability['id'];
-			if(in_array($availability['id'], $selected, true)) echo " checked";
-			echo ">".$availability['value']."</label><br />";
-		}
+	foreach($availabilities as $availability) {
+		if(in_array($availability['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='availability[]' value='".$availability['id']."' checked";
+		else echo"<label class='colitem'><input type='checkbox' name='availability[]' value='".$availability['id']."'";
+		echo ">".$availability['value']."</label><br />";
+	}
 	echo '</div>';
 }
 

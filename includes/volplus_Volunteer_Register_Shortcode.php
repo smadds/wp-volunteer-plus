@@ -75,6 +75,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 			foreach($_POST['disabilities'] as $key=>$value){
 				$_POST['interests'][$key] = intval($value);}
 			$volunteer->disabilities = $_POST['disabilities'];}
+		if(isset($_POST['how_heard']))$volunteer->how_heard = (int) $_POST['how_heard'];$_POST['how_heard'] = $volunteer->ethnicity;
 
 
 		$periods = array(
@@ -239,7 +240,14 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 //echo "userid: '" . $userid . "'";	
 //	if(is_null($wpuserid)){
 	if(!isset($volunteer->volplus_id)){ ?>
-		<div class="volplus-col-12">
+<!--		<div class="volplus-col-12">-->
+
+		<script type="text/css" >
+			[class*="volplus-col-"] {
+				padding: 0.2em!important;
+			}
+		</script>
+
 			<h2>Create your account</h2>
 			<?php if(isset($signUpError)) echo '<div>'.$signUpError.'</div>'?>
 			<form action="" method="post" name="user_registration">
@@ -309,24 +317,27 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 					<input type="date" name="date_birth" format= "dd/MM/yyyy" value="<?php echo $volunteer->date_birth;?>"/></label>
 				<input type="hidden" name="date_birth_prefer_not_say" value="1"/>
 				<label class="volplus-col-2">Gender <span class="error">*</span>   
-					<?php gender($volunteer->gender);?></label>				
+					<?php gender($volunteer->gender);?></label>
 				<label class="volplus-col-3">Employment Status <span class="error" >*</span>   
-					<?php employment_status($volunteer->employment);?></label>				
+					<?php employment_status($volunteer->employment);?></label>
 				<label class="volplus-col-4">Ethnicity <span class="error">*</span>
-					<?php ethnicity($volunteer->ethnicity);?></label>				
+					<?php ethnicity($volunteer->ethnicity);?></label>
+				<label class="volplus-col-4">How did you hear of us?
+					<?php how_heard($volunteer->how_heard);?></label>
 				<label class="volplus-col-3">Disability <span class="error">*</span>
-					<?php disability($volunteer->disability);?></label>				
+					<?php disability($volunteer->disability);?></label>
 				<label class="volplus-col-3" id="display-details-label" <?php if($volunteer->disability !== 1) echo " style='display:none;'"?>>Details
-					<?php disability_type($volunteer->disabilities);?></label>				
+					<?php disability_type($volunteer->disabilities);?></label>
 
 
-				<div class="volplus-col-12"><input type="submit" name="user_registration" value="SignUp" /></div>
+				<div class="volplus-col-12"><input class = "button" type="submit" name="user_registration" value="Sign Up" /></div>
 
 			</form>
-		</div>
+<!--		</div>-->
 	<?php }; ?>
-<!-- --><?php echo "POST:<br/>" . json_encode($_POST, JSON_UNESCAPED_SLASHES)?><br/>
-<?php echo "volunteer:<br/>" . json_encode($volunteer, JSON_UNESCAPED_SLASHES)?><br/>
+<!--<?php echo "POST:<br/>" . json_encode($_POST, JSON_UNESCAPED_SLASHES)?><br/>
+<?php echo "volunteer:<br/>" . json_encode($volunteer, JSON_UNESCAPED_SLASHES)?><br/> -->
+<?php var_dump_safe($GLOBALS['volunteer_fields']);?>
 <div class="volplus-col-6"><?php var_dump_safe($_POST) ?></div>
 <div class="volplus-col-6"><?php var_dump_safe($volunteer) ?></div>
 
