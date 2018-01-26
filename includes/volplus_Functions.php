@@ -195,7 +195,7 @@ function display_interests($selected) {
 	foreach($GLOBALS['volunteer_interests'] as $interest) {
 		if(in_array($interest['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='interests[]' value='".$interest['id']."' checked";
 		else echo"<label class='colitem'><input type='checkbox' name='interests[]' value='".$interest['id']."'";
-		echo ">".$interest['interest']."</label><br />";
+		echo " onclick='return LimitInterests()'>".$interest['interest']."</label><br />";
 	}
 	echo '</div>';
 }
@@ -206,7 +206,7 @@ function display_activities($selected){
 	foreach($GLOBALS['volunteer_activities'] as $activity) {
 		if(in_array($activity['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='activities[]' value='".$activity['id']."' checked";
 		else echo"<label class='colitem'><input type='checkbox' name='activities[]' value='".$activity['id']."'";
-		echo ">".$activity['activity']."</label><br />";
+		echo " onclick='return LimitActivities()'>".$activity['activity']."</label><br />";
 	}
 	echo '</div>';
 }

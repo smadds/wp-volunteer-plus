@@ -1,3 +1,32 @@
+function LimitInterests()  { 
+	var elements = document.getElementsByName("interests[]");
+	var total = 0;
+	for(var i in elements) {
+		var element = elements[i];
+		if(element.checked) total++;
+		if(total>3) {
+			alert("No more than 3 Interests can be selected. Please uncheck another Interest if you want to select this one.");
+			element.checked = false;
+			return false;    
+		}
+	}
+} 
+
+function LimitActivities()  { 
+	var elements = document.getElementsByName("activities[]");
+	var total = 0;
+	for(var i in elements) {
+		var element = elements[i];
+		if(element.checked) total++;
+		if(total>3) {
+			alert("No more than 3 Activities can be selected. Please uncheck another Activity if you want to select this one.");
+			element.checked = false;
+			return false;    
+		}
+	}
+} 
+
+
 jQuery(document).ready(function($) {
 
 	$('div#logout.button').click(function(){

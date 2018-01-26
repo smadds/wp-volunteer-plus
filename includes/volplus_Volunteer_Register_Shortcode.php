@@ -336,10 +336,10 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 <!--		</div>-->
 	<?php }; ?>
 <!--<?php echo "POST:<br/>" . json_encode($_POST, JSON_UNESCAPED_SLASHES)?><br/>
-<?php echo "volunteer:<br/>" . json_encode($volunteer, JSON_UNESCAPED_SLASHES)?><br/> -->
+<?php echo "volunteer:<br/>" . json_encode($volunteer, JSON_UNESCAPED_SLASHES)?><br/>
 <?php var_dump_safe($GLOBALS['volunteer_fields']);?>
 <div class="volplus-col-6"><?php var_dump_safe($_POST) ?></div>
-<div class="volplus-col-6"><?php var_dump_safe($volunteer) ?></div>
+<div class="volplus-col-6"><?php var_dump_safe($volunteer) ?></div>-->
 
 	<script type="text/javascript" >
 			document.getElementById('disability-type').onchange = function(e) {
