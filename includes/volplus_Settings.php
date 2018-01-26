@@ -10,6 +10,22 @@ function volplus_plugin_menu() {
 }
 
 function volplus_plugin_settings_page() {
+	$args = array(
+		'textarea_rows' => 15,
+		'teeny' => true,
+		'quicktags' => true,
+		'media_buttons' => true,
+		'wpautop' => false
+	);
+
+$intro_not_logged_in = "<p><strong>You can show your interested in volunteering for this position by registering as a volunteer with us. ";
+$intro_not_logged_in .= "It's not difficult - we just need some of your details so that we can introduce you to the organisation.</strong></p>";
+$intro_not_logged_in .= "<p>If you have not already registered, click the 'Register' button below to sign up. ";
+$intro_not_logged_in .= "If you have already registered, clicking 'Cancel' will close this popup and you can log in by entering your email ";
+$intro_not_logged_in .= "&amp; password on this page.</p>";
+$intro_not_logged_in .= "<p>Finally, if you just want to discuss this, use the 'Contact Us' button and let us know how we can contact you.</p>";
+$intro_logged_in = "<p><strong>You are already logged in, so go ahead and register your interest.</strong></p>";
+$intro_logged_in .= "<p>We'll pass your details onto the organisation offering the position, so expect to hear back from them.</p>";
 ?>  
 <div class="wrap">
 <h2>Volunteer Plus Settings</h2>
@@ -74,8 +90,18 @@ function volplus_plugin_settings_page() {
         </tr>
  
         <tr valign="top">
-        <th scope="row">Response Form Content (e.g. shortcode to contact form)</th>
+        <th scope="row">Response Form (e.g. shortcode to contact form)</th>
         <td><input type="text" name="volplus_responseformcontent" size="40" value="<?php echo esc_attr(get_option('volplus_responseformcontent')); ?>" /></td>
+        </tr>
+
+        <tr valign="top">
+        <th scope="row">Response Intro - not logged in</th>
+			<td><?php wp_editor(get_option('volplus_responsenotloggedinintro', $intro_not_logged_in), 'volplus_responsenotloggedinintro', $args)?></td>
+        </tr>
+
+        <tr valign="top">
+        <th scope="row">Response Intro - logged in</th>
+			<td><?php wp_editor(get_option('volplus_responseloggedinintro', $intro_logged_in), 'volplus_responseloggedinintro', $args)?></td>
         </tr>
 
        <tr valign="top">
@@ -124,6 +150,8 @@ function volplus_plugin_settings() {
 	register_setting( 'volplus-plugin-settings-group', 'volplus_googlemapzoom' );
 	register_setting( 'volplus-plugin-settings-group', 'volplus_license_code' );
 	register_setting( 'volplus-plugin-settings-group', 'volplus_responseformcontent' );	
+	register_setting( 'volplus-plugin-settings-group', 'volplus_responsenotloggedinintro' );	
+	register_setting( 'volplus-plugin-settings-group', 'volplus_responseloggedinintro' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_hidebrackets' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_voltimeout' );	
 }

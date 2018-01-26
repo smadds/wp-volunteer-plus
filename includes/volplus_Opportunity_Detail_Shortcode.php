@@ -22,10 +22,21 @@ function volplus_opportunity_detail_func($atts) {
 
 	<h1><?php echo remove_brackets($opportunity['opportunity']); ?></h1>
 	
-<button type="button" class="volplus_respondButton button">I'm Interested</button>
+<button type="button" class="volplus_respondButton button"><i class="fa fa-check fa-4x"></i>I'm Interested</button>
 
-<div id="volplus_response" hidden="hidden" style="z-index:1000;display: inline-block;">
-	<?php echo do_shortcode(get_option('volplus_responseformcontent'));?>
+<div id="volplus_response_notloggedin"  hidden='hidden'>
+	<div id='responseintro'>
+		<?php echo stripslashes( html_entity_decode(get_option('volplus_responsenotloggedinintro')));?>
+	</div>
+	<div id='responseform'>
+		<?php echo do_shortcode(get_option('volplus_responseformcontent'));?>
+	</div>
+</div>	
+
+<div id="volplus_response_loggedin" hidden="hidden">
+	<div id='interestedintro'>
+		<?php echo stripslashes( html_entity_decode(get_option('volplus_responseloggedinintro')));?>
+	</div>
 </div>	
 
 <style type="text/css">
@@ -54,32 +65,78 @@ function volplus_opportunity_detail_func($atts) {
 	wp_enqueue_style("volplus_frontend_css");
 	?>
 	jQuery(document).ready(function($) {
-		$( "#volplus_response" ).dialog({
+		$( "#volplus_response_notloggedin" ).dialog({
 			dialogClass: 'wp-dialog',
 			modal: true,
 			autoOpen: false,
 			show: {effect: "fade", duration: 500},
 			closeOnEscape: true,
-			title: "Contact Us",
+			title: "I'm Interested...",
 			width: 400,
-			buttons: {
-				"Become a registered volunteer": function() {
-					window.location.assign("volunteer-registration/?opp-id=" + <?php echo $querystring['opp-id'];?>);
+			buttons: [
+				{
+					text: 'Register',
+					class: 'button',
+					click: function() {
+						window.location.assign("volunteer-registration/?opp-id=" + <?php echo $querystring['opp-id'];?>);
+					}
 				},
-            "Cancel": function() {
-                $(this).dialog('close');
+ 				{
+					text: 'Contact us',
+					class: 'button',
+					click: function() {
+						document.getElementById("responseintro").style.display = "none";
+						document.getElementById("responseform").style.display = "inherit";
+					}
+				},
+ 				{
+					text: 'Cancel',
+					class: 'button',
+					click: function() {
+						$(this).dialog('close');
+					}
 				}
-			},
-			open: function (event, ui) {
-				$(".ui-widget-overlay").click(function () {
-					$("#volplus_response").dialog('close');
-				});
-			},
+			]
+		});
 
+		$( "#volplus_response_loggedin" ).dialog({
+			dialogClass: 'wp-dialog',
+			modal: true,
+			autoOpen: false,
+			show: {effect: "fade", duration: 500},
+			closeOnEscape: true,
+			title: "I'm Interested...",
+			width: 400,
+			buttons: [
+				{
+					text: 'Register my interest',
+					class: 'button',
+					click: function() {
+						alert('Register interest of volunteer');
+					}
+				},
+ 				{
+					text: 'Cancel',
+					class: 'button',
+					click: function() {
+						$(this).dialog('close');
+					}
+				}
+			]
 		});
+
 		$( ".volplus_respondButton" ).click(function() {
-			$( "#volplus_response" ).dialog( "open" );
+			var loggedin = (document.cookie.indexOf("volplus_user_id") >= 0);
+//console.log('loggedin:', loggedin);
+			if (loggedin) {
+				$( "#volplus_response_loggedin" ).dialog( "open" );				
+			}else {
+				document.getElementById("responseform").style.display = "none";
+				document.getElementById("responseintro").style.display = "inherit";
+				$( "#volplus_response_notloggedin" ).dialog( "open" );
+			}
 		});
+
 	});
 </script>
 

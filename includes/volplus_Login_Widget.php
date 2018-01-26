@@ -195,20 +195,37 @@ function ajax_login(){
 	} else {
 // get user details
 		$endpoint = API_URL . 'volunteers/'.(int) $responsebody['id'];
-		$volunteer = wp_remote_get( $endpoint, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
-		$volunteer = json_decode($volunteer['body']);
- 
- 		setcookie('volplus_user_id', $responsebody['id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-		setcookie('volplus_user_first_name', $volunteer->first_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-		setcookie('volplus_user_last_name', $volunteer->last_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+		$response = wp_remote_get( $endpoint, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+		$volunteer = json_decode($response['body']);
+		if ( $response['response']['code'] !== 200) {
+			$error_message = $response['response']['message'];
+//			echo "Something went wrong: <em>".$response['response']['message']." (Code ".$response['response']['code'].")</em>";
+			$body = "";
+			foreach($volunteer as $key=>$data){
+//				echo "<br/>".$key.": ";
+				foreach($data as $data2){
+					$body .= $data2;
+				}
+			}
+			echo json_encode(array('loggedin'=>false, 'message'=>__($body)));
+			setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user_first_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user_last_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+		}else{
+	 		setcookie('volplus_user_id', $responsebody['id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user_first_name', $volunteer->first_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user_last_name', $volunteer->last_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 
-		echo json_encode(array(
-			'loggedin'=>true,
-			'message'=>__('Login successful'),
-//			'volunteer'=> $volunteer,
-			'first_name'=> $volunteer->first_name,
-			'last_name'=> $volunteer->last_name
-		));
+			echo json_encode(array(
+				'loggedin'=>true,
+				'message'=>__('Login successful'),
+				'response'=> $response,
+//				'volunteer'=> $volunteer,
+				'first_name'=> $volunteer->first_name,
+				'last_name'=> $volunteer->last_name,
+				'volplus_id'=> $responsebody->id
+			));
+		}
 	}
 	die();
 }

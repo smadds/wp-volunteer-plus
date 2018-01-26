@@ -1,3 +1,14 @@
+
+#volplus_response {
+	background-color: white;
+	padding: 10px;
+	border: 0;
+	z-index:1000;
+	display: block;
+	width: 100%;
+	text-align: center;
+}
+
 .volplus_halfwidth {
     width: 50%;
     display: inline;
@@ -78,5 +89,111 @@ label:hover {
 
 label + input[type=checkbox]:checked {
 	background-color: #e0e0e0;
+}
+
+/* For desktop: */
+    [class*="volplus-col-"] {
+        float: left;
+        display: inline;
+    }
+.volplus-col-1 {width: 8.33%;}
+.volplus-col-2 {width: 16.66%;}
+.volplus-col-3 {width: 25%;}
+.volplus-col-4 {width: 33.33%;}
+.volplus-col-5 {width: 41.66%;}
+.volplus-col-6 {width: 50%;}
+.volplus-col-7 {width: 58.33%;}
+.volplus-col-8 {width: 66.66%;}
+.volplus-col-9 {width: 75%;}
+.volplus-col-10 {width: 83.33%;}
+.volplus-col-11 {width: 91.66%;}
+.volplus-col-12 {width: 100%;}
+
+@media only screen and (max-width: 1400px) {
+    /* For mobile phones: */
+    [class*="volplus-col-"] {
+        width: 100%;
+    }
+}
+
+
+.volplus-list {
+	margin-bottom: 1em;
+	border-bottom: 1px;
+	border-style: dashed;
+	border-color: #c0c0c0;
+}
+
+.volplus-list h2 {
+	font-size: 1.2em;
+}
+
+.volplus-list p a.button {
+	font-size: 0.9em;
+	padding: 0.2em 0.8em;
+}
+
+.volplus-list p {
+	margin-bottom: 0.5em;
+	margin-left: 2em;
+	font-size:0.9em;
+}
+
+.volplus-list .organisation::before {
+	content: "Organisation: "
+}
+
+.volplus-list .location::before {
+	content: "Location: "
+}
+
+.volplus-checkbox {
+	width: 1.5em;
+	height: 1.5em;
+	margin:0;
+}
+
+label {
+	margin-top: 1.5em;
+	line-height: 1.8em;
+	display: inline-block;
+}
+
+.colcontainer {
+	min-width: 0;
+	border: 1px solid #ddd;
+	background: #f9f9f9;
+	border-radius: 0.6em;
+	
+}
+
+ul.volplus-pagination {
+    list-style: none;
+    margin: 25px 0 50px 0;
+    padding: 0;
+}
+
+ul.volplus-pagination li {
+    float: left;
+    margin: 0 5px 5px 0;
+}
+
+ul.volplus-pagination li a, ul.volplus-pagination li span {
+    display: block;
+    background-color: #F9F9F9;
+    text-decoration: none;
+    padding: 0px 10px;
+    min-width: 32px;
+    text-align: center;
+    color: #565656;
+}
+
+ul.volplus-pagination li a:hover, ul.volplus-pagination a.current {
+    background-color: #00509a;
+    color: #FFFFFF;
+}
+
+ul.volplus-pagination li a:hover {
+    opacity: 0.2;
 }
 

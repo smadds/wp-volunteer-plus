@@ -60,6 +60,8 @@ jQuery(document).ready(function($) {
 //					document.location.href = ajax_login_object.redirecturl;
 					document.getElementById("not_logged_in").style.display = "none";
 					document.getElementById("login").style.display = "none";
+					if (!data.first_name) data.first_name = 'Private';
+					if (!data.last_name) data.last_name = 'Volunteer';
 					$('div#welcome_name').text(data.first_name + " " + data.last_name);
 					document.getElementById("welcome").style.display = "inherit";
 					
