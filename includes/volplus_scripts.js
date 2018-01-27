@@ -29,10 +29,11 @@ function LimitActivities()  {
 
 jQuery(document).ready(function($) {
 
+//		Log out by clearing cookies & changing displayed divs
 	$('div#logout.button').click(function(){
-		document.cookie = 'volplus_user_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain='+location.host;
-		document.cookie = 'volplus_user_first_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain='+location.host;
-		document.cookie = 'volplus_user_last_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain='+location.host;
+		document.cookie = 'volplus_user_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+		document.cookie = 'volplus_user_first_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+		document.cookie = 'volplus_user_last_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
 		document.getElementById("not_logged_in").style.display = "inherit";
 		document.getElementById("login").style.display = "inherit";
 		document.getElementById("logged_in").style.display = "none";

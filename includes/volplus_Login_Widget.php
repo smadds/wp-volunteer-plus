@@ -18,34 +18,36 @@ class volplus_Login_Widget extends WP_Widget {
  	$display_in = is_volplus_user_logged_in() ? 'inherit' : 'none';
  	$display_out = is_volplus_user_logged_in() ? 'none' : 'inherit';
 	?>
-	
+
+
+	<div id="login_widget">
    	<div id="logged_in" style="display:<?php echo $display_in ?>"><?php
-    	if ( ! empty( $loggedin_title )) echo $args['before_title'] . $loggedin_title . $args['after_title'];
-		if(isset($instance['loggedin_intro_text'])) {
-			$loggedin_intro_text = apply_filters('widget_title',$instance['loggedin_intro_text']);
-			if(!empty($loggedin_intro_text)) {
-				echo $loggedin_intro_text;
-			}
-		}?>
+	    	if ( ! empty( $loggedin_title )) echo $args['before_title'] . $loggedin_title . $args['after_title'];
+			if(isset($instance['loggedin_intro_text'])) {
+				$loggedin_intro_text = apply_filters('widget_title',$instance['loggedin_intro_text']);
+				if(!empty($loggedin_intro_text)) {
+					echo $loggedin_intro_text;
+				}
+			}?>
 		</div>
 
     	<div id="not_logged_in" style="display:<?php	echo $display_out ?>"><?php
-    	if ( ! empty( $title )) echo $args['before_title'] . $title . $args['after_title'];
-		if(isset($instance['intro_text'])) {
-			$intro_text = apply_filters('widget_title',$instance['intro_text']);
-			if(!empty($intro_text)) {
-				echo $intro_text;
-			}
-		}
-		echo "</div>";
+	    	if ( ! empty( $title )) echo $args['before_title'] . $title . $args['after_title'];
+			if(isset($instance['intro_text'])) {
+				$intro_text = apply_filters('widget_title',$instance['intro_text']);
+				if(!empty($intro_text)) {
+					echo $intro_text;
+				}
+			}?>
+		</div>
 
-	if(! volplus_licensed()) echo '<h3>'._e( 'Unlicensed Volunteer Plus Plugin', 'wp_volunteer-plus' ).'</h3>';
+		<?php if(! volplus_licensed()) echo '<h3>'._e( 'Unlicensed Volunteer Plus Plugin', 'wp_volunteer-plus' ).'</h3>';?>
 
 
-		echo "<div id='welcome' class='volplus-welcome' style='display:" . $display_in . "'>Welcome back, ";
-			echo "<div id='welcome_name' style='display:inline'>";
-				if(isset($_COOKIE['volplus_user_id'])) echo $_COOKIE['volplus_user_first_name'] . " " . $_COOKIE['volplus_user_last_name'];
-			echo "</div>";?>
+		<div id='welcome' class='volplus-welcome' style='display:<?php echo $display_in?>'>Welcome back, 
+			<div id='welcome_name' class='volplus_welcome_name' style='display:inline'>
+				<?php if(isset($_COOKIE['volplus_user_id'])) echo " " . $_COOKIE['volplus_user_first_name'] . " " . $_COOKIE['volplus_user_last_name'];?>
+			</div>
 			<p><div id='logout' class='button'> Log Out </div></p>
 		</div>
 
@@ -62,6 +64,8 @@ class volplus_Login_Widget extends WP_Widget {
 		<p id='volplus_login_status' class="status"></p>
 		</form>
 
+	</div>
+	
 	<script type="text/css">
 		div.volplus-welcome{
 			font-size: 2em;
@@ -142,9 +146,9 @@ class volplus_Login_Widget extends WP_Widget {
 }
 
 function ajax_login_init(){
-    wp_register_script('ajax-login-script', VOLPLUS_URL . 'includes/ajax-login-script.js', array('jquery') ); 
-    wp_enqueue_script('ajax-login-script');
-    wp_localize_script( 'ajax-login-script', 'ajax_login_object', array( 
+    wp_register_script('volplus_scripts', VOLPLUS_URL . 'includes/volplus_scripts.js', array('jquery') ); 
+    wp_enqueue_script('volplus_scripts');
+    wp_localize_script( 'volplus_scripts', 'ajax_login_object', array( 
         'ajaxurl' => admin_url( 'admin-ajax.php' ),
         'redirecturl' => home_url(),
         'loadingmessage' => __('Checking your details, please wait...')

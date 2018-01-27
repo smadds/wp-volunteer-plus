@@ -1,3 +1,14 @@
+[class*="volplus-col-"] {
+	padding: 0.2em!important;
+}
+
+#welcome.volplus_welcome{
+	font-size: 1.4em;
+}
+
+.volplus_welcome_name{
+	font-weight: bold;
+}
 
 #volplus_response {
 	background-color: white;

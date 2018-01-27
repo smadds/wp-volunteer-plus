@@ -22,7 +22,7 @@ function volplus_opportunity_detail_func($atts) {
 
 	<h1><?php echo remove_brackets($opportunity['opportunity']); ?></h1>
 	
-<button type="button" class="volplus_respondButton button"><i class="fa fa-check fa-4x"></i>I'm Interested</button>
+<button type="button" class="volplus_respondButton button"><i class="fa fa-thumbs-up fa-4x"></i>I'm Interested</button>
 
 <div id="volplus_response_notloggedin"  hidden='hidden'>
 	<div id='responseintro'>
@@ -131,6 +131,7 @@ function volplus_opportunity_detail_func($atts) {
 			if (loggedin) {
 				$( "#volplus_response_loggedin" ).dialog( "open" );				
 			}else {
+				document.getElementById("logout").click();
 				document.getElementById("responseform").style.display = "none";
 				document.getElementById("responseintro").style.display = "inherit";
 				$( "#volplus_response_notloggedin" ).dialog( "open" );
@@ -268,8 +269,8 @@ function volplus_opportunity_detail_func($atts) {
 	
 	 <?php
 	    $availability = $opportunity['availability']['availability'];
-		$available = '<span class="available">Yes</span>';
-		$not_available = '<span class="not_available">No</span>';
+		$available = '<span class="available fa fa-check fa-lg"></span>';
+		$not_available = '<span class="not_available fa fa-times" style="opacity:0.2"></span>';
 	 ?>
 
 		<table>
@@ -388,7 +389,7 @@ function volplus_opportunity_detail_func($atts) {
 			<?php } ?>
 		<?php } ?>
 	</div>
-	<!-- --><?php var_dump_safe($opportunity);?>
+	<!-- <?php var_dump_safe($opportunity);?>-->
 
 <?php }
 

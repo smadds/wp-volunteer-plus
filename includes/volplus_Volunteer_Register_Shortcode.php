@@ -141,7 +141,9 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		if ( 1 > count( $reg_errors->get_error_messages() ) ) {
 			//add VolPlus account
 //			print_r_safe($_POST);
-			$response = wp_remote_post(API_URL . 'volunteers', array(
+			$endpoint = 'volunteers';
+			if(isset($_COOKIE['volplus_user_id'])) $endpoint .= '/' . $_COOKIE['volplus_user_id'];
+			$response = wp_remote_post(API_URL . $endpoint, array(
 				'timeout' => 45,
 				'redirection' => 5,
 				'httpversion' => '1.0',
@@ -185,7 +187,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 					'cookies' => array()
 					)
 				);
-				var_dump_safe( $response );
+//				var_dump_safe( $response );
 			
 				$responsebody = (array) json_decode($response['body']);
 				if ( $response['response']['code'] !== 200) {
@@ -200,6 +202,9 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 					unset($volunteer->volplus_id);
 				} else {
 					setcookie('volplus_user_id', $volunteer->volplus_id, time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+					setcookie('volplus_user_first_name', $volunteer->first_name, time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+					setcookie('volplus_user_last_name', $volunteer->last_name, time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+					echo '<script> jQuery( "#login_widget" ).load(window.location.href + " #login" ); </script>';
 //				var_dump_safe( $responsebody );			
 				}
 			
@@ -237,19 +242,64 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		}
 	}
 
-//echo "userid: '" . $userid . "'";	
-//	if(is_null($wpuserid)){
-	if(!isset($volunteer->volplus_id)){ ?>
-<!--		<div class="volplus-col-12">-->
+	if(!is_volplus_user_logged_in()){
+		echo "<h2>Create your account</h2>";
+		$buttontext = "Sign Up";
+	}else {
+		echo "<h2>Update your details</h2>";
+		$buttontext = "Update Details";
+		$endpoint = 'volunteers/' . $_COOKIE['volplus_user_id'];
+		$response = wp_remote_get(API_URL . $endpoint, array(
+			'timeout' => 45,
+			'redirection' => 5,
+			'httpversion' => '1.0',
+			'blocking' => true,
+			'headers' => array('Authorization' => 'Bearer '.API_KEY),
+			'body' => null,
+			'cookies' => array()
+			)
+		);
+		$response = (array) json_decode($response['body']);
+		foreach($response as $key=>$data){
+			$volunteer->$key = $data;
+		}
+		
+// ******************** FIX /volunteers GET to match PUSH ************************
 
-		<script type="text/css" >
-			[class*="volplus-col-"] {
-				padding: 0.2em!important;
-			}
-		</script>
+		$volunteer->telephone = $volunteer->telephone_number;
+		$volunteer->mobile = $volunteer->mobile_number;
 
-			<h2>Create your account</h2>
-			<?php if(isset($signUpError)) echo '<div>'.$signUpError.'</div>'?>
+		$temparray = [];
+		foreach($volunteer->interests as $key=>$data) array_push($temparray, $data->id);
+		$volunteer->interests = $temparray;
+
+		$temparray = [];
+		foreach($volunteer->activities as $key=>$data) array_push($temparray, $data->id);
+		$volunteer->activities = $temparray;
+
+		$temparray = [];
+		foreach($volunteer->availability as $key=>$data) if($data) $temparray += array($key=>1);
+		$volunteer->availability = $temparray;
+
+		$temparray = [];
+		foreach($volunteer->why_volunteer as $key=>$data) array_push($temparray, $data->id);
+		$volunteer->reasons = $temparray;
+
+		$temparray = [];
+		foreach($volunteer->disability_type as $key=>$data) array_push($temparray, $data->id);
+		$volunteer->disabilities = $temparray;
+
+		$volunteer->gender = $volunteer->gender->id;
+		$volunteer->ethnicity = $volunteer->ethnicity->id;
+		$volunteer->how_heard = $volunteer->how_heard->id;
+		$volunteer->disability = $volunteer->disability->id;
+		
+// *************************************************************************
+		
+// var_dump_safe($volunteer);
+
+	}
+			if(isset($signUpError)) echo '<div>'.$signUpError.'</div>'?>
 			<form action="" method="post" name="user_registration">
 
 				<p><label class="volplus-col-2">Title (optional)  
@@ -271,10 +321,12 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 					<input type="text" name="last_name" placeholder="Last Name" required value="<?php echo $volunteer->last_name?>" /></label></p>
 				<label class="volplus-col-8">Email address <span class="error">*</span>
 					<input type="email" name="email_address"  placeholder="Email address" required value="<?php echo $volunteer->email_address?>" /></label>
-				<p><label class="volplus-col-6">Password (8 characters or more) <span class="error">*</span>
-					<input type="password" name="password" placeholder="Password" required value="<?php echo $volunteer->password?>" /></label>
-				<label class="volplus-col-6">Password <span class="error">*</span>
-					<input type="password" name="password_confirmation" placeholder="Repeat your password" required value="<?php echo $volunteer->password_confirmation?>" /></label></p>
+				<?php if(!is_volplus_user_logged_in()){?>
+					<p><label class="volplus-col-6">Password (8 characters or more) <span class="error">*</span>
+						<input type="password" name="password" placeholder="Password" required value="<?php echo $volunteer->password?>" /></label>
+					<label class="volplus-col-6">Password <span class="error">*</span>
+						<input type="password" name="password_confirmation" placeholder="Repeat your password" required value="<?php echo $volunteer->password_confirmation?>" /></label></p>
+				<?php }; ?>
 
 				<h2 class="volplus-col-12"><br/>Address</h2>
 				<label class="volplus-col-12">Address 1 <span class="error">*</span>  
@@ -330,11 +382,11 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 					<?php disability_type($volunteer->disabilities);?></label>
 
 
-				<div class="volplus-col-12"><input class = "button" type="submit" name="user_registration" value="Sign Up" /></div>
+				<div class="volplus-col-12"><input class = "button" type="submit" name="user_registration" value=<?php echo $buttontext?>/></div>
 
 			</form>
 <!--		</div>-->
-	<?php }; ?>
+	<?php// }; ?>
 <!--<?php echo "POST:<br/>" . json_encode($_POST, JSON_UNESCAPED_SLASHES)?><br/>
 <?php echo "volunteer:<br/>" . json_encode($volunteer, JSON_UNESCAPED_SLASHES)?><br/>
 <?php var_dump_safe($GLOBALS['volunteer_fields']);?>
@@ -342,7 +394,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 <div class="volplus-col-6"><?php var_dump_safe($volunteer) ?></div>-->
 
 	<script type="text/javascript" >
-			document.getElementById('disability-type').onchange = function(e) {
+			document.getElementById('disability-type').onchange = function() {
 				if (document.getElementById("disability-type").value == 1) {
 	 				document.getElementById("display-details-label").style.display = "block";
 				} else {
