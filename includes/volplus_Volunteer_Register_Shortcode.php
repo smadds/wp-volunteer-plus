@@ -89,7 +89,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		);
 		foreach($periods as $period){
 			if(isset($_POST[$period]) && $_POST[$period]=="on"){
-				$volunteer->availability[$period]=1;
+				$volunteer->$period=1;
 				$_POST[$period]=1;
 			}		
 		}
@@ -106,10 +106,10 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		
 		// flag if age not given
 		if(isset($_POST['date_birth']) && $_POST['date_birth']!==""){
-			$volunteer->date_birth = $_POST['date_birth'];
- 			$volunteer->date_birth_prefer_not_say = NULL;
 			$_POST['date_birth'] = implode('/', array_reverse(explode('-', $_POST['date_birth']))); // put into UK date order dd/MM/yyyy
 			$_POST['date_birth_prefer_not_say'] = NULL;
+ 			$volunteer->date_birth_prefer_not_say = NULL;
+			$volunteer->date_birth = $_POST['date_birth'];
 		} else {
 			$volunteer->date_birth_prefer_not_say = 1;
 			$_POST['date_birth_prefer_not_say'] = 1;
@@ -119,21 +119,24 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
         
     
     
-		if(empty( $volunteer->first_name ) || empty( $volunteer->last_name ) || empty( $volunteer->username ) || empty( $volunteer->email_address ) || empty($volunteer->password)) {
-			$reg_errors->add('field', 'Required form field is missing'); }    
-		if ( 6 > strlen( $volunteer->username ) ) {
-			$reg_errors->add('username_length', 'Your username would be too short. Please make sure your the length of your First name + Last name are at least 5 characters' );}
+		if(empty( $volunteer->first_name ) || empty( $volunteer->last_name )) {
+			$reg_errors->add('field', 'We need your first & last names'); }    
+		if(empty( $volunteer->email_address )) {
+			$reg_errors->add('field', 'We need an email address to create an account'); }    
+		if(empty(($volunteer->password) || empty($volunteer->password_confirmation)) && !is_volplus_user_logged_in) {
+			$reg_errors->add('field', 'An email field is missing'); }    
 		if ( !is_email( $volunteer->email_address ) ) {
 			$reg_errors->add( 'email_invalid', 'We can\'t make out your email address. Please check it\'s correct' ); }
 		if ( $volplus_atts['wordpress-account'] && email_exists( $volunteer->email_address ) ) {
-			$reg_errors->add( 'email', 'This email address is already in our system. Have you already registered?' ); }
-		if ( 7 > strlen( $volunteer->password ) ) {
-			$reg_errors->add( 'password', 'Your password too short. It must be at least 8 characters' ); }
-		if ( $volunteer->password !== $volunteer->password_confirmation ) {
-			$reg_errors->add( 'password_confirmation', 'Your passwords do not match' ); }    
+			$reg_errors->add( 'email', 'This email address is already in our system. Please use the Login panel' ); }
+		if(!is_volplus_user_logged_in()){
+			if ( 7 > strlen( $volunteer->password ) ) {
+				$reg_errors->add( 'password', 'Your password too short. It must be at least 8 characters' ); }
+			if ( $volunteer->password !== $volunteer->password_confirmation ) {
+				$reg_errors->add( 'password_confirmation', 'Your passwords do not match' ); }}    
 		if (is_wp_error( $reg_errors )) { 
-			foreach ( $reg_errors->get_error_messages() as $error ) {
-				$signUpError='<p style="color:#FF0000; text-align:left;"><strong>We have a problem </strong>: '.$error . '<br /></p>';
+			foreach ( $reg_errors->get_error_messages() as $key=>$data ) {
+				$signUpError='<p style="color:#FF0000; text-align:left;"><strong>We have a problem </strong>: '.$data . '<br /></p>';
 			} 
 		}
     
@@ -149,7 +152,8 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 				'httpversion' => '1.0',
 				'blocking' => true,
 				'headers' => array('Authorization' => 'Bearer '.API_KEY),
-				'body' => (array) $_POST,
+//				'body' => (array) $_POST,
+				'body' => (array) $volunteer,
 				'cookies' => array()
 				)
 			);
@@ -157,7 +161,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 			$responsebody = (array) json_decode($response['body']);
 //			var_dump_safe( $responsebody );
 
-			if ( $response['response']['code'] !== 201) {
+			if ( !($response['response']['code'] == 201 || $response['response']['code'] ==  200)) {
 				$error_message = $response['response']['message'];
 				echo "Something went wrong: <em>".$response['response']['message']." (Code ".$response['response']['code'].")</em>";
 				foreach($responsebody as $key=>$data){
@@ -243,67 +247,24 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 	}
 
 	if(!is_volplus_user_logged_in()){
-		echo "<h2>Create your account</h2>";
+		echo "<div id='vol_main_heading'><h2>Create your account</h2></div>";
 		$buttontext = "Sign Up";
 	}else {
-		echo "<h2>Update your details</h2>";
+		echo "<div id='vol_main_heading'><h2>Update your details</h2></div>";
 		$buttontext = "Update Details";
-		$endpoint = 'volunteers/' . $_COOKIE['volplus_user_id'];
-		$response = wp_remote_get(API_URL . $endpoint, array(
-			'timeout' => 45,
-			'redirection' => 5,
-			'httpversion' => '1.0',
-			'blocking' => true,
-			'headers' => array('Authorization' => 'Bearer '.API_KEY),
-			'body' => null,
-			'cookies' => array()
-			)
-		);
-		$response = (array) json_decode($response['body']);
-		foreach($response as $key=>$data){
+		$response = get_volunteer_details($_COOKIE['volplus_user_id']);
+		$responsebody = json_decode($response['body']);
+		foreach($responsebody as $key=>$data){
 			$volunteer->$key = $data;
 		}
-		
-// ******************** FIX /volunteers GET to match PUSH ************************
 
-		$volunteer->telephone = $volunteer->telephone_number;
-		$volunteer->mobile = $volunteer->mobile_number;
-
-		$temparray = [];
-		foreach($volunteer->interests as $key=>$data) array_push($temparray, $data->id);
-		$volunteer->interests = $temparray;
-
-		$temparray = [];
-		foreach($volunteer->activities as $key=>$data) array_push($temparray, $data->id);
-		$volunteer->activities = $temparray;
-
-		$temparray = [];
-		foreach($volunteer->availability as $key=>$data) if($data) $temparray += array($key=>1);
-		$volunteer->availability = $temparray;
-
-		$temparray = [];
-		foreach($volunteer->why_volunteer as $key=>$data) array_push($temparray, $data->id);
-		$volunteer->reasons = $temparray;
-
-		$temparray = [];
-		foreach($volunteer->disability_type as $key=>$data) array_push($temparray, $data->id);
-		$volunteer->disabilities = $temparray;
-
-		$volunteer->gender = $volunteer->gender->id;
-		$volunteer->ethnicity = $volunteer->ethnicity->id;
-		$volunteer->how_heard = $volunteer->how_heard->id;
-		$volunteer->disability = $volunteer->disability->id;
-		
-// *************************************************************************
-		
-// var_dump_safe($volunteer);
-
+// var_dump_safe($responsebody);
 	}
 			if(isset($signUpError)) echo '<div>'.$signUpError.'</div>'?>
 			<form action="" method="post" name="user_registration">
 
 				<p><label class="volplus-col-2">Title (optional)  
-					<select name="title" class="text">
+					<select id="title" name="title" class="text">
 						<option value="" <?php if($volunteer->title=="") echo 'selected';?> >Select</option>
 						<option value="Mr" <?php if($volunteer->title=="Mr") echo 'selected';?> >Mr</option>
 						<option value="Master" <?php if($volunteer->title=="Master") echo 'selected';?> >Master</option>
@@ -316,37 +277,36 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 				</label>
 
 				<label class="volplus-col-5">First name <span class="error">*</span>  
-					<input type="text" name="first_name" placeholder="First Name" required autofocus value="<?php echo $volunteer->first_name?>"/></label>
+					<input type="text" id="first_name" name="first_name" placeholder="First Name" required autofocus value="<?php echo $volunteer->first_name?>"/></label>
 				<label class="volplus-col-5">Last name <span class="error">*</span>  
-					<input type="text" name="last_name" placeholder="Last Name" required value="<?php echo $volunteer->last_name?>" /></label></p>
+					<input type="text" id="last_name" name="last_name" placeholder="Last Name" required value="<?php echo $volunteer->last_name?>" /></label></p>
 				<label class="volplus-col-8">Email address <span class="error">*</span>
-					<input type="email" name="email_address"  placeholder="Email address" required value="<?php echo $volunteer->email_address?>" /></label>
-				<?php if(!is_volplus_user_logged_in()){?>
+					<input type="email" id="email_address" name="email_address"  placeholder="Email address" required value="<?php echo $volunteer->email_address?>" /></label>
+				<div id="passwords">
 					<p><label class="volplus-col-6">Password (8 characters or more) <span class="error">*</span>
 						<input type="password" name="password" placeholder="Password" required value="<?php echo $volunteer->password?>" /></label>
 					<label class="volplus-col-6">Password <span class="error">*</span>
 						<input type="password" name="password_confirmation" placeholder="Repeat your password" required value="<?php echo $volunteer->password_confirmation?>" /></label></p>
-				<?php }; ?>
-
+				</div>
 				<h2 class="volplus-col-12"><br/>Address</h2>
 				<label class="volplus-col-12">Address 1 <span class="error">*</span>  
-					<input type="text" name="address_line_1" placeholder="Address 1" required value="<?php echo $volunteer->address_line_1?>"/></label>
+					<input type="text" id="address_line_1" name="address_line_1" placeholder="Address 1" required value="<?php echo $volunteer->address_line_1?>"/></label>
 				<label class="volplus-col-12">Address 2  
-					<input type="text" name="address_line_2" placeholder="Address 2" value="<?php echo $volunteer->address_line_2?>"/></label>
+					<input type="text" id="address_line_2" name="address_line_2" placeholder="Address 2" value="<?php echo $volunteer->address_line_2?>"/></label>
 				<label class="volplus-col-12">Address 3  
-					<input type="text" name="address_line_3" placeholder="Address 3" value="<?php echo $volunteer->address_line_3?>"/></label>
+					<input type="text" id="address_line_3" name="address_line_3" placeholder="Address 3" value="<?php echo $volunteer->address_line_3?>"/></label>
 				<label class="volplus-col-4">Town <span class="error">*</span> 
-					<input type="text" name="town" placeholder="Town" required value="<?php echo $volunteer->town?>"/></label>
+					<input type="text" id="town" name="town" placeholder="Town" required value="<?php echo $volunteer->town?>"/></label>
 				<label class="volplus-col-4">County <span class="error">*</span>   
-					<input type="text" name="county" placeholder="County" required value="<?php echo $volunteer->county?>"/></label>
+					<input type="text" id="county" name="county" placeholder="County" required value="<?php echo $volunteer->county?>"/></label>
 				<label class="volplus-col-3">Postcode <span class="error">*</span>   
-					<input type="text" name="postcode" placeholder="Postcode" required value="<?php echo $volunteer->postcode?>"/></label>
+					<input type="text" id="postcode" name="postcode" placeholder="Postcode" required value="<?php echo $volunteer->postcode?>"/></label>
 
 				<h2 class="volplus-col-12"><br/>Contact Details</h2>
 				<label class="volplus-col-6">Telephone <span class="error">*</span>  
-					<input type="text" name="telephone" placeholder="Telephone number" required value="<?php echo $volunteer->telephone?>"/></label>
+					<input type="text" id="telephone" name="telephone" placeholder="Telephone number" required value="<?php echo $volunteer->telephone?>"/></label>
 				<label class="volplus-col-6">Mobile  
-					<input type="text" name="mobile" placeholder="Mobile number" value="<?php echo $volunteer->mobile?>"/></label>
+					<input type="text" id="mobile" name="mobile" placeholder="Mobile number" value="<?php echo $volunteer->mobile?>"/></label>
 				<h2 class="volplus-col-12"><br/>Interests & Activities</h2>
 				<label class="volplus-col-6">Interests
 					<?php display_interests($volunteer->interests);?></label>
@@ -356,22 +316,22 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 				<label class="volplus-col-4">When are you available?
 					<?php display_availability_table($volunteer->availability);?></label>
 				<label class="volplus-col-8">Availability Details (specific details regarding your availability e.g. shift worker)  
-					<textarea name="availability_details" rows="10"><?php if(isset($volunteer->availability_details)) echo $volunteer->availability_details?></textarea></label>
+					<textarea id="availability_details" name="availability_details" rows="10"><?php if(isset($volunteer->availability_details)) echo $volunteer->availability_details?></textarea></label>
 				<h2 class="volplus-col-12"><br/>Volunteering</h2>
 				<label class="volplus-col-12">Volunteering Experience  
-					<textarea name="volunteering_experience" rows="10"><?php if(isset($volunteer->volunteering_experience)) echo $volunteer->volunteering_experience?></textarea></label>
+					<textarea id="volunteering_experience" name="volunteering_experience" rows="10"><?php if(isset($volunteer->volunteering_experience)) echo $volunteer->volunteering_experience?></textarea></label>
 				<label class="volplus-col-4">Why volunteer?  
 					<?php display_reasons($volunteer->reasons);?></label>				
 				<label class="volplus-col-8">Further details on why volunteering  
-					<textarea name="volunteering_reason_info" rows="10"><?php if(isset($volunteer->volunteering_reason_info)) echo $volunteer->volunteering_reason_info?></textarea></label>
+					<textarea id="volunteering_reason_info" name="volunteering_reason_info" rows="10"><?php if(isset($volunteer->volunteering_reason_info)) echo $volunteer->volunteering_reason_info?></textarea></label>
 				<h2 class="volplus-col-12"><br/>About</h2>
 				<label class="volplus-col-3">Date of birth (optional) 
-					<input type="date" name="date_birth" format= "dd/MM/yyyy" value="<?php echo $volunteer->date_birth;?>"/></label>
-				<input type="hidden" name="date_birth_prefer_not_say" value="1"/>
+					<input type="date" id="date_birth" name="date_birth" format= "dd/MM/yyyy" value="<?php echo implode('-', array_reverse(explode('/', $volunteer->date_birth)));?>"/></label>
+				<input type="hidden" id="date_birth_prefer_not_say" name="date_birth_prefer_not_say" value="1"/>
 				<label class="volplus-col-2">Gender <span class="error">*</span>   
 					<?php gender($volunteer->gender);?></label>
 				<label class="volplus-col-3">Employment Status <span class="error" >*</span>   
-					<?php employment_status($volunteer->employment);?></label>
+					<?php employment($volunteer->employment);?></label>
 				<label class="volplus-col-4">Ethnicity <span class="error">*</span>
 					<?php ethnicity($volunteer->ethnicity);?></label>
 				<label class="volplus-col-4">How did you hear of us?

@@ -5,6 +5,7 @@ require_once VOLPLUS_PATH . 'includes/volplus_Functions.php';
 function volplus_opportunity_detail_func($atts) {
 	parse_str($_SERVER['QUERY_STRING'],$querystring);
 	$opp = $querystring['opp-id'];
+	setcookie('volplus_opp_id', $opp, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 	$opportunity = wp_remote_get(API_URL . 'opportunities/'.$opp, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
 	$response_code = wp_remote_retrieve_response_code($opportunity);
 
@@ -19,6 +20,7 @@ function volplus_opportunity_detail_func($atts) {
 	}
 
 ?>
+<div id="opportunity_detail">
 
 	<h1><?php echo remove_brackets($opportunity['opportunity']); ?></h1>
 	
@@ -36,7 +38,16 @@ function volplus_opportunity_detail_func($atts) {
 <div id="volplus_response_loggedin" hidden="hidden">
 	<div id='interestedintro'>
 		<?php echo stripslashes( html_entity_decode(get_option('volplus_responseloggedinintro')));?>
+		<textarea id="interested_notes" rows="5" placeholder="You can add some notes about your interest here..."></textarea>
 	</div>
+	<p id='volplus_enquiry_status' class="status"></p>
+</div>	
+
+<div id="volplus_interest_registered" hidden="hidden">
+	<div id='interestedintro'>
+		<?php echo stripslashes( html_entity_decode(get_option('volplus_enquirysuccessmsg')));?>
+	</div>
+	<p id='volplus_enquiry_status' class="status"></p>
 </div>	
 
 <style type="text/css">
@@ -78,7 +89,7 @@ function volplus_opportunity_detail_func($atts) {
 					text: 'Register',
 					class: 'button',
 					click: function() {
-						window.location.assign("volunteer-registration/?opp-id=" + <?php echo $querystring['opp-id'];?>);
+						window.location.assign("volunteer-details/?opp-id=" + <?php echo $querystring['opp-id'];?>);
 					}
 				},
  				{
@@ -112,11 +123,51 @@ function volplus_opportunity_detail_func($atts) {
 					text: 'Register my interest',
 					class: 'button',
 					click: function() {
-						alert('Register interest of volunteer');
+						$('div#volplus_response_loggedin p.status').show().text(ajax_login_object.loadingmessage);
+						this.hide;
+						$.ajax({
+							type: 'POST',
+							dataType: 'json',
+							url: ajax_login_object.ajaxurl,
+							data: { 
+								'action': 'volplusajaxenquire', //calls wp_ajax_nopriv_ajaxlogin
+								'security': $('div#opportunity_detail #security').val(),
+								'interested_notes': $('textarea#interested_notes').val()
+							}, 
+							success: function(result){
+								$("div#volplus_response_loggedin p.status").text(result.message);
+								$("#volplus_response_loggedin").dialog('close');
+								$('#volplus_interest_registered').dialog('open');
+								
+//console.log("success data:", result);
+							}
+						});
+
+						
+//						alert('Register interest of volunteer');
 					}
 				},
  				{
 					text: 'Cancel',
+					class: 'button',
+					click: function() {
+						$(this).dialog('close');
+					}
+				}
+			]
+		});
+
+		$( "#volplus_interest_registered" ).dialog({
+			dialogClass: 'wp-dialog',
+			modal: true,
+			autoOpen: false,
+			show: {effect: "fade", duration: 500},
+			closeOnEscape: true,
+			title: "Interest Registered",
+			width: 400,
+			buttons: [
+ 				{
+					text: 'Close',
 					class: 'button',
 					click: function() {
 						$(this).dialog('close');
@@ -390,6 +441,9 @@ function volplus_opportunity_detail_func($atts) {
 		<?php } ?>
 	</div>
 	<!-- <?php var_dump_safe($opportunity);?>-->
+	
+	<?php wp_nonce_field( 'ajax-enquiry-nonce', 'security' ); ?>
+</div>	
 
 <?php }
 
@@ -397,6 +451,9 @@ function volplus_opportunity_detail_func($atts) {
 // Register jquery dependency and the shortcode.
 
 //wp_enqueue_script('volplus-opportunity-detail', VOLPLUS_PATH .'/includes/volplus_Opportunity_Detail_Shortcode.php', array('jquery'), null, true);
-add_shortcode( 'volplus-opportunity-detail', 'volplus_opportunity_detail_func' );
+add_action('wp_enqueue_scripts', 'ajax_enquire_init');
+add_action( 'wp_ajax_volplusajaxenquire', 'ajax_enquire' );
+add_action( 'wp_ajax_nopriv_volplusajaxenquire', 'ajax_enquire' );
 
+add_shortcode( 'volplus-opportunity-detail', 'volplus_opportunity_detail_func' );
 ?>

@@ -3,7 +3,7 @@
  * Plugin Name:   WP Volunteer Plus
  * Plugin URI:    https://maddox.co.uk/volunteer-plus
  * Description:   A selection of tools for interacting with the Volunteer Plus Database
- * Version:       0.4.17
+ * Version:       1.0.0
  * Author:        Simon Maddox
  * Author URI:    https://maddox.co.uk
  */
@@ -93,12 +93,12 @@ register_activation_hook(__FILE__, 'volplus_activate');
 
 function volplus_activate() {
 // create necessary pages if they do not exist
-	if( get_page_by_path('volunteer-registration') === null ) { // page doesn't exist
+	if( get_page_by_path('volunteer-details') === null ) { // page doesn't exist
 		wp_insert_post(array(
 			'post_type' => 'page',
-			'post_title' => 'Volunteer Registration',
-			'post_content' => '[volplus-volunteer-register]',
-			'post_name' => 'volunteer-registration',
+			'post_title' => 'Volunteer Details',
+			'post_content' => '[volplus-volunteer-register wordpress-account=0]',
+			'post_name' => 'volunteer-details',
 			'post_status' => 'publish',
 			'post_author' => 1,
     ));

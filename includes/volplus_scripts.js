@@ -34,11 +34,14 @@ jQuery(document).ready(function($) {
 		document.cookie = 'volplus_user_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
 		document.cookie = 'volplus_user_first_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
 		document.cookie = 'volplus_user_last_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-		document.getElementById("not_logged_in").style.display = "inherit";
-		document.getElementById("login").style.display = "inherit";
-		document.getElementById("logged_in").style.display = "none";
-		document.getElementById("welcome").style.display = "none";
-		$('form#login p.status').text('');
+		document.cookie = 'volplus_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+		document.location.href = '/';
+//		document.getElementById("not_logged_in").style.display = "inherit";
+//		document.getElementById("login").style.display = "inherit";
+//		document.getElementById("logged_in").style.display = "none";
+//		document.getElementById("welcome").style.display = "none";
+//		$('form#login p.status').text('');
+//		document.getElementById("vol_main_heading").innerHTML = "<h2>Create your account</h2>";
 	})
 
 //		Perform AJAX login on form submit
@@ -55,20 +58,78 @@ jQuery(document).ready(function($) {
 				'password': $('form#login #password').val(), 
 				'security': $('form#login #security').val() },
 			success: function(data){
-// console.log("success data:", data);
 				$('form#login p.status').text(data.message);
 				if (data.loggedin == true){
-//					document.location.href = ajax_login_object.redirecturl;
+					var voldetails = JSON.parse(data.response.body);
+//console.log("success data:", voldetails);
 					document.getElementById("not_logged_in").style.display = "none";
 					document.getElementById("login").style.display = "none";
 					if (!data.first_name) data.first_name = 'Private';
 					if (!data.last_name) data.last_name = 'Volunteer';
 					$('div#welcome_name').text(data.first_name + " " + data.last_name);
 					document.getElementById("welcome").style.display = "inherit";
-					
+					if(location.pathname == '/volunteer-details/'){
+						document.getElementById("vol_main_heading").innerHTML = "<h2>Update your details</h2>";
+						document.getElementById("title").value = voldetails.title;
+						document.getElementById("first_name").value = decodeHtml(voldetails.first_name);
+						document.getElementById("last_name").value = decodeHtml(voldetails.last_name);
+						document.getElementById("email_address").value = voldetails.email_address;
+						document.getElementById("address_line_1").value = decodeHtml(voldetails.address_line_1);
+						document.getElementById("address_line_2").value = decodeHtml(voldetails.address_line_2);
+						document.getElementById("address_line_3").value = decodeHtml(voldetails.address_line_3);
+						document.getElementById("town").value = decodeHtml(voldetails.town);
+						document.getElementById("county").value = decodeHtml(voldetails.county);
+						document.getElementById("postcode").value = voldetails.postcode;
+						document.getElementById("telephone").value = voldetails.telephone;
+						document.getElementById("mobile").value = voldetails.mobile;
+						document.getElementById("availability_details").value = decodeHtml(voldetails.availability_details);
+						document.getElementById("volunteering_experience").value = decodeHtml(voldetails.volunteering_experience);
+						document.getElementById("volunteering_reason_info").value = decodeHtml(voldetails.volunteering_reason_info);
+						document.getElementById("date_birth").value = voldetails.date_birth;
+						document.getElementById("gender").value = voldetails.gender;
+						document.getElementById("employment").value = voldetails.employment;
+						document.getElementById("ethnicity").value = voldetails.ethnicity;
+						document.getElementById("how_heard").value = voldetails.how_heard;
+						document.getElementById("date_birth_prefer_not_say").value = voldetails.date_birth_prefer_not_say;
+						document.getElementById("disability").value = voldetails.disability;
+						if (voldetails.disability == 1) {
+			 				document.getElementById("display-details-label").style.display = "block";}
+			 			else document.getElementById("display-details-label").style.display = "none";
+	
+						
+						for(var i=0, len=voldetails.activities.length; i<len; i++){
+							document.getElementById("activity-"+(voldetails.activities[i])).checked = true;}
+						for(var i=0, len=voldetails.interests.length; i<len; i++){
+							document.getElementById("interest-"+(voldetails.interests[i])).checked = true;}
+						for(var i=0, len=voldetails.disabilities.length; i<len; i++){
+							document.getElementById("disabilities-"+(voldetails.disabilities[i])).checked = true;}
+						for(var i=0, len=voldetails.reasons.length; i<len; i++){
+							document.getElementById("reason-"+(voldetails.reasons[i])).checked = true;}
+						
+						var periods = [
+							'mon_mor','mon_aft','mon_eve',
+							'tue_mor','tue_aft','tue_eve',
+							'wed_mor','wed_aft','wed_eve',
+							'thu_mor','thu_aft','thu_eve',
+							'fri_mor','fri_aft','fri_eve',
+							'sat_mor','sat_aft','sat_eve',
+							'sun_mor','sun_aft','sun_eve'
+						];
+						for(var i=0, len=voldetails.availability.length; i<len; i++){
+							document.getElementById("availability-"+(periods.indexOf(voldetails.availability[i]))).checked = true;}
+					}
 				}
 			}
 		});
 		e.preventDefault();
 	});
 });
+
+function decodeHtml(html) {
+    var txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+}
+
+
+// enquiry

@@ -1,12 +1,76 @@
 <?php
 
+// get volunteer details given ID - WITH CORRECTIONS
+function get_volunteer_details($id) {
+	$endpoint = 'volunteers/' . $id;
+	$response = wp_remote_get(API_URL . $endpoint, array(
+		'timeout' => 45,
+		'redirection' => 5,
+		'httpversion' => '1.0',
+		'blocking' => true,
+		'headers' => array('Authorization' => 'Bearer '.API_KEY),
+		'body' => null,
+		'cookies' => array()
+		)
+	);
+// ******************** FIX /volunteers GET to match PUSH ************************
+
+	$bodyobj = json_decode($response['body']);
+//var_dump_safe($bodyobj);		
+
+	$bodyobj->telephone = $bodyobj->telephone_number;unset($bodyobj->telephone_number);	//different name - API documentation error
+	$bodyobj->mobile = $bodyobj->mobile_number;unset($bodyobj->mobile_number);				//different name - API documentation error
+
+	$temparray = [];
+	foreach($bodyobj->interests as $key=>$data) array_push($temparray, $data->id);
+	$bodyobj->interests = $temparray;
+
+	$temparray = [];
+	foreach($bodyobj->activities as $key=>$data) array_push($temparray, $data->id);
+	$bodyobj->activities = $temparray;
+
+	$temparray = [];
+	foreach($bodyobj->why_volunteer as $key=>$data) array_push($temparray, $data->id);
+	$bodyobj->reasons = $temparray; unset($bodyobj->why_volunteer);	//different name, but as documented
+
+	if(isset($bodyobj->disability_type)){
+		$temparray = [];
+		foreach($bodyobj->disability_type as $key=>$data) array_push($temparray, $data->id);
+		$bodyobj->disabilities = $temparray; unset($bodyobj->disability_type); //different name, but as documented
+	}
+
+	$temparray = [];
+//	foreach($bodyobj->availability as $key=>$data) if($data) $temparray += array($key=>1);
+	foreach($bodyobj->availability as $key=>$data) if($data) array_push($temparray, $key);
+	$bodyobj->availability = $temparray;
+
+
+	$bodyobj->gender = isset($bodyobj->gender) ? $bodyobj->gender->id : null;
+	$bodyobj->ethnicity = isset($bodyobj->ethnicity) ? $bodyobj->ethnicity->id : null;
+	$bodyobj->how_heard = isset($bodyobj->how_heard) ? $bodyobj->how_heard->id : null;
+	$bodyobj->disability = isset($bodyobj->disability) ? $bodyobj->disability->id : null;
+	$bodyobj->employment = isset($bodyobj->employment) ? $bodyobj->employment->id : null;
+	$bodyobj->volunteering_reason_info = isset($bodyobj->why_volunteer_info) ? $bodyobj->why_volunteer_info : null;
+	$bodyobj->volunteering_experience = isset($bodyobj->experience) ? $bodyobj->experience : null;	
+
+$response['body'] = json_encode($bodyobj);
+	
+// *************************************************************************
+
+//var_dump_safe($response);		
+
+	return $response;
+}
+
+
 
 // check logged in cookie & reset the countdown if already set
 function is_volplus_user_logged_in(){
+	if(isset($_COOKIE['volplus_user_first_name'])) setcookie('volplus_user_first_name', $_COOKIE['volplus_user_first_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+	if(isset($_COOKIE['volplus_user_last_name'])) setcookie('volplus_user_last_name', $_COOKIE['volplus_user_last_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+	if(isset($_COOKIE['volplus_user'])) setcookie('volplus_user', $_COOKIE['volplus_user'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 	if(isset($_COOKIE['volplus_user_id'])){
 		setcookie('volplus_user_id', $_COOKIE['volplus_user_id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-		setcookie('volplus_user_first_name', $_COOKIE['volplus_user_first_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-		setcookie('volplus_user_last_name', $_COOKIE['volplus_user_last_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 		return true;
 	} else {
 		return false;
@@ -88,7 +152,7 @@ function disability_type($selected){
 	echo '<div class="colcontainer"  id="disability-type">';             
 	foreach($GLOBALS['volunteer_fields']['disabilities'] as $disability) {
 		if(in_array($disability['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='disabilities[]' value='".$disability['id']."' checked";
-		else echo"<label class='colitem'><input type='checkbox' name='disabilities[]' value='".$disability['id']."'";
+		else echo"<label class='colitem'><input type='checkbox' id='disabilities-".$disability['id']."' name='disabilities[]' value='".$disability['id']."'";
 		echo ">".$disability['value']."</label><br />";
 	}
 	echo '</div>';
@@ -102,7 +166,7 @@ function gender($selected) {
 		['id'=>3, 'value'=> 'Prefer not to say'],
 //		['id'=>4, 'value'=> 'Not known'] // option not shown for web form
 	);
-	echo "<select name='gender' id='gender'>";
+	echo "<select id='gender' name='gender' id='gender' required>";
 		echo "<option value='' ";
 		if($selected=="") echo 'selected'; // nothing selected
 		echo ">Select</option>";
@@ -122,7 +186,7 @@ function disability($selected) {
 		['id'=>3, 'value'=> 'Prefer not to say'],
 //		['id'=>4, 'value'=> 'Not known'] // option not shown for web form
 	);
-	echo "<select name='disability' id='disability-type'>";
+	echo "<select id='disability' name='disability' id='disability-type' required>";
 		echo "<option value='' ";
 		if($selected=="") echo 'selected'; // nothing selected
 		echo ">Select</option>";
@@ -136,7 +200,7 @@ function disability($selected) {
 
 // display how_heard options
 function how_heard($selected) {
-	echo "<select name='how_heard'>";
+	echo "<select id='how_heard' name='how_heard'>";
 		echo "<option value='' ";
 		if($selected=="") echo 'selected';
 		echo ">Select</option>";
@@ -150,7 +214,7 @@ function how_heard($selected) {
 
 // display ethnicity options
 function ethnicity($selected) {
-	echo "<select name='ethnicity'>";
+	echo "<select id='ethnicity' name='ethnicity' required>";
 		echo "<option value='' ";
 		if($selected=="") echo 'selected';
 		echo ">Select</option>";
@@ -163,8 +227,8 @@ function ethnicity($selected) {
 }
 
 // display employment statuses
-function employment_status($selected) {
-	echo "<select name='employment'>";
+function employment($selected) {
+	echo "<select id='employment' name='employment' required>";
 		echo "<option value='' ";
 		if($selected=="") echo 'selected';
 		echo ">Select</option>";
@@ -182,7 +246,7 @@ function display_reasons($selected) {
 	echo '<div class="colcontainer">';             
 	foreach($GLOBALS['volunteer_fields']['volunteering_reasons'] as $reason) {
 		if(in_array($reason['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='reasons[]' value='".$reason['id']."' checked";
-		else echo"<label class='colitem'><input type='checkbox' name='reasons[]' value='".$reason['id']."'";
+		else echo"<label class='colitem'><input type='checkbox' id='reason-".$reason['id']."' name='reasons[]' value='".$reason['id']."'";
 		echo ">".$reason['value']."</label><br />";
 	}
 	echo '</div>';
@@ -194,7 +258,7 @@ function display_interests($selected) {
 	echo '<div class="colcontainer">';             
 	foreach($GLOBALS['volunteer_interests'] as $interest) {
 		if(in_array($interest['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='interests[]' value='".$interest['id']."' checked";
-		else echo"<label class='colitem'><input type='checkbox' name='interests[]' value='".$interest['id']."'";
+		else echo"<label class='colitem'><input type='checkbox' id='interest-".$interest['id']."' name='interests[]' value='".$interest['id']."'";
 		echo " onclick='return LimitInterests()'>".$interest['interest']."</label><br />";
 	}
 	echo '</div>';
@@ -205,7 +269,7 @@ function display_activities($selected){
 	echo '<div class="colcontainer">';             
 	foreach($GLOBALS['volunteer_activities'] as $activity) {
 		if(in_array($activity['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='activities[]' value='".$activity['id']."' checked";
-		else echo"<label class='colitem'><input type='checkbox' name='activities[]' value='".$activity['id']."'";
+		else echo"<label class='colitem'><input type='checkbox' id='activity-".$activity['id']."' name='activities[]' value='".$activity['id']."'";
 		echo " onclick='return LimitActivities()'>".$activity['activity']."</label><br />";
 	}
 	echo '</div>';
@@ -254,7 +318,7 @@ function display_availability_table($selected){
 			$period = $periods[$index];
 // var_dump_safe($period);
 // var_dump_safe($selected);
-			echo '<td><input class="volplus-checkbox" type="checkbox" name="'.$period.'"';
+			echo '<td><input type="checkbox" id="availability-'.$index.'" class="volplus-checkbox" name="'.$period.'"';
 			if(array_key_exists($period, $selected)) echo ' checked';
 			echo '/></td>';
 			$index++;
@@ -388,3 +452,155 @@ function geocode($address){
         return false;
     }
 }
+
+// AJAX FUNCTIONS***********************************************************
+
+// AJAX LOGIN ********************************
+function ajax_login_init(){
+    wp_register_script('volplus_scripts', VOLPLUS_URL . 'includes/volplus_scripts.js', array('jquery') ); 
+    wp_enqueue_script('volplus_scripts');
+    wp_localize_script( 'volplus_scripts', 'ajax_login_object', array( 
+        'ajaxurl' => admin_url( 'admin-ajax.php' ),
+        'redirecturl' => home_url(),
+        'loadingmessage' => __('Checking your details, please wait...')
+    ));
+    // Enable the user with no privileges to run ajax_login() in AJAX
+}
+
+function ajax_login(){
+	// First check the nonce, if it fails the function will break
+	check_ajax_referer( 'ajax-login-nonce', 'security' );
+	// Nonce is checked, get the POST data and sign user on
+	$volpluslogin = array(
+		'email_address' => $_POST['email_address'],
+		'password' => $_POST['password'],
+		'type' => 1 // 1=volunteer, 2=organisation
+	);
+	$response = wp_remote_post(API_URL . 'login', array(
+		'timeout' => 45,
+		'redirection' => 5,
+		'httpversion' => '1.0',
+		'blocking' => true,
+		'headers' => array('Authorization' => 'Bearer '.API_KEY),
+		'body' => (array) $volpluslogin,
+		'cookies' => array()
+		)
+	);
+			
+	$responsebody = (array) json_decode($response['body']);
+	if ( $response['response']['code'] !== 200) {
+		$error_message = $response['response']['message'];
+//		echo "Something went wrong: <em>".$response['response']['message']." (Code ".$response['response']['code'].")</em>";
+		$body = "";
+		foreach($responsebody as $key=>$data){
+//			echo "<br/>".$key.": ";
+			foreach($data as $data2){
+				if($data2=="The password field is incorrect." || $data2=="The email address does not exist.")$data2="Login error. Please check your login details";
+				$body .= $data2;
+			}
+		}
+		echo json_encode(array('loggedin'=>false, 'message'=>__($body)));
+		setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+		setcookie('volplus_user_first_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+		setcookie('volplus_user_last_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+		setcookie('volplus_user',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+	} else {
+// get user details
+//		echo json_encode(array('loggedin'=>true, 'message'=>$body, 'volplus_id'=>$responsebody['id']));die();
+//		setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+//		$response2 = get_volunteer_details($responsebody['id']);
+		$response2 = get_volunteer_details($responsebody['id']);
+		$volunteer = json_decode($response2['body']);
+		if ( $response2['response']['code'] !== 200) {
+			$error_message = $response2->response->message;
+//			echo "Something went wrong: <em>".$response['response']['message']." (Code ".$response['response']['code'].")</em>";
+			$body = "";
+			foreach($volunteer as $key=>$data){
+//				echo "<br/>".$key.": ";
+				foreach($data as $data2){
+					$body .= $data2;
+				}
+			}
+			echo json_encode(array('loggedin'=>false, 'message'=>__($body)));
+			setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user_first_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user_last_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+		}else{
+	 		setcookie('volplus_user_id', $responsebody['id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user_first_name', $volunteer->first_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user_last_name', $volunteer->last_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user', json_encode($volunteer), time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+
+			echo json_encode(array(
+				'loggedin'=>true,
+				'message'=>__('Login successful'),
+				'response'=> $response2,
+				'first_name'=> $volunteer->first_name,
+				'last_name'=> $volunteer->last_name,
+				'volplus_id'=> $responsebody['id']
+			));
+		}
+	}
+	die();
+}
+
+
+// AJAX ENQUIRE ********************************
+function ajax_enquire_init(){
+    wp_register_script('volplus_scripts', VOLPLUS_URL . 'includes/volplus_scripts.js', array('jquery') ); 
+    wp_enqueue_script('volplus_scripts');
+    wp_localize_script( 'volplus_scripts', 'ajax_enquire_object', array( 
+        'ajaxurl' => admin_url( 'admin-ajax.php' ),
+        'redirecturl' => home_url(),
+        'loadingmessage' => __('Registering your interest, please wait...')
+    ));
+    // Enable the user with no privileges to run ajax_login() in AJAX
+}
+
+function ajax_enquire(){
+	// First check the nonce, if it fails the function will break
+//	check_ajax_referer( 'ajax-enquire-nonce', 'security' );
+	// Nonce is checked, get the POST data and sign user on
+	$volplusenquiry = array(
+		'volunteer' => $_COOKIE['volplus_user_id'],
+		'opportunity' => $_COOKIE['volplus_opp_id'],
+		'notes'=> $_POST['interested_notes']
+	);
+
+	$response = wp_remote_post(API_URL . 'enquiries', array(
+		'timeout' => 45,
+		'redirection' => 5,
+		'httpversion' => '1.0',
+		'blocking' => true,
+		'headers' => array('Authorization' => 'Bearer '.API_KEY),
+		'body' => (array) $volplusenquiry,
+		'cookies' => array()
+		)
+	);
+			
+	$responsebody = (array) json_decode($response['body']);
+	if ( $response['response']['code'] !== 201) {
+		$error_message = $response['response']['message'];
+		$body = "";
+		foreach($responsebody as $key=>$data){
+			foreach($data as $data2){
+				$body .= $data2;
+			}
+		}
+		echo json_encode(array(
+			'message'=>__($body),
+			'enquiry_id'=> null,
+//			'debug'=>$volplusenquiry
+		));
+	} else {
+		echo json_encode(array(
+			'message'=>__('Your interest has been registered'),
+			'enquiry_id'=> $responsebody['id'],
+//			'debug'=>$response
+		));
+	}
+	die();
+}
+
+

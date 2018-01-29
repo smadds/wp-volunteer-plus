@@ -26,6 +26,8 @@ $intro_not_logged_in .= "&amp; password on this page.</p>";
 $intro_not_logged_in .= "<p>Finally, if you just want to discuss this, use the 'Contact Us' button and let us know how we can contact you.</p>";
 $intro_logged_in = "<p><strong>You are already logged in, so go ahead and register your interest.</strong></p>";
 $intro_logged_in .= "<p>We'll pass your details onto the organisation offering the position, so expect to hear back from them.</p>";
+$enquiry_success_msg = "<h3>Congratulations!</h3><p>Your interest in this opportunity has been registered.</p>";
+$enquiry_success_msg .= "<p>We will now pass your details on to the organisation offering the opportunity."; 
 ?>  
 <div class="wrap">
 <h2>Volunteer Plus Settings</h2>
@@ -104,6 +106,11 @@ $intro_logged_in .= "<p>We'll pass your details onto the organisation offering t
 			<td><?php wp_editor(get_option('volplus_responseloggedinintro', $intro_logged_in), 'volplus_responseloggedinintro', $args)?></td>
         </tr>
 
+        <tr valign="top">
+        <th scope="row">Enquiry success message</th>
+			<td><?php wp_editor(get_option('volplus_enquirysuccessmsg', $enquiry_success_msg), 'volplus_enquirysuccessmsg', $args)?></td>
+        </tr>
+
        <tr valign="top">
         <th scope="row">Hide bracketed text in Opportunity titles & Organisation names</th>
         <td><input type="checkbox" name="volplus_hidebrackets" <?php if(get_option('volplus_hidebrackets') == 'on') echo 'checked'; ?> /></td>
@@ -152,6 +159,7 @@ function volplus_plugin_settings() {
 	register_setting( 'volplus-plugin-settings-group', 'volplus_responseformcontent' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_responsenotloggedinintro' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_responseloggedinintro' );	
+	register_setting( 'volplus-plugin-settings-group', 'volplus_enquirysuccessmsg' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_hidebrackets' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_voltimeout' );	
 }

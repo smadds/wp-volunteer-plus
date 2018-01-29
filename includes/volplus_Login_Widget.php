@@ -144,98 +144,13 @@ class volplus_Login_Widget extends WP_Widget {
 		return $instance;
 	}
 }
-
-function ajax_login_init(){
-    wp_register_script('volplus_scripts', VOLPLUS_URL . 'includes/volplus_scripts.js', array('jquery') ); 
-    wp_enqueue_script('volplus_scripts');
-    wp_localize_script( 'volplus_scripts', 'ajax_login_object', array( 
-        'ajaxurl' => admin_url( 'admin-ajax.php' ),
-        'redirecturl' => home_url(),
-        'loadingmessage' => __('Checking your details, please wait...')
-    ));
-    // Enable the user with no privileges to run ajax_login() in AJAX
-}
-
-    add_action('wp_enqueue_scripts', 'ajax_login_init');
-    add_action( 'wp_ajax_volplusajaxlogin', 'ajax_login' );
-    add_action( 'wp_ajax_nopriv_volplusajaxlogin', 'ajax_login' );
-
-
-function ajax_login(){
-	// First check the nonce, if it fails the function will break
-	check_ajax_referer( 'ajax-login-nonce', 'security' );
-	// Nonce is checked, get the POST data and sign user on
-	$volpluslogin = array(
-		'email_address' => $_POST['email_address'],
-		'password' => $_POST['password'],
-		'type' => 1 // 1=volunteer, 2=organisation
-	);
-	$response = wp_remote_post(API_URL . 'login', array(
-		'timeout' => 45,
-		'redirection' => 5,
-		'httpversion' => '1.0',
-		'blocking' => true,
-		'headers' => array('Authorization' => 'Bearer '.API_KEY),
-		'body' => (array) $volpluslogin,
-		'cookies' => array()
-		)
-	);
-			
-	$responsebody = (array) json_decode($response['body']);
-	if ( $response['response']['code'] !== 200) {
-		$error_message = $response['response']['message'];
-//		echo "Something went wrong: <em>".$response['response']['message']." (Code ".$response['response']['code'].")</em>";
-		$body = "";
-		foreach($responsebody as $key=>$data){
-//			echo "<br/>".$key.": ";
-			foreach($data as $data2){
-				$body .= $data2;
-			}
-		}
-		echo json_encode(array('loggedin'=>false, 'message'=>__($body)));
-		setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
-		setcookie('volplus_user_first_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
-		setcookie('volplus_user_last_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
-	} else {
-// get user details
-		$endpoint = API_URL . 'volunteers/'.(int) $responsebody['id'];
-		$response = wp_remote_get( $endpoint, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
-		$volunteer = json_decode($response['body']);
-		if ( $response['response']['code'] !== 200) {
-			$error_message = $response['response']['message'];
-//			echo "Something went wrong: <em>".$response['response']['message']." (Code ".$response['response']['code'].")</em>";
-			$body = "";
-			foreach($volunteer as $key=>$data){
-//				echo "<br/>".$key.": ";
-				foreach($data as $data2){
-					$body .= $data2;
-				}
-			}
-			echo json_encode(array('loggedin'=>false, 'message'=>__($body)));
-			setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
-			setcookie('volplus_user_first_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
-			setcookie('volplus_user_last_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
-		}else{
-	 		setcookie('volplus_user_id', $responsebody['id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-			setcookie('volplus_user_first_name', $volunteer->first_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-			setcookie('volplus_user_last_name', $volunteer->last_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-
-			echo json_encode(array(
-				'loggedin'=>true,
-				'message'=>__('Login successful'),
-				'response'=> $response,
-//				'volunteer'=> $volunteer,
-				'first_name'=> $volunteer->first_name,
-				'last_name'=> $volunteer->last_name,
-				'volplus_id'=> $responsebody->id
-			));
-		}
-	}
-	die();
-}
 // Register the widget.
 function register_volplus_Login_Widget() { 
   register_widget( 'volplus_Login_Widget' );
 }
+add_action('wp_enqueue_scripts', 'ajax_login_init');
+add_action( 'wp_ajax_volplusajaxlogin', 'ajax_login' );
+add_action( 'wp_ajax_nopriv_volplusajaxlogin', 'ajax_login' );
 add_action( 'widgets_init', 'register_volplus_Login_Widget' );
+
 ?>
