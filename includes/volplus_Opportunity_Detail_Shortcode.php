@@ -5,7 +5,7 @@ require_once VOLPLUS_PATH . 'includes/volplus_Functions.php';
 function volplus_opportunity_detail_func($atts) {
 	parse_str($_SERVER['QUERY_STRING'],$querystring);
 	$opp = $querystring['opp-id'];
-	setcookie('volplus_opp_id', $opp, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+	setcookie('volplus_opp_id', $opp, 0, COOKIEPATH, COOKIE_DOMAIN );
 	$opportunity = wp_remote_get(API_URL . 'opportunities/'.$opp, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
 	$response_code = wp_remote_retrieve_response_code($opportunity);
 
@@ -24,7 +24,7 @@ function volplus_opportunity_detail_func($atts) {
 
 	<h1><?php echo remove_brackets($opportunity['opportunity']); ?></h1>
 	
-<button type="button" class="volplus_respondButton button"><i class="fa fa-thumbs-up fa-4x"></i>I'm Interested</button>
+<button type="button" id="volplus_respondButton" class="volplus_respondButton button"><i class="fa fa-thumbs-up fa-4x"></i>I'm Interested</button>
 
 <div id="volplus_response_notloggedin"  hidden='hidden'>
 	<div id='responseintro'>
@@ -322,9 +322,22 @@ function volplus_opportunity_detail_func($atts) {
 	<?php wp_nonce_field( 'ajax-enquiry-nonce', 'security' ); ?>
 </div>	
 
-<?php }
+	<script type="text/javascript" >
+		jQuery(document).ready(function($) {
+
+			if($.cookie("volplus_iminterested")) {
+				$.removeCookie("volplus_iminterested", {path:'/'});
+				$("button#volplus_respondButton").click();
+			};
+
+		});
+
+	</script>
 
 
+<?php }?>
+
+<?php
 // Register jquery dependency and the shortcode.
 
 //wp_enqueue_script('volplus-opportunity-detail', VOLPLUS_PATH .'/includes/volplus_Opportunity_Detail_Shortcode.php', array('jquery'), null, true);

@@ -208,7 +208,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 					setcookie('volplus_user_id', $volunteer->volplus_id, time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 					setcookie('volplus_user_first_name', $volunteer->first_name, time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 					setcookie('volplus_user_last_name', $volunteer->last_name, time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );				
-					echo '<script type="text/javascript">showwelcome()</script>';
+//					echo '<script type="text/javascript">jQuery("#welcomeNewUser").style.display = "inherit";</script>';
 //					echo '<script>location.assign("/opportunities/?opp-id=' . $volunteer->volplus_id . '")</script>';
 					
 //				var_dump_safe( $responsebody );			
@@ -268,7 +268,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 	
 	if(isset($signUpError)) echo '<div>'.$signUpError.'</div>'?>
 
-	<form action="" method="post" name="user_registration">
+	<form id="user_registration" action="" method="post" name="user_registration">
 
 		<p><label class="volplus-col-2">Title (optional)  
 			<select id="title" name="title" class="text">
@@ -291,7 +291,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 			<input type="email" id="email_address" name="email_address"  placeholder="Email address" required value="<?php echo $volunteer->email_address?>" /></label>
 		<div id="passwords">
 			<p><label class="volplus-col-6">Password (8 characters or more) <span class="error">*</span>
-				<input type="password" name="password" placeholder="Password" required value="<?php echo $volunteer->password?>" /></label>
+				<input type="password" id="password" name="password" placeholder="Password" required value="<?php echo $volunteer->password?>" /></label>
 			<label class="volplus-col-6">Password <span class="error">*</span>
 				<input type="password" name="password_confirmation" placeholder="Repeat your password" required value="<?php echo $volunteer->password_confirmation?>" /></label></p>
 		</div>
@@ -349,15 +349,15 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 			<?php disability_type($volunteer->disabilities);?></label>
 		<div class="volplus-col-12">
 			<?php if(get_option('volplus_compliancepage')) {?>
-				<label class="volplus-col-9">I accept the <a href="/<?php echo get_post_field( 'post_name', get_option('volplus_compliancepage'))?>" target=_blank>Terms & Conditions</a>
+				<label class="volplus-col-8">I accept the <a href="/<?php echo get_post_field( 'post_name', get_option('volplus_compliancepage'))?>" target=_blank>Terms & Conditions</a>
 					<input type="checkbox" name="accept_terms" required></label>
 			<?php }?>
 			<input id="user_registration" class = "button" type="submit" name="user_registration" value="<?php echo $buttontext ?>" style="font-size:1.2em">
 			<p id='compliancemsg'><?php echo stripslashes(get_option('volplus_enquirycompliancemsg'));?></p>
 		</div>
 	</form>
- 	<div id="welcomeNewUser" style="display:none;"><?php
-		echo stripslashes(get_option('volplus_welcomenewusermsg'))?>
+ 	<div id="welcomeNewUser" hidden="hidden"><?php
+		echo stripslashes(html_entity_decode(get_option('volplus_welcomenewusermsg')))?>
 	</div>
 <!--		</div>-->
 	<?php// }; ?>
@@ -376,11 +376,21 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 			}
 		}
 
+
+
 		jQuery(document).ready(function($) {
-			function showwelcome(){
-				$( "#welcomeNewUser" ).dialog( "open" );
-			}
-		
+			
+			$("#user_registration").submit(function(e){
+				$.cookie("volplus_newuser", true,  { path: '/' });
+			});
+			
+			$(document).ready(function () {
+				if($.cookie("volplus_newuser")){
+					$.removeCookie("volplus_newuser", {path:'/'});
+					$("#welcomeNewUser").dialog("open");
+				}
+			});
+
 			$( "#welcomeNewUser" ).dialog({
 				dialogClass: 'wp-dialog',
 				modal: true,
@@ -391,15 +401,25 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 				width: 400,
 				buttons: [
 		 			{
+						text: 'Take me back',
+						class: 'button',
+						click: function() {
+							$.cookie("volplus_iminterested", true,  { path: '/' });
+							$(this).dialog('close');
+							window.location.assign("opportunities/?opp-id=" + $.cookie('volplus_opp_id'));
+						}
+					},
+		 			{
 						text: 'Close',
 						class: 'button',
 						click: function() {
 							$(this).dialog('close');
-							window.location.assign("opportunities/?opp-id=" + $.cookie('volplus_opp_id'));
+							window.location.reload();
 						}
 					}
 				]
 			});
+
 		});
 
 	

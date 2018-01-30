@@ -604,4 +604,94 @@ function ajax_enquire(){
 	die();
 }
 
+// AJAX REGISTER USER **************************
+function ajax_userreg_init(){
+    wp_register_script('volplus_scripts', VOLPLUS_URL . 'includes/volplus_scripts.js', array('jquery') ); 
+    wp_enqueue_script('volplus_scripts');
+    wp_localize_script( 'volplus_scripts', 'ajax_userrreg_object', array( 
+        'ajaxurl' => admin_url( 'admin-ajax.php' ),
+        'redirecturl' => home_url(),
+        'loadingmessage' => __('Submitting data, please wait...')
+    ));
+}
+
+function ajax_addvolunteer(){
+	// First check the nonce, if it fails the function will break
+	check_ajax_referer( 'ajax-addvolunteer-nonce', 'security' );
+	// Nonce is checked, get the POST data and sign user on
+	$volplusaddvolunteer = array(
+		'email_address' => $_POST['email_address'],
+		'password' => $_POST['password'],
+		'type' => 1 // 1=volunteer, 2=organisation
+	);
+	$response = wp_remote_post(API_URL . 'volunteers', array(
+		'timeout' => 45,
+		'redirection' => 5,
+		'httpversion' => '1.0',
+		'blocking' => true,
+		'headers' => array('Authorization' => 'Bearer '.API_KEY),
+		'body' => (array) $volpluslogin,
+		'cookies' => array()
+		)
+	);
+			
+	$responsebody = (array) json_decode($response['body']);
+	if ( $response['response']['code'] !== 200) {
+		$error_message = $response['response']['message'];
+//		echo "Something went wrong: <em>".$response['response']['message']." (Code ".$response['response']['code'].")</em>";
+		$body = "";
+		foreach($responsebody as $key=>$data){
+//			echo "<br/>".$key.": ";
+			foreach($data as $data2){
+				if($data2=="The password field is incorrect." || $data2=="The email address does not exist.")$data2="Login error. Please check your login details";
+				$body .= $data2;
+			}
+		}
+		echo json_encode(array('loggedin'=>false, 'message'=>__($body)));
+		setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+		setcookie('volplus_user_first_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+		setcookie('volplus_user_last_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+		setcookie('volplus_user',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+	} else {
+// get user details
+//		echo json_encode(array('loggedin'=>true, 'message'=>$body, 'volplus_id'=>$responsebody['id']));die();
+//		setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+//		$response2 = get_volunteer_details($responsebody['id']);
+		$response2 = get_volunteer_details($responsebody['id']);
+		$volunteer = json_decode($response2['body']);
+		if ( $response2['response']['code'] !== 200) {
+			$error_message = $response2->response->message;
+//			echo "Something went wrong: <em>".$response['response']['message']." (Code ".$response['response']['code'].")</em>";
+			$body = "";
+			foreach($volunteer as $key=>$data){
+//				echo "<br/>".$key.": ";
+				foreach($data as $data2){
+					$body .= $data2;
+				}
+			}
+			echo json_encode(array('loggedin'=>false, 'message'=>__($body)));
+			setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user_first_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user_last_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+		}else{
+	 		setcookie('volplus_user_id', $responsebody['id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user_first_name', $volunteer->first_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user_last_name', $volunteer->last_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user', json_encode($volunteer), time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+
+			echo json_encode(array(
+				'loggedin'=>true,
+				'message'=>__('Login successful'),
+				'response'=> $response2,
+				'first_name'=> $volunteer->first_name,
+				'last_name'=> $volunteer->last_name,
+				'volplus_id'=> $responsebody['id']
+			));
+		}
+	}
+	die();
+}
+
+
 

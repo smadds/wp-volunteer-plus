@@ -126,7 +126,7 @@ $welcome_new_user_msg .= "<p>Do you want to register your interest in this volun
         </tr>
 
        <tr valign="top">
-        <th scope="row">Registration compliance message (bottom of registration form)</th>
+        <th scope="row">New user welcome message</th>
 			<td><?php wp_editor(get_option('volplus_welcomenewusermsg', $welcome_new_user_msg), 'volplus_welcomenewusermsg', $args)?></td>
         </tr>
 

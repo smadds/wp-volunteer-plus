@@ -61,7 +61,7 @@ jQuery(document).ready(function($) {
 				$('form#login p.status').text(data.message);
 				if (data.loggedin == true){
 					var voldetails = JSON.parse(data.response.body);
-console.log("success data:", voldetails);
+//console.log("success data:", voldetails);
 					document.getElementById("not_logged_in").style.display = "none";
 					document.getElementById("login").style.display = "none";
 					if (!data.first_name) data.first_name = 'Private';
