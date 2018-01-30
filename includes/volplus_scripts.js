@@ -61,13 +61,14 @@ jQuery(document).ready(function($) {
 				$('form#login p.status').text(data.message);
 				if (data.loggedin == true){
 					var voldetails = JSON.parse(data.response.body);
-//console.log("success data:", voldetails);
+console.log("success data:", voldetails);
 					document.getElementById("not_logged_in").style.display = "none";
 					document.getElementById("login").style.display = "none";
 					if (!data.first_name) data.first_name = 'Private';
 					if (!data.last_name) data.last_name = 'Volunteer';
 					$('div#welcome_name').text(data.first_name + " " + data.last_name);
 					document.getElementById("welcome").style.display = "inherit";
+					if (document.getElementById("user_registration")) document.getElementById("user_registration").value = "Update";
 					if(location.pathname == '/volunteer-details/'){
 						document.getElementById("vol_main_heading").innerHTML = "<h2>Update your details</h2>";
 						document.getElementById("title").value = voldetails.title;
@@ -115,14 +116,129 @@ jQuery(document).ready(function($) {
 							'sat_mor','sat_aft','sat_eve',
 							'sun_mor','sun_aft','sun_eve'
 						];
-						for(var i=0, len=voldetails.availability.length; i<len; i++){
-							document.getElementById("availability-"+(periods.indexOf(voldetails.availability[i]))).checked = true;}
+						for(var i=0, len=periods.length; i<len; i++){
+							document.getElementById("availability-"+ i).checked = (voldetails.availability.hasOwnProperty(periods[i]))}
 					}
 				}
 			}
 		});
 		e.preventDefault();
 	});
+
+	$( "#volplus_response_notloggedin" ).dialog({
+		dialogClass: 'wp-dialog',
+		modal: true,
+		autoOpen: false,
+		show: {effect: "fade", duration: 500},
+		closeOnEscape: true,
+		title: "I'm Interested...",
+		width: 400,
+		buttons: [
+			{
+				text: 'Register',
+				class: 'button',
+				click: function() {
+					window.location.assign("volunteer-details/?opp-id=" + $.cookie('volplus_opp_id'));
+				}
+			},
+ 				{
+				text: 'Contact us',
+				class: 'button',
+				click: function() {
+					document.getElementById("responseintro").style.display = "none";
+					document.getElementById("responseform").style.display = "inherit";
+				}
+			},
+ 				{
+				text: 'Cancel',
+				class: 'button',
+				click: function() {
+					$(this).dialog('close');
+				}
+			}
+		]
+	});
+
+	$( "#volplus_response_loggedin" ).dialog({
+		dialogClass: 'wp-dialog',
+		modal: true,
+		autoOpen: false,
+		show: {effect: "fade", duration: 500},
+		closeOnEscape: true,
+		title: "I'm Interested...",
+		width: 400,
+		buttons: [
+			{
+				text: 'Register my interest',
+				class: 'button',
+				click: function() {
+					$('div#volplus_response_loggedin p.status').show().text(ajax_login_object.loadingmessage);
+					$.ajax({
+						type: 'POST',
+						dataType: 'json',
+						url: ajax_login_object.ajaxurl,
+						data: { 
+							'action': 'volplusajaxenquire', //calls wp_ajax_nopriv_ajaxlogin
+							'security': $('div#opportunity_detail #security').val(),
+							'interested_notes': $('textarea#interested_notes').val()
+						}, 
+						success: function(result){
+							$("div#volplus_response_loggedin p.status").text(result.message);
+							$("#volplus_response_loggedin").dialog('close');
+							$('#volplus_interest_registered').dialog('open');
+						}
+					});
+				}
+			},
+ 				{
+				text: 'Cancel',
+				class: 'button',
+				click: function() {
+					$(this).dialog('close');
+				}
+			}
+		]
+	});
+
+	$( "#volplus_interest_registered" ).dialog({
+		dialogClass: 'wp-dialog',
+		modal: true,
+		autoOpen: false,
+		show: {effect: "fade", duration: 500},
+		closeOnEscape: true,
+		title: "Interest Registered",
+		width: 400,
+		buttons: [
+ 				{
+				text: 'Close',
+				class: 'button',
+				click: function() {
+					$(this).dialog('close');
+				}
+			}
+		]
+	});
+
+	$( ".volplus_respondButton" ).click(function() {
+		var loggedin = (document.cookie.indexOf("volplus_user_id") >= 0);
+		if(loggedin) {
+			document.getElementById("not_logged_in").style.display = "none";
+			document.getElementById("login").style.display = "none";
+			document.getElementById("logged_in").style.display = "inherit";
+			document.getElementById("welcome").style.display = "inherit";
+			$( "#volplus_response_loggedin" ).dialog( "open" );				
+		}else {
+			document.getElementById("responseform").style.display = "none";
+			document.getElementById("responseintro").style.display = "inherit";
+			document.getElementById("not_logged_in").style.display = "inherit";
+			document.getElementById("login").style.display = "inherit";
+			document.getElementById("logged_in").style.display = "none";
+			document.getElementById("welcome").style.display = "none";
+			$( "#volplus_response_notloggedin" ).dialog( "open" );
+		}
+	});
+
+
 });
 
 function decodeHtml(html) {
@@ -130,6 +246,8 @@ function decodeHtml(html) {
     txt.innerHTML = html;
     return txt.value;
 }
+
+
 
 
 // enquiry

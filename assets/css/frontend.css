@@ -2,6 +2,10 @@
 	padding: 0.2em!important;
 }
 
+.form-col {
+	width: 100%;
+}
+
 #welcome.volplus_welcome{
 	font-size: 1.4em;
 }

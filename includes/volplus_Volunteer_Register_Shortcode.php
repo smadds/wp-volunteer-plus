@@ -10,7 +10,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 
 // override default attributes with user attributes
 	$volplus_atts = shortcode_atts([
-		'wordpress-account' => 1,
+		'wordpress-account' => 0,
 //		'roundup' => 1,
 	], $atts, $tag);
 
@@ -204,11 +204,13 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 						}
 					}
 					unset($volunteer->volplus_id);
-				} else {
+				} else { // Successful registration
 					setcookie('volplus_user_id', $volunteer->volplus_id, time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 					setcookie('volplus_user_first_name', $volunteer->first_name, time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-					setcookie('volplus_user_last_name', $volunteer->last_name, time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-					echo '<script> jQuery( "#login_widget" ).load(window.location.href + " #login" ); </script>';
+					setcookie('volplus_user_last_name', $volunteer->last_name, time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );				
+					echo '<script type="text/javascript">showwelcome()</script>';
+//					echo '<script>location.assign("/opportunities/?opp-id=' . $volunteer->volplus_id . '")</script>';
+					
 //				var_dump_safe( $responsebody );			
 				}
 			
@@ -248,7 +250,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 
 	if(!is_volplus_user_logged_in()){
 		echo "<div id='vol_main_heading'><h2>Create your account</h2></div>";
-		$buttontext = "Sign Up";
+		$buttontext = "Register";
 	}else {
 		echo "<div id='vol_main_heading'><h2>Update your details</h2></div>";
 		$buttontext = "Update Details";
@@ -257,110 +259,151 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		foreach($responsebody as $key=>$data){
 			$volunteer->$key = $data;
 		}
-
+		foreach($volunteer->availability as $key=>$data){
+			$volunteer->$key = $data;
+		}
+		unset($volunteer->availability);
 // var_dump_safe($responsebody);
 	}
-			if(isset($signUpError)) echo '<div>'.$signUpError.'</div>'?>
-			<form action="" method="post" name="user_registration">
+	
+	if(isset($signUpError)) echo '<div>'.$signUpError.'</div>'?>
 
-				<p><label class="volplus-col-2">Title (optional)  
-					<select id="title" name="title" class="text">
-						<option value="" <?php if($volunteer->title=="") echo 'selected';?> >Select</option>
-						<option value="Mr" <?php if($volunteer->title=="Mr") echo 'selected';?> >Mr</option>
-						<option value="Master" <?php if($volunteer->title=="Master") echo 'selected';?> >Master</option>
-						<option value="Mrs" <?php if($volunteer->title=="Mrs") echo 'selected';?> >Mrs</option>
-						<option value="Miss" <?php if($volunteer->title=="Miss") echo 'selected';?> >Miss</option>
-						<option value="Ms" <?php if($volunteer->title=="Ms") echo 'selected';?> >Ms</option>
-						<option value="Dr" <?php if($volunteer->title=="Dr") echo 'selected';?> >Dr</option>
-						<option value="Prof" <?php if($volunteer->title=="Prof") echo 'selected';?> >Prof</option>
-					</select>
-				</label>
+	<form action="" method="post" name="user_registration">
 
-				<label class="volplus-col-5">First name <span class="error">*</span>  
-					<input type="text" id="first_name" name="first_name" placeholder="First Name" required autofocus value="<?php echo $volunteer->first_name?>"/></label>
-				<label class="volplus-col-5">Last name <span class="error">*</span>  
-					<input type="text" id="last_name" name="last_name" placeholder="Last Name" required value="<?php echo $volunteer->last_name?>" /></label></p>
-				<label class="volplus-col-8">Email address <span class="error">*</span>
-					<input type="email" id="email_address" name="email_address"  placeholder="Email address" required value="<?php echo $volunteer->email_address?>" /></label>
-				<div id="passwords">
-					<p><label class="volplus-col-6">Password (8 characters or more) <span class="error">*</span>
-						<input type="password" name="password" placeholder="Password" required value="<?php echo $volunteer->password?>" /></label>
-					<label class="volplus-col-6">Password <span class="error">*</span>
-						<input type="password" name="password_confirmation" placeholder="Repeat your password" required value="<?php echo $volunteer->password_confirmation?>" /></label></p>
-				</div>
-				<h2 class="volplus-col-12"><br/>Address</h2>
-				<label class="volplus-col-12">Address 1 <span class="error">*</span>  
-					<input type="text" id="address_line_1" name="address_line_1" placeholder="Address 1" required value="<?php echo $volunteer->address_line_1?>"/></label>
-				<label class="volplus-col-12">Address 2  
-					<input type="text" id="address_line_2" name="address_line_2" placeholder="Address 2" value="<?php echo $volunteer->address_line_2?>"/></label>
-				<label class="volplus-col-12">Address 3  
-					<input type="text" id="address_line_3" name="address_line_3" placeholder="Address 3" value="<?php echo $volunteer->address_line_3?>"/></label>
-				<label class="volplus-col-4">Town <span class="error">*</span> 
-					<input type="text" id="town" name="town" placeholder="Town" required value="<?php echo $volunteer->town?>"/></label>
-				<label class="volplus-col-4">County <span class="error">*</span>   
-					<input type="text" id="county" name="county" placeholder="County" required value="<?php echo $volunteer->county?>"/></label>
-				<label class="volplus-col-3">Postcode <span class="error">*</span>   
-					<input type="text" id="postcode" name="postcode" placeholder="Postcode" required value="<?php echo $volunteer->postcode?>"/></label>
+		<p><label class="volplus-col-2">Title (optional)  
+			<select id="title" name="title" class="text">
+				<option value="" <?php if($volunteer->title=="") echo 'selected';?> >Select</option>
+				<option value="Mr" <?php if($volunteer->title=="Mr") echo 'selected';?> >Mr</option>
+				<option value="Master" <?php if($volunteer->title=="Master") echo 'selected';?> >Master</option>
+				<option value="Mrs" <?php if($volunteer->title=="Mrs") echo 'selected';?> >Mrs</option>
+				<option value="Miss" <?php if($volunteer->title=="Miss") echo 'selected';?> >Miss</option>
+				<option value="Ms" <?php if($volunteer->title=="Ms") echo 'selected';?> >Ms</option>
+				<option value="Dr" <?php if($volunteer->title=="Dr") echo 'selected';?> >Dr</option>
+				<option value="Prof" <?php if($volunteer->title=="Prof") echo 'selected';?> >Prof</option>
+			</select>
+		</label>
 
-				<h2 class="volplus-col-12"><br/>Contact Details</h2>
-				<label class="volplus-col-6">Telephone <span class="error">*</span>  
-					<input type="text" id="telephone" name="telephone" placeholder="Telephone number" required value="<?php echo $volunteer->telephone?>"/></label>
-				<label class="volplus-col-6">Mobile  
-					<input type="text" id="mobile" name="mobile" placeholder="Mobile number" value="<?php echo $volunteer->mobile?>"/></label>
-				<h2 class="volplus-col-12"><br/>Interests & Activities</h2>
-				<label class="volplus-col-6">Interests
-					<?php display_interests($volunteer->interests);?></label>
-				<label class="volplus-col-6">Activities
-					<?php display_activities($volunteer->activities);?></label>				
-				<h2 class="volplus-col-12"><br/>Availability</h2>
-				<label class="volplus-col-4">When are you available?
-					<?php display_availability_table($volunteer->availability);?></label>
-				<label class="volplus-col-8">Availability Details (specific details regarding your availability e.g. shift worker)  
-					<textarea id="availability_details" name="availability_details" rows="10"><?php if(isset($volunteer->availability_details)) echo $volunteer->availability_details?></textarea></label>
-				<h2 class="volplus-col-12"><br/>Volunteering</h2>
-				<label class="volplus-col-12">Volunteering Experience  
-					<textarea id="volunteering_experience" name="volunteering_experience" rows="10"><?php if(isset($volunteer->volunteering_experience)) echo $volunteer->volunteering_experience?></textarea></label>
-				<label class="volplus-col-4">Why volunteer?  
-					<?php display_reasons($volunteer->reasons);?></label>				
-				<label class="volplus-col-8">Further details on why volunteering  
-					<textarea id="volunteering_reason_info" name="volunteering_reason_info" rows="10"><?php if(isset($volunteer->volunteering_reason_info)) echo $volunteer->volunteering_reason_info?></textarea></label>
-				<h2 class="volplus-col-12"><br/>About</h2>
-				<label class="volplus-col-3">Date of birth (optional) 
-					<input type="date" id="date_birth" name="date_birth" format= "dd/MM/yyyy" value="<?php echo implode('-', array_reverse(explode('/', $volunteer->date_birth)));?>"/></label>
-				<input type="hidden" id="date_birth_prefer_not_say" name="date_birth_prefer_not_say" value="1"/>
-				<label class="volplus-col-2">Gender <span class="error">*</span>   
-					<?php gender($volunteer->gender);?></label>
-				<label class="volplus-col-3">Employment Status <span class="error" >*</span>   
-					<?php employment($volunteer->employment);?></label>
-				<label class="volplus-col-4">Ethnicity <span class="error">*</span>
-					<?php ethnicity($volunteer->ethnicity);?></label>
-				<label class="volplus-col-4">How did you hear of us?
-					<?php how_heard($volunteer->how_heard);?></label>
-				<label class="volplus-col-3">Disability <span class="error">*</span>
-					<?php disability($volunteer->disability);?></label>
-				<label class="volplus-col-3" id="display-details-label" <?php if($volunteer->disability !== 1) echo " style='display:none;'"?>>Details
-					<?php disability_type($volunteer->disabilities);?></label>
+		<label class="volplus-col-5">First name <span class="error">*</span>  
+			<input type="text" id="first_name" name="first_name" placeholder="First Name" required autofocus value="<?php echo $volunteer->first_name?>"/></label>
+		<label class="volplus-col-5">Last name <span class="error">*</span>  
+			<input type="text" id="last_name" name="last_name" placeholder="Last Name" required value="<?php echo $volunteer->last_name?>" /></label></p>
+		<label class="volplus-col-8">Email address <span class="error">*</span>
+			<input type="email" id="email_address" name="email_address"  placeholder="Email address" required value="<?php echo $volunteer->email_address?>" /></label>
+		<div id="passwords">
+			<p><label class="volplus-col-6">Password (8 characters or more) <span class="error">*</span>
+				<input type="password" name="password" placeholder="Password" required value="<?php echo $volunteer->password?>" /></label>
+			<label class="volplus-col-6">Password <span class="error">*</span>
+				<input type="password" name="password_confirmation" placeholder="Repeat your password" required value="<?php echo $volunteer->password_confirmation?>" /></label></p>
+		</div>
+		<h2 class="volplus-col-12"><br/>Address</h2>
+		<label class="volplus-col-12">Address 1 <span class="error">*</span>  
+			<input type="text" id="address_line_1" name="address_line_1" placeholder="Address 1" required value="<?php echo $volunteer->address_line_1?>"/></label>
+		<label class="volplus-col-12">Address 2  
+			<input type="text" id="address_line_2" name="address_line_2" placeholder="Address 2" value="<?php echo $volunteer->address_line_2?>"/></label>
+		<label class="volplus-col-12">Address 3  
+			<input type="text" id="address_line_3" name="address_line_3" placeholder="Address 3" value="<?php echo $volunteer->address_line_3?>"/></label>
+		<label class="volplus-col-4">Town <span class="error">*</span> 
+			<input type="text" id="town" name="town" placeholder="Town" required value="<?php echo $volunteer->town?>"/></label>
+		<label class="volplus-col-4">County <span class="error">*</span>   
+			<input type="text" id="county" name="county" placeholder="County" required value="<?php echo $volunteer->county?>"/></label>
+		<label class="volplus-col-3">Postcode <span class="error">*</span>   
+			<input type="text" id="postcode" name="postcode" placeholder="Postcode" required value="<?php echo $volunteer->postcode?>"/></label>
 
-
-				<div class="volplus-col-12"><input class = "button" type="submit" name="user_registration" value=<?php echo $buttontext?>/></div>
-
-			</form>
+		<h2 class="volplus-col-12"><br/>Contact Details</h2>
+		<label class="volplus-col-6">Telephone <span class="error">*</span>  
+			<input type="text" id="telephone" name="telephone" placeholder="Telephone number" required value="<?php echo $volunteer->telephone?>"/></label>
+		<label class="volplus-col-6">Mobile  
+			<input type="text" id="mobile" name="mobile" placeholder="Mobile number" value="<?php echo $volunteer->mobile?>"/></label>
+		<h2 class="volplus-col-12"><br/>Interests & Activities</h2>
+		<label class="volplus-col-6">Interests
+			<?php display_interests($volunteer->interests);?></label>
+		<label class="volplus-col-6">Activities
+			<?php display_activities($volunteer->activities);?></label>				
+		<h2 class="volplus-col-12"><br/>Availability</h2>
+		<label class="volplus-col-4">When are you available?
+			<?php display_availability_table($volunteer);?></label>
+		<label class="volplus-col-8">Availability Details (specific details regarding your availability e.g. shift worker)  
+			<textarea id="availability_details" name="availability_details" rows="10"><?php if(isset($volunteer->availability_details)) echo $volunteer->availability_details?></textarea></label>
+		<h2 class="volplus-col-12"><br/>Volunteering</h2>
+		<label class="volplus-col-12">Volunteering Experience  
+			<textarea id="volunteering_experience" name="volunteering_experience" rows="10"><?php if(isset($volunteer->volunteering_experience)) echo $volunteer->volunteering_experience?></textarea></label>
+		<label class="volplus-col-4">Why volunteer?  
+			<?php display_reasons($volunteer->reasons);?></label>				
+		<label class="volplus-col-8">Further details on why volunteering  
+			<textarea id="volunteering_reason_info" name="volunteering_reason_info" rows="10"><?php if(isset($volunteer->volunteering_reason_info)) echo $volunteer->volunteering_reason_info?></textarea></label>
+		<h2 class="volplus-col-12"><br/>About</h2>
+		<label class="volplus-col-3">Date of birth (optional) 
+			<input type="date" id="date_birth" name="date_birth" format= "dd/MM/yyyy" style="height: 2.3rem" value="<?php echo implode('-', array_reverse(explode('/', $volunteer->date_birth)));?>"/></label>
+		<input type="hidden" id="date_birth_prefer_not_say" name="date_birth_prefer_not_say" value="1"/>
+		<label class="volplus-col-2">Gender <span class="error">*</span>   
+			<?php gender($volunteer->gender);?></label>
+		<label class="volplus-col-3">Employment Status <span class="error" >*</span>   
+			<?php employment($volunteer->employment);?></label>
+		<label class="volplus-col-4">Ethnicity <span class="error">*</span>
+			<?php ethnicity($volunteer->ethnicity);?></label>
+		<label class="volplus-col-4">How did you hear of us? <span class="error">*</span>
+			<?php how_heard($volunteer->how_heard);?></label>
+		<label class="volplus-col-3">Disability <span class="error">*</span>
+			<?php disability($volunteer->disability);?></label>
+		<label class="volplus-col-5" id="display-details-label" <?php if($volunteer->disability !== 1) echo " style='display:none;'"?>>Details
+			<?php disability_type($volunteer->disabilities);?></label>
+		<div class="volplus-col-12">
+			<?php if(get_option('volplus_compliancepage')) {?>
+				<label class="volplus-col-9">I accept the <a href="/<?php echo get_post_field( 'post_name', get_option('volplus_compliancepage'))?>" target=_blank>Terms & Conditions</a>
+					<input type="checkbox" name="accept_terms" required></label>
+			<?php }?>
+			<input id="user_registration" class = "button" type="submit" name="user_registration" value="<?php echo $buttontext ?>" style="font-size:1.2em">
+			<p id='compliancemsg'><?php echo stripslashes(get_option('volplus_enquirycompliancemsg'));?></p>
+		</div>
+	</form>
+ 	<div id="welcomeNewUser" style="display:none;"><?php
+		echo stripslashes(get_option('volplus_welcomenewusermsg'))?>
+	</div>
 <!--		</div>-->
 	<?php// }; ?>
-<!--<?php echo "POST:<br/>" . json_encode($_POST, JSON_UNESCAPED_SLASHES)?><br/>
+<!-- <div class="volplus-col-12"><?php echo "POST:<br/>" . json_encode($_POST, JSON_UNESCAPED_SLASHES)?><br/>
 <?php echo "volunteer:<br/>" . json_encode($volunteer, JSON_UNESCAPED_SLASHES)?><br/>
-<?php var_dump_safe($GLOBALS['volunteer_fields']);?>
-<div class="volplus-col-6"><?php var_dump_safe($_POST) ?></div>
-<div class="volplus-col-6"><?php var_dump_safe($volunteer) ?></div>-->
+<?php// var_dump_safe($GLOBALS['volunteer_fields']);?>
+<div class="volplus-col-5"><?php var_dump_safe($_POST) ?></div>
+<div class="volplus-col-5"><?php var_dump_safe($volunteer) ?></div></div>-->
 
 	<script type="text/javascript" >
-			document.getElementById('disability-type').onchange = function() {
-				if (document.getElementById("disability-type").value == 1) {
-	 				document.getElementById("display-details-label").style.display = "block";
-				} else {
-					document.getElementById("display-details-label").style.display = "none";
-				}
+		document.getElementById('disability-type').onchange = function() {
+			if (document.getElementById("disability-type").value == 1) {
+	 			document.getElementById("display-details-label").style.display = "block";
+			} else {
+				document.getElementById("display-details-label").style.display = "none";
+			}
 		}
+
+		jQuery(document).ready(function($) {
+			function showwelcome(){
+				$( "#welcomeNewUser" ).dialog( "open" );
+			}
+		
+			$( "#welcomeNewUser" ).dialog({
+				dialogClass: 'wp-dialog',
+				modal: true,
+				autoOpen: false,
+				show: {effect: "fade", duration: 500},
+				closeOnEscape: true,
+				title: "You are registered",
+				width: 400,
+				buttons: [
+		 			{
+						text: 'Close',
+						class: 'button',
+						click: function() {
+							$(this).dialog('close');
+							window.location.assign("opportunities/?opp-id=" + $.cookie('volplus_opp_id'));
+						}
+					}
+				]
+			});
+		});
+
+	
+
 	</script>
 
 <?php

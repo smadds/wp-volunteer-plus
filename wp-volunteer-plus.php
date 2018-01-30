@@ -3,7 +3,7 @@
  * Plugin Name:   WP Volunteer Plus
  * Plugin URI:    https://maddox.co.uk/volunteer-plus
  * Description:   A selection of tools for interacting with the Volunteer Plus Database
- * Version:       1.0.0
+ * Version:       1.0.1
  * Author:        Simon Maddox
  * Author URI:    https://maddox.co.uk
  */
@@ -31,10 +31,14 @@ define( "API_KEY", get_option('volplus_api_key') );
 
 function volplus_scripts() {
 	wp_register_style( 'volplus_frontend_css', VOLPLUS_URL . 'assets/css/frontend.css' );
-	wp_enqueue_style('volplus_frontend_css');
-	wp_enqueue_style (  'wp-jquery-ui-dialog');
+	wp_enqueue_style( 'volplus_frontend_css');
+	wp_enqueue_style ( 'wp-jquery-ui-dialog');
 	wp_enqueue_script( 'jquery-ui-core' );
+	wp_enqueue_script( 'jquery-ui-dialog');
+	wp_enqueue_script( 'jquery-effects-core');
 	wp_enqueue_script( 'jquery-effects-fade' );
+	wp_register_script( 'jquery_cookie', VOLPLUS_URL . 'includes/jquery.cookie.min.js');
+	wp_enqueue_script('jquery_cookie');
 }
 add_action( 'admin_init', 'volplus_scripts' );
 add_action('wp_enqueue_scripts', 'volplus_scripts');

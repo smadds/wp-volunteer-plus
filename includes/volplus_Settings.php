@@ -25,9 +25,18 @@ $intro_not_logged_in .= "If you have already registered, clicking 'Cancel' will 
 $intro_not_logged_in .= "&amp; password on this page.</p>";
 $intro_not_logged_in .= "<p>Finally, if you just want to discuss this, use the 'Contact Us' button and let us know how we can contact you.</p>";
 $intro_logged_in = "<p><strong>You are already logged in, so go ahead and register your interest.</strong></p>";
-$intro_logged_in .= "<p>We'll pass your details onto the organisation offering the position, so expect to hear back from them.</p>";
+$intro_logged_in .= "<p>Just so we're clear - by clicking the Register My Interest button, you're agreeing that we can pass your details onto the organisation offering this opportunity.</p>";
 $enquiry_success_msg = "<h3>Congratulations!</h3><p>Your interest in this opportunity has been registered.</p>";
 $enquiry_success_msg .= "<p>We will now pass your details on to the organisation offering the opportunity."; 
+$enquiry_compliance_msg = "This information will be held on a computer which complies with the Data Protection Act 1984.";
+$enquiry_compliance_msg .= " We use a volunteer database which is accessible to other volunteer centres in the county.";
+$enquiry_compliance_msg .= " Your information will be seen by these centres unless you request otherwise.</p>"; 
+$enquiry_compliance_msg .= "<p>Any information marked above as confidential will not be released to any person without your prior agreement.</p>";
+$welcome_new_user_msg = "<h2>Congratulations!</h2><p>You have successfully registered as a volunteer.<p>";
+$welcome_new_user_msg .= "<p>Please make a note of your email and password details, as you will need these if you want to show your interest in opportunities in the future.</p>";
+$welcome_new_user_msg .= "<p>Do you want to register your interest in this volunteering opportunity now?</p>";
+
+
 ?>  
 <div class="wrap">
 <h2>Volunteer Plus Settings</h2>
@@ -112,6 +121,16 @@ $enquiry_success_msg .= "<p>We will now pass your details on to the organisation
         </tr>
 
        <tr valign="top">
+        <th scope="row">Registration compliance message (bottom of registration form)</th>
+			<td><?php wp_editor(get_option('volplus_enquirycompliancemsg', $enquiry_compliance_msg), 'volplus_enquirycompliancemsg', $args)?></td>
+        </tr>
+
+       <tr valign="top">
+        <th scope="row">Registration compliance message (bottom of registration form)</th>
+			<td><?php wp_editor(get_option('volplus_welcomenewusermsg', $welcome_new_user_msg), 'volplus_welcomenewusermsg', $args)?></td>
+        </tr>
+
+       <tr valign="top">
         <th scope="row">Hide bracketed text in Opportunity titles & Organisation names</th>
         <td><input type="checkbox" name="volplus_hidebrackets" <?php if(get_option('volplus_hidebrackets') == 'on') echo 'checked'; ?> /></td>
         </tr>
@@ -119,6 +138,18 @@ $enquiry_success_msg .= "<p>We will now pass your details on to the organisation
         <tr valign="top">
         <th scope="row">Volunteer login timeout (hours)</th>
         <td><input type="number" name="volplus_voltimeout" min="1" max="72" value="<?php echo esc_attr(get_option('volplus_voltimeout', 1)); ?>" /></td>
+        </tr>
+
+        <tr valign="top">
+        <th scope="row">T&C page (checkbox on registration if selected)</th>
+        <td><?php
+        $args= array(
+    	    	'show_option_none'=>'(Not Used)',
+    	    	'selected'=> get_option('volplus_compliancepage', null),
+    	    	'name'=> 'volplus_compliancepage'
+        	);
+        	wp_dropdown_pages($args);
+        	?></td>
         </tr>
 
     </table>
@@ -160,6 +191,9 @@ function volplus_plugin_settings() {
 	register_setting( 'volplus-plugin-settings-group', 'volplus_responsenotloggedinintro' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_responseloggedinintro' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_enquirysuccessmsg' );	
+	register_setting( 'volplus-plugin-settings-group', 'volplus_enquirycompliancemsg' );	
+	register_setting( 'volplus-plugin-settings-group', 'volplus_welcomenewusermsg' );	
+	register_setting( 'volplus-plugin-settings-group', 'volplus_compliancepage' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_hidebrackets' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_voltimeout' );	
 }

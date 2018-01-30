@@ -19,7 +19,7 @@ function get_volunteer_details($id) {
 //var_dump_safe($bodyobj);		
 
 	$bodyobj->telephone = $bodyobj->telephone_number;unset($bodyobj->telephone_number);	//different name - API documentation error
-	$bodyobj->mobile = $bodyobj->mobile_number;unset($bodyobj->mobile_number);				//different name - API documentation error
+	$bodyobj->mobile = isset($bodyobj->mobile_number) ? $bodyobj->mobile_number : null;unset($bodyobj->mobile_number);	//different name - API documentation error
 
 	$temparray = [];
 	foreach($bodyobj->interests as $key=>$data) array_push($temparray, $data->id);
@@ -29,9 +29,11 @@ function get_volunteer_details($id) {
 	foreach($bodyobj->activities as $key=>$data) array_push($temparray, $data->id);
 	$bodyobj->activities = $temparray;
 
-	$temparray = [];
-	foreach($bodyobj->why_volunteer as $key=>$data) array_push($temparray, $data->id);
-	$bodyobj->reasons = $temparray; unset($bodyobj->why_volunteer);	//different name, but as documented
+	if(isset($bodyobj->why_volunteer)){
+		$temparray = [];
+		foreach($bodyobj->why_volunteer as $key=>$data) array_push($temparray, $data->id);
+		$bodyobj->reasons = $temparray; unset($bodyobj->why_volunteer);	//different name, but as documented
+	}
 
 	if(isset($bodyobj->disability_type)){
 		$temparray = [];
@@ -40,8 +42,7 @@ function get_volunteer_details($id) {
 	}
 
 	$temparray = [];
-//	foreach($bodyobj->availability as $key=>$data) if($data) $temparray += array($key=>1);
-	foreach($bodyobj->availability as $key=>$data) if($data) array_push($temparray, $key);
+	foreach($bodyobj->availability as $key=>$data) if($data) $temparray[$key] = $data;
 	$bodyobj->availability = $temparray;
 
 
@@ -200,7 +201,7 @@ function disability($selected) {
 
 // display how_heard options
 function how_heard($selected) {
-	echo "<select id='how_heard' name='how_heard'>";
+	echo "<select id='how_heard' name='how_heard' required>";
 		echo "<option value='' ";
 		if($selected=="") echo 'selected';
 		echo ">Select</option>";
