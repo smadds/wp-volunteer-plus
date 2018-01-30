@@ -345,8 +345,10 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 			<?php how_heard($volunteer->how_heard);?></label>
 		<label class="volplus-col-3">Disability <span class="error">*</span>
 			<?php disability($volunteer->disability);?></label>
-		<label class="volplus-col-5" id="display-details-label" <?php if($volunteer->disability !== 1) echo " style='display:none;'"?>>Details
-			<?php disability_type($volunteer->disabilities);?></label>
+			<?php if(in_array('disabilities',$GLOBALS['volunteer_fields'])){?>
+			<label class="volplus-col-5" id="display-details-label" <?php if($volunteer->disability !== 1) echo " style='display:none;'"?>>Details
+				<?php disability_type($volunteer->disabilities);?></label>
+			<?php }?>
 		<div class="volplus-col-12">
 			<?php if(get_option('volplus_compliancepage')) {?>
 				<label class="volplus-col-8">I accept the <a href="/<?php echo get_post_field( 'post_name', get_option('volplus_compliancepage'))?>" target=_blank>Terms & Conditions</a>
@@ -368,8 +370,8 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 <div class="volplus-col-5"><?php var_dump_safe($volunteer) ?></div></div>-->
 
 	<script type="text/javascript" >
-		document.getElementById('disability-type').onchange = function() {
-			if (document.getElementById("disability-type").value == 1) {
+		document.getElementById('disability').onchange = function() {
+			if (document.getElementById("disability").value == 1 && document.getElementById("disability-type").length > 1) {
 	 			document.getElementById("display-details-label").style.display = "block";
 			} else {
 				document.getElementById("display-details-label").style.display = "none";

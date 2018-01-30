@@ -150,11 +150,13 @@ class volplus_volunteer {
 
 // display disability types (multi-select)
 function disability_type($selected){
-	echo '<div class="colcontainer"  id="disability-type">';             
-	foreach($GLOBALS['volunteer_fields']['disabilities'] as $disability) {
-		if(in_array($disability['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='disabilities[]' value='".$disability['id']."' checked";
-		else echo"<label class='colitem'><input type='checkbox' id='disabilities-".$disability['id']."' name='disabilities[]' value='".$disability['id']."'";
-		echo ">".$disability['value']."</label><br />";
+	echo '<div class="colcontainer"  id="disability-type">';
+	if(in_array('disabilities',$GLOBALS['volunteer_fields'])){   //disability types may not be defined          
+		foreach($GLOBALS['volunteer_fields']['disabilities'] as $disability) {
+			if(in_array($disability['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='disabilities[]' value='".$disability['id']."' checked";
+			else echo"<label class='colitem'><input type='checkbox' id='disabilities-".$disability['id']."' name='disabilities[]' value='".$disability['id']."'";
+			echo ">".$disability['value']."</label><br />";
+		}
 	}
 	echo '</div>';
 }
@@ -187,7 +189,7 @@ function disability($selected) {
 		['id'=>3, 'value'=> 'Prefer not to say'],
 //		['id'=>4, 'value'=> 'Not known'] // option not shown for web form
 	);
-	echo "<select id='disability' name='disability' id='disability-type' required>";
+	echo "<select id='disability' name='disability' required>";
 		echo "<option value='' ";
 		if($selected=="") echo 'selected'; // nothing selected
 		echo ">Select</option>";
