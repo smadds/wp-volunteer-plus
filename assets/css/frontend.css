@@ -107,21 +107,22 @@ label + input[type=checkbox]:checked {
 }
 
 /* For desktop: */
-    [class*="volplus-col-"] {
-        float: left;
-        display: inline;
-    }
-.volplus-col-1 {width: 8.33%;}
-.volplus-col-2 {width: 16.66%;}
-.volplus-col-3 {width: 25%;}
-.volplus-col-4 {width: 33.33%;}
-.volplus-col-5 {width: 41.66%;}
-.volplus-col-6 {width: 50%;}
-.volplus-col-7 {width: 58.33%;}
-.volplus-col-8 {width: 66.66%;}
-.volplus-col-9 {width: 75%;}
-.volplus-col-10 {width: 83.33%;}
-.volplus-col-11 {width: 91.66%;}
+[class*="volplus-col-"] {
+	float: left;
+	display: inline;
+}
+
+.volplus-col-1 {width: 8%;}
+.volplus-col-2 {width: 16%;}
+.volplus-col-3 {width: 24%;}
+.volplus-col-4 {width: 32%;}
+.volplus-col-5 {width: 40%;}
+.volplus-col-6 {width: 49%;}
+.volplus-col-7 {width: 57%;}
+.volplus-col-8 {width: 65%;}
+.volplus-col-9 {width: 74%;}
+.volplus-col-10 {width: 82%;}
+.volplus-col-11 {width: 90%;}
 .volplus-col-12 {width: 100%;}
 
 @media only screen and (max-width: 1400px) {
@@ -163,9 +164,8 @@ label + input[type=checkbox]:checked {
 }
 
 .volplus-checkbox {
-	width: 1.5em;
-	height: 1.5em;
 	margin:0;
+	transform: scale(2);
 }
 
 label {

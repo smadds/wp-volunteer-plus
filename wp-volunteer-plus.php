@@ -3,7 +3,7 @@
  * Plugin Name:   WP Volunteer Plus
  * Plugin URI:    https://maddox.co.uk/volunteer-plus
  * Description:   A selection of tools for interacting with the Volunteer Plus Database
- * Version:       1.0.3
+ * Version:       1.0.4
  * Author:        Simon Maddox
  * Author URI:    https://maddox.co.uk
  */
@@ -12,8 +12,8 @@
 define('VOLPLUS_PATH', plugin_dir_path(__FILE__)); 
 define('VOLPLUS_URL', plugin_dir_url(__FILE__)); 
 define('VOLPLUS_SLUG', 'wp-volunteer-plus'); 
-define('COOKIEPATH', '/');
-define ('COOKIE_DOMAIN', $_SERVER['HTTP_HOST']);
+//define('COOKIEPATH', '/');
+//define ('COOKIE_DOMAIN', $_SERVER['HTTP_HOST']);
 
 
 //Add Settings option to plugins list page
@@ -74,7 +74,8 @@ $volunteer_fields = wp_remote_get(API_URL . 'volunteer_fields', array('headers' 
 $response_code = wp_remote_retrieve_response_code($volunteer_fields);
 if($response_code == 200) {
 	$GLOBALS['volunteer_fields'] = json_decode($volunteer_fields['body'], true);
-	setcookie('volplus_volunteer_fields', $volunteer_fields['body'], 0, COOKIEPATH, COOKIE_DOMAIN );
+	setcookie('volplus_volunteer_fields', json_encode($GLOBALS['volunteer_fields']), 0, COOKIEPATH, COOKIE_DOMAIN );
+//var_dump_safe($volunteer_fields);
 } else {
 	alert_safe ('(Error code '.$response_code.')');
 }

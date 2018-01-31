@@ -114,7 +114,7 @@ function volplus_opportunity_detail_func($atts) {
 				<?php foreach($opportunity['quality_control'] as $quality_control) { ?>
 				<li class="status_<?php echo $quality_control['status']; ?>">
 					<?php echo $quality_control['title']; ?>
-					<?php if($quality_control['notes']) { ?>
+					<?php if($quality_control['notes'] && !get_option('volplus_hideqcdetails')) { ?>
 						<br /><small><?php echo $quality_control['notes']; ?></small>
 					<?php } ?>
 				</li>
@@ -259,6 +259,8 @@ function volplus_opportunity_detail_func($atts) {
 	<?php } ?>
 	</div>
 
+	<button type="button" id="volplus_respondButton2" class="volplus_respondButton button"><i class="fa fa-thumbs-up fa-4x"></i>I'm Interested</button>
+
 	<div class="volplus-col-12"><hr></div>
 
 <!-- google map -->
@@ -287,7 +289,6 @@ function volplus_opportunity_detail_func($atts) {
 	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<?php echo get_option('volplus_googlemapkey');?>&callback=initMap" async defer>
 	</script>
 	<?php } ?>
-
 			
 	<div class="volplus-col-6">
 		<?php if($opportunity['organisation_opportunities']) { ?>
