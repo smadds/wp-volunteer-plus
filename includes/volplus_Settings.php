@@ -35,6 +35,8 @@ $enquiry_compliance_msg .= "<p>Any information marked above as confidential will
 $welcome_new_user_msg = "<h2>Congratulations!</h2><p>You have successfully registered as a volunteer.<p>";
 $welcome_new_user_msg .= "<p>Please make a note of your email and password details, as you will need these if you want to show your interest in opportunities in the future.</p>";
 $welcome_new_user_msg .= "<p>Do you want to register your interest in this volunteering opportunity now?</p>";
+$age_band_message = "<p>To help us match you to opportunities, and for safeguarding reasons, we need to calculate your age band.</p>";
+$age_band_message .= "<p>Please enter your date of birth and we will calculate the band.</p>";
 
 
 ?>  
@@ -66,7 +68,8 @@ $welcome_new_user_msg .= "<p>Do you want to register your interest in this volun
 			<td><?php echo $_SERVER['HTTP_HOST'] ?></td>
 		</tr>
 		<th scope="row">Plugin License Code</th>
-		<td><input type="password" name="volplus_license_code" size="40" value="<?php echo esc_attr( get_option('volplus_license_code') ); ?>" /></td>
+		<td><input type="password" name="volplus_license_code" size="40" value="<?php echo esc_attr( get_option('volplus_license_code') ); ?>" />
+			<span class="description">If you have not received your code contact <a href:"mailto:info@maddox.co.uk">info@maddox.co.uk</a></span></td>
 		<tr valign="top">
 			<th scope="row"><h3>Google Maps</h3></th>
 		</tr>
@@ -80,7 +83,8 @@ $welcome_new_user_msg .= "<p>Do you want to register your interest in this volun
 		</tr>
 		<tr valign="top">
 			<th scope="row">Map default centre</th>
-			<td><input type="text" name="volplus_googlemapcentre" size="40" value="<?php echo esc_attr( get_option('volplus_googlemapcentre') ); ?>" /></td>
+			<td><input type="text" name="volplus_googlemapcentre" size="40" value="<?php echo esc_attr( get_option('volplus_googlemapcentre') ); ?>" />
+			<span class="description">Enter a postcode, place or district name</span></td>
 		</tr>
 		<tr valign="top">
 			<th scope="row">Google Maps Zoom</th>
@@ -90,8 +94,9 @@ $welcome_new_user_msg .= "<p>Do you want to register your interest in this volun
 			<th scope="row"><h3>Other Settings</h3></th>
 		</tr>
 		<tr valign="top">
-			<th scope="row">Response Form (use a shortcode to a contact form)</th>
-			<td><input type="text" name="volplus_responseformcontent" size="40" value="<?php echo esc_attr(get_option('volplus_responseformcontent')); ?>" /></td>
+			<th scope="row">Contact Us Response Form</th>
+			<td><input type="text" name="volplus_responseformcontent" size="40" value="<?php echo esc_attr(get_option('volplus_responseformcontent')); ?>" />
+			<span class="description">Use a shortcode to a contact form, or leave blank to hide this option</span></td>
 		</tr>
 		<tr valign="top">
 			<th scope="row">Response Intro - not logged in</th>
@@ -114,8 +119,13 @@ $welcome_new_user_msg .= "<p>Do you want to register your interest in this volun
 			<td><?php wp_editor(get_option('volplus_welcomenewusermsg', $welcome_new_user_msg), 'volplus_welcomenewusermsg', $args)?></td>
 		</tr>
 		<tr valign="top">
-			<th scope="row">Hide bracketed text in Opportunity titles & Organisation names</th>
-			<td><input type="checkbox" name="volplus_hidebrackets" <?php if(get_option('volplus_hidebrackets') == 'on') echo 'checked'; ?> /></td>
+			<th scope="row">Date of birth popup message</th>
+			<td><?php wp_editor(get_option('volplus_agebandmsg', $age_band_message), 'volplus_agebandmsg', $args)?></td>
+		</tr>
+		<tr valign="top">
+			<th scope="row">Hide bracketed text</th>
+			<td><input type="checkbox" name="volplus_hidebrackets" <?php if(get_option('volplus_hidebrackets') == 'on') echo 'checked'; ?> />
+			<span class="description">Strips out text within brackets in Opportunity titles & Organisation names</span></td>
 		</tr>
 		<tr valign="top">
 			<th scope="row">Hide Quality Control item details </th>
@@ -176,6 +186,7 @@ function volplus_plugin_settings() {
 	register_setting( 'volplus-plugin-settings-group', 'volplus_enquirysuccessmsg' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_enquirycompliancemsg' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_welcomenewusermsg' );	
+	register_setting( 'volplus-plugin-settings-group', 'volplus_agebandmsg' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_compliancepage' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_hidebrackets' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_hideqcdetails' );	

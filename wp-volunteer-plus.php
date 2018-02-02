@@ -3,7 +3,7 @@
  * Plugin Name:   WP Volunteer Plus
  * Plugin URI:    https://maddox.co.uk/volunteer-plus
  * Description:   A selection of tools for interacting with the Volunteer Plus Database
- * Version:       1.0.4
+ * Version:       1.0.5
  * Author:        Simon Maddox
  * Author URI:    https://maddox.co.uk
  */

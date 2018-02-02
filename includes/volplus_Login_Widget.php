@@ -10,8 +10,8 @@ class volplus_Login_Widget extends WP_Widget {
   }
 // Create the widget output.
   function widget( $args, $instance ) { 	
-    $loggedin_title = apply_filters( 'widget_title', $instance[ 'loggedin_title' ] );
-    $title = apply_filters( 'widget_title', $instance[ 'title' ] );
+		if (isset($instance[ 'loggedin_title' ])) $loggedin_title = apply_filters( 'widget_title', $instance[ 'loggedin_title' ]);
+		if (isset($instance[ 'title' ])) $title = apply_filters( 'widget_title', $instance[ 'title' ] );
 // before and after widget arguments are defined by themes
     echo $args['before_widget'];
  

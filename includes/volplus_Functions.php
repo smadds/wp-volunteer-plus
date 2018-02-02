@@ -695,5 +695,18 @@ function ajax_addvolunteer(){
 	die();
 }
 
+//convert dob to age band
+function dobToAgeBand($age){
+	$yourage = (int) DateTime::createFromFormat('Y-m-d', $age)
+     ->diff(new DateTime('now'))
+     ->y;
+	if($yourage < 16) return("Under 15");
+	elseif($yourage <19) return("15-18");
+	elseif($yourage <26) return("19-25");
+	elseif($yourage <45) return("26-44");
+	elseif($yourage <65) return("45-64");
+	elseif($yourage >64) return("Over 65");
+	else return("Error");
+}
 
 

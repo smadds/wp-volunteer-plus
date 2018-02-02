@@ -29,6 +29,7 @@ function volplus_opportunity_detail_func($atts) {
 <div id="volplus_response_notloggedin"  hidden='hidden'>
 	<div id='responseintro'>
 		<?php echo stripslashes( html_entity_decode(get_option('volplus_responsenotloggedinintro')));?>
+		<?php the_widget('volplus_Login_Widget');?>
 	</div>
 	<div id='responseform'>
 		<?php echo do_shortcode(get_option('volplus_responseformcontent'));?>

@@ -332,9 +332,13 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		<label class="volplus-col-8">Further details on why volunteering  
 			<textarea id="volunteering_reason_info" name="volunteering_reason_info" rows="10"><?php if(isset($volunteer->volunteering_reason_info)) echo $volunteer->volunteering_reason_info?></textarea></label>
 		<h2 class="volplus-col-12"><br/>About</h2>
-		<label class="volplus-col-3">Date of birth (optional) 
-			<input type="date" id="date_birth" name="date_birth" format= "dd/MM/yyyy" style="height: 2.3rem" value="<?php echo implode('-', array_reverse(explode('/', $volunteer->date_birth)));?>"/></label>
+		<label class="volplus-col-3">Age band
+<?php
+?>
+			<div id='agerangediv'><input type="text" id='agerange' readonly value='<?php if(isset($volunteer->date_birth)){echo dobToAgeBand($volunteer->date_birth);}else{ echo "Set age band";}?>'/></div></label> 
+<!--			<input type="date" id="date_birth" name="date_birth" format= "dd/MM/yyyy" style="height: 2.3rem" value="<?php echo implode('-', array_reverse(explode('/', $volunteer->date_birth)));?>"/></label>-->
 		<input type="hidden" id="date_birth_prefer_not_say" name="date_birth_prefer_not_say" value="1"/>
+		<input type="hidden" id="date_birth" name="date_birth"/>
 		<label class="volplus-col-2">Gender <span class="error">*</span>   
 			<?php gender($volunteer->gender);?></label>
 		<label class="volplus-col-3">Employment Status <span class="error" >*</span>   
@@ -361,13 +365,22 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
  	<div id="welcomeNewUser" hidden="hidden"><?php
 		echo stripslashes(html_entity_decode(get_option('volplus_welcomenewusermsg')))?>
 	</div>
+
+	<div id="calcagerange" hidden><?php
+		echo stripslashes(html_entity_decode(get_option('volplus_agebandmsg')))?>
+		<input type="date" id="popup_date_birth" name="popup_date_birth" format= "dd/MM/yyyy" style="width: 200px" value="<?php echo implode('-', array_reverse(explode('/', $volunteer->date_birth)));?>"/>
+	</div>
+
 <!--		</div>-->
 	<?php// }; ?>
-<!-- <div class="volplus-col-12"><?php echo "POST:<br/>" . json_encode($_POST, JSON_UNESCAPED_SLASHES)?><br/>
+<div class="volplus-col-12">
+
+<!-- <?php echo "POST:<br/>" . json_encode($_POST, JSON_UNESCAPED_SLASHES)?><br/>
 <?php echo "volunteer:<br/>" . json_encode($volunteer, JSON_UNESCAPED_SLASHES)?><br/>
-<?php// var_dump_safe($GLOBALS['volunteer_fields']);?>
+<?php// var_dump_safe($GLOBALS['volunteer_fields']);?>-->
 <div class="volplus-col-5"><?php var_dump_safe($_POST) ?></div>
-<div class="volplus-col-5"><?php var_dump_safe($volunteer) ?></div></div>-->
+<div class="volplus-col-5"><?php var_dump_safe($volunteer) ?></div>
+</div>
 
 	<script type="text/javascript" >
 		document.getElementById('disability').onchange = function() {
@@ -377,10 +390,83 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 				document.getElementById("display-details-label").style.display = "none";
 			}
 		}
+		
 
 
 
 		jQuery(document).ready(function($) {
+
+			function getAge(dateString) {
+				var today = new Date();
+				var birthDate = new Date(dateString);
+				var age = today.getFullYear() - birthDate.getFullYear();
+				var m = today.getMonth() - birthDate.getMonth();
+				if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+					age--;
+				}
+				return age;
+			}
+			
+			$("#agerangediv").click(function () {
+				$("#calcagerange").dialog("open");
+			})
+			
+			$("#calcagerange").dialog({
+				dialogClass: 'wp-dialog',
+				modal: true,
+				autoOpen: false,
+				show: {effect: "fade", duration: 500},
+				closeOnEscape: true,
+				title: "Calculate your age band",
+				width: 500,
+				buttons: [
+		 			{
+						text: 'I\'d rather not say',
+						class: 'button',
+						click: function() {
+							$("#date_birth_prefer_not_say").val("yes");
+								$("#date_birth").val(null);
+								$("#popup_date_birth").val(null);
+								$("#agerange").val("Not recorded");
+							$(this).dialog('close');
+						}
+					},
+		 			{
+						text: 'Cancel',
+						class: 'button',
+						click: function() {
+							$(this).dialog('close');
+						}
+					},
+		 			{
+						text: 'Calculate Band',
+						class: 'button',
+						click: function() {
+							var dob = $("#popup_date_birth").val();
+							if(dob){
+								$("#date_birth").val(dob);
+								$("#date_birth_prefer_not_say").val("no");
+								var age = getAge(dob);
+								if(age < 16){ $("#agerange").val("Under 15");
+								} else if(age <19){ $("#agerange").val("15-18");
+								} else if(age <26){ $("#agerange").val("19-25");
+								} else if(age <45){ $("#agerange").val("26-44");
+								} else if(age <65){ $("#agerange").val("45-64");
+								} else {$("#agerange").val("Over 65");
+								}								
+								$(this).dialog('close');
+							}
+						}
+					}
+				]
+				
+			})
+			
+			$('#calcagerange').live('keyup', function(e){
+				if (e.keyCode == 13) {
+					$(':button:contains("Calculate Band")').click();
+				}
+			});
 			
 			$("#user_registration").submit(function(e){
 				$.cookie("volplus_newuser", true,  { path: '/' });

@@ -1,3 +1,9 @@
+// run php in javascript
+function fromPHP(phpString) {
+	var category = phpString;
+	alert(category);
+}
+
 function LimitInterests()  { 
 	var elements = document.getElementsByName("interests[]");
 	var total = 0;
