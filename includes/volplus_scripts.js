@@ -40,7 +40,7 @@ jQuery(document).ready(function($) {
 		document.cookie = 'volplus_user_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
 		document.cookie = 'volplus_user_first_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
 		document.cookie = 'volplus_user_last_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-		document.cookie = 'volplus_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+//		document.cookie = 'volplus_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
 		document.location.href = '/';
 //		document.getElementById("not_logged_in").style.display = "inherit";
 //		document.getElementById("login").style.display = "inherit";

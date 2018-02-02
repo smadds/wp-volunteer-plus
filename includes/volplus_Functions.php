@@ -69,7 +69,7 @@ $response['body'] = json_encode($bodyobj);
 function is_volplus_user_logged_in(){
 	if(isset($_COOKIE['volplus_user_first_name'])) setcookie('volplus_user_first_name', $_COOKIE['volplus_user_first_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 	if(isset($_COOKIE['volplus_user_last_name'])) setcookie('volplus_user_last_name', $_COOKIE['volplus_user_last_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-	if(isset($_COOKIE['volplus_user'])) setcookie('volplus_user', $_COOKIE['volplus_user'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+//	if(isset($_COOKIE['volplus_user'])) setcookie('volplus_user', $_COOKIE['volplus_user'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 	if(isset($_COOKIE['volplus_user_id'])){
 		setcookie('volplus_user_id', $_COOKIE['volplus_user_id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 		return true;
@@ -528,12 +528,12 @@ function ajax_login(){
 			setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
 			setcookie('volplus_user_first_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
 			setcookie('volplus_user_last_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
-			setcookie('volplus_user',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+//			setcookie('volplus_user',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
 		}else{
 	 		setcookie('volplus_user_id', $responsebody['id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 			setcookie('volplus_user_first_name', $volunteer->first_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 			setcookie('volplus_user_last_name', $volunteer->last_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-			setcookie('volplus_user', json_encode($volunteer), time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+//			setcookie('volplus_user', json_encode($volunteer), time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 
 			echo json_encode(array(
 				'loggedin'=>true,
@@ -653,7 +653,7 @@ function ajax_addvolunteer(){
 		setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
 		setcookie('volplus_user_first_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
 		setcookie('volplus_user_last_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
-		setcookie('volplus_user',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+//		setcookie('volplus_user',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
 	} else {
 // get user details
 //		echo json_encode(array('loggedin'=>true, 'message'=>$body, 'volplus_id'=>$responsebody['id']));die();
@@ -675,12 +675,12 @@ function ajax_addvolunteer(){
 			setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
 			setcookie('volplus_user_first_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
 			setcookie('volplus_user_last_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
-			setcookie('volplus_user',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+//			setcookie('volplus_user',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
 		}else{
 	 		setcookie('volplus_user_id', $responsebody['id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 			setcookie('volplus_user_first_name', $volunteer->first_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 			setcookie('volplus_user_last_name', $volunteer->last_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-			setcookie('volplus_user', json_encode($volunteer), time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+//			setcookie('volplus_user', json_encode($volunteer), time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 
 			echo json_encode(array(
 				'loggedin'=>true,

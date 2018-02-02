@@ -318,18 +318,18 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		<label class="volplus-col-6">Interests
 			<?php display_interests($volunteer->interests);?></label>
 		<label class="volplus-col-6">Activities
-			<?php display_activities($volunteer->activities);?></label>				
+			<?php display_activities($volunteer->activities);?></label>
 		<h2 class="volplus-col-12"><br/>Availability</h2>
 		<label class="volplus-col-4">When are you available?
 			<?php display_availability_table($volunteer);?></label>
 		<label class="volplus-col-8">Availability Details (specific details regarding your availability e.g. shift worker)  
 			<textarea id="availability_details" name="availability_details" rows="10"><?php if(isset($volunteer->availability_details)) echo $volunteer->availability_details?></textarea></label>
 		<h2 class="volplus-col-12"><br/>Volunteering</h2>
-		<label class="volplus-col-12">Volunteering Experience  
+		<label class="volplus-col-12">Volunteering & Work Experience
 			<textarea id="volunteering_experience" name="volunteering_experience" rows="10"><?php if(isset($volunteer->volunteering_experience)) echo $volunteer->volunteering_experience?></textarea></label>
-		<label class="volplus-col-4">Why volunteer?  
-			<?php display_reasons($volunteer->reasons);?></label>				
-		<label class="volplus-col-8">Further details on why volunteering  
+		<label class="volplus-col-4">Why volunteer?
+			<?php display_reasons($volunteer->reasons);?></label>
+		<label class="volplus-col-8">Any additional information
 			<textarea id="volunteering_reason_info" name="volunteering_reason_info" rows="10"><?php if(isset($volunteer->volunteering_reason_info)) echo $volunteer->volunteering_reason_info?></textarea></label>
 		<h2 class="volplus-col-12"><br/>About</h2>
 		<label class="volplus-col-3">Age band
@@ -355,7 +355,9 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 			<?php }?>
 		<div class="volplus-col-12">
 			<?php if(get_option('volplus_compliancepage')) {?>
-				<label class="volplus-col-8">I accept the <a href="/<?php echo get_post_field( 'post_name', get_option('volplus_compliancepage'))?>" target=_blank>Terms & Conditions</a>
+				<div id="legal" hidden><?php echo get_post_field('post_content', get_option('volplus_compliancepage'));?></div>
+				<label class="volplus-col-8">I accept the <a id="legalPopup" href="#">Terms & Conditions</a>
+<!--				<label class="volplus-col-8">I accept the <a href="/<?php echo get_post_field( 'post_name', get_option('volplus_compliancepage'))?>" target=_blank>Terms & Conditions</a>-->
 					<input type="checkbox" name="accept_terms" required></label>
 			<?php }?>
 			<input id="user_registration" class = "button" type="submit" name="user_registration" value="<?php echo $buttontext ?>" style="font-size:1.2em">
@@ -370,6 +372,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		echo stripslashes(html_entity_decode(get_option('volplus_agebandmsg')))?>
 		<input type="date" id="popup_date_birth" name="popup_date_birth" format= "dd/MM/yyyy" style="width: 200px" value="<?php echo implode('-', array_reverse(explode('/', $volunteer->date_birth)));?>"/>
 	</div>
+
 
 <!--		</div>-->
 	<?php// }; ?>
@@ -406,6 +409,30 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 				}
 				return age;
 			}
+			
+			$("#legalPopup").click(function () {
+				$("#legal").dialog("open");
+			})
+			
+			$("#legal").dialog({
+				dialogClass: 'wp-dialog',
+				modal: true,
+				autoOpen: false,
+				show: {effect: "fade", duration: 500},
+				closeOnEscape: true,
+				title: "Terms & Conditions",
+				width: ($(window).width()*0.8),
+				buttons: [
+		 			{
+						text: 'Close',
+						class: 'button',
+						click: function() {
+							$(this).dialog('close');
+						}
+					}
+				]
+				
+			})
 			
 			$("#agerangediv").click(function () {
 				$("#calcagerange").dialog("open");
