@@ -335,7 +335,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		<label class="volplus-col-3">Age band
 <?php
 ?>
-			<div id='agerangediv'><input type="text" id='agerange' readonly value='<?php if(isset($volunteer->date_birth)){echo dobToAgeBand($volunteer->date_birth);}else{ echo "Set age band";}?>'/></div></label> 
+			<div id='agerangediv'><input type="text" id='agerange' style='height:2.6em;' readonly value='<?php if(isset($volunteer->date_birth)){echo dobToAgeBand($volunteer->date_birth);}else{ echo "Set age band";}?>'/></div></label> 
 <!--			<input type="date" id="date_birth" name="date_birth" format= "dd/MM/yyyy" style="height: 2.3rem" value="<?php echo implode('-', array_reverse(explode('/', $volunteer->date_birth)));?>"/></label>-->
 		<input type="hidden" id="date_birth_prefer_not_say" name="date_birth_prefer_not_say" value="1"/>
 		<input type="hidden" id="date_birth" name="date_birth"/>
