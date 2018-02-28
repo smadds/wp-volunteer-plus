@@ -69,7 +69,7 @@ $age_band_message .= "<p>Please enter your date of birth and we will calculate t
 		</tr>
 		<th scope="row">Plugin License Code</th>
 		<td><input type="password" name="volplus_license_code" size="40" value="<?php echo esc_attr( get_option('volplus_license_code') ); ?>" />
-			<span class="description">If you have not received your code contact <a href:"mailto:info@maddox.co.uk">info@maddox.co.uk</a></span></td>
+			<span class="description">If you have not received your code email <a href:"mailto:info@maddox.co.uk">info@maddox.co.uk</a> with your Domain name as shown above</span></td>
 		<tr valign="top">
 			<th scope="row"><h3>Google Maps</h3></th>
 		</tr>
@@ -128,15 +128,22 @@ $age_band_message .= "<p>Please enter your date of birth and we will calculate t
 			<span class="description">Strips out text within brackets in Opportunity titles & Organisation names</span></td>
 		</tr>
 		<tr valign="top">
+			<th scope="row">Hide Org Direct Contact fields</th>
+			<td><input type="checkbox" name="volplus_hideorgdirect" <?php if(get_option('volplus_hideorgdirect', 'on') == 'on') echo 'checked'; ?> />
+			<span class="description">Hides telephone & emails from Organisation details</span></td>
+		</tr>
+		<tr valign="top">
 			<th scope="row">Hide Quality Control item details </th>
-			<td><input type="checkbox" name="volplus_hideqcdetails" <?php if(get_option('volplus_hideqcdetails', null) == 'on') echo 'checked'; ?> /></td>
+			<td><input type="checkbox" name="volplus_hideqcdetails" <?php if(get_option('volplus_hideqcdetails', null) == 'on') echo 'checked'; ?> />
+			<span class="description">Hides 2nd level of details</span></td>
 		</tr>
 		<tr valign="top">
-			<th scope="row">Volunteer login timeout (hours)</th>
-			<td><input type="number" name="volplus_voltimeout" min="1" max="72" value="<?php echo esc_attr(get_option('volplus_voltimeout', 1)); ?>" /></td>
+			<th scope="row">Volunteer login timeout</th>
+			<td><input type="number" name="volplus_voltimeout" min="1" max="72" value="<?php echo esc_attr(get_option('volplus_voltimeout', 1)); ?>" />
+			<span class="description">Hour(s). Accepts decimal (e.g. 0.5 for 30mins)</span></td>
 		</tr>
 		<tr valign="top">
-			<th scope="row">T&C page (checkbox on registration if selected)</th>
+			<th scope="row">T&C page</th>
 			<td><?php
 				$args= array(
 					'show_option_none'=>'(Not Used)',
@@ -144,7 +151,7 @@ $age_band_message .= "<p>Please enter your date of birth and we will calculate t
 					'name'=> 'volplus_compliancepage'
   				);
 				wp_dropdown_pages($args);?>
-			</td>
+			<span class="description"> Shows a mandatory check-box on registration if a page is selected</span></td>
 		</tr>
 	</table>
 	<?php submit_button();?> 
@@ -189,6 +196,7 @@ function volplus_plugin_settings() {
 	register_setting( 'volplus-plugin-settings-group', 'volplus_agebandmsg' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_compliancepage' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_hidebrackets' );	
+	register_setting( 'volplus-plugin-settings-group', 'volplus_hideorgdirect' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_hideqcdetails' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_voltimeout' );	
 }

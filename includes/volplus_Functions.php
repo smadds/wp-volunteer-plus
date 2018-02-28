@@ -1,5 +1,20 @@
 <?php
 
+// Display Organisation details
+
+function getOrgDetails($id) {
+	$organisation = wp_remote_get(API_URL . 'organisations/'.$id, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+	$response_code = wp_remote_retrieve_response_code($organisation);
+	if($response_code == 200) {
+		$organisation = json_decode($organisation['body'], true);
+		return $organisation;
+	} else {
+		wp_redirect("/404");
+		exit;
+	}
+}
+
+
 // get volunteer details given ID - WITH CORRECTIONS
 function get_volunteer_details($id) {
 	$endpoint = 'volunteers/' . $id;
@@ -694,6 +709,18 @@ function ajax_addvolunteer(){
 	}
 	die();
 }
+
+//AJAX GET PAGE
+add_action('wp_ajax_nopriv_volplus_get_legal', 'volplus_get_legal');
+add_action('wp_ajax_volplus_get_legal', 'volplus_get_legal');
+function volplus_get_page(){
+	if(null !==(get_option('volplus_compliancepage'))) {
+		$output = apply_filters('the_content', get_post_field('post_content', get_option('volplus_compliancepage')));
+		echo json_encode($output);
+		die;
+	}
+}
+
 
 //convert dob to age band
 function dobToAgeBand($age){

@@ -6,6 +6,7 @@ function volplus_opportunity_detail_func($atts) {
 	parse_str($_SERVER['QUERY_STRING'],$querystring);
 	$opp = $querystring['opp-id'];
 	setcookie('volplus_opp_id', $opp, 0, COOKIEPATH, COOKIE_DOMAIN );
+//Fetch opportunity details
 	$opportunity = wp_remote_get(API_URL . 'opportunities/'.$opp, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
 	$response_code = wp_remote_retrieve_response_code($opportunity);
 
@@ -18,9 +19,12 @@ function volplus_opportunity_detail_func($atts) {
 		wp_redirect("/404");
 		exit;
 	}
+	
+	$organisation = getOrgDetails($opportunity['organisation']['id']);
 
 ?>
-<div id="opportunity_detail">
+
+<div id='opportunity_detail' class='volplus-col-12'>
 
 	<h1><?php echo remove_brackets($opportunity['opportunity']); ?></h1>
 	
@@ -76,7 +80,52 @@ function volplus_opportunity_detail_func($atts) {
 
 	<?php echo $opportunity['skills']; ?>
 	
-	<p>Posted by <?php echo $opportunity['organisation']['organisation']; ?></p>
+	<div id=orgDetails class="volplus-col-12">
+		<h2>Organisation</h2>
+		<div class="volplus-col-6">
+			<strong><?php echo remove_brackets($organisation['organisation'])?><br/></strong>
+			<?php 
+			if(null !== $organisation['address_line_1']) echo stripcslashes(html_entity_decode($organisation['address_line_1'])) . "<br/>"; 
+			if(null !== $organisation['address_line_2']) echo stripcslashes(html_entity_decode($organisation['address_line_2'])) . "<br/>"; 
+			if(null !== $organisation['address_line_3']) echo stripcslashes(html_entity_decode($organisation['address_line_3'])) . "<br/>"; 
+			if(null !== $organisation['town']) echo stripcslashes(html_entity_decode($organisation['town'])); 
+			if(null !== $organisation['county']) echo ", " . stripcslashes(html_entity_decode($organisation['county'])) . "<br/>"; 
+			if(null !== $organisation['postcode']) echo stripcslashes(html_entity_decode($organisation['postcode'])); 
+			?>
+		</div>	
+		<div class="volplus-col-6">
+			<?php 
+			$orgStatus = array(
+				'',
+				'Registered Charity',
+				'Charitable Incorporated Organisations (CIO)',
+				'Unregistered Community Group',
+				'Community Interest Company (CIC)',
+				'Company Limited by Guarantee',
+				'Statutory Organisation',
+				'Private Business',
+				'Other'
+			);		
+			if(null !== $organisation['status']) echo "Org type: <strong>" . $orgStatus[$organisation['status']] . "</strong><br/>"; 
+			if(null !== $organisation['website']) echo "Website: <a target=_blank href='" . stripcslashes(html_entity_decode($organisation['website'])) . "'>". stripcslashes(html_entity_decode($organisation['website'])) . "</a><br/>";
+			if(get_option('volplus_hideorgdirect', 'on') !== 'on') {
+				if(null !== $organisation['telephone_number']) echo "Tel:  <a target=_blank href='tel:" . stripcslashes(html_entity_decode($organisation['telephone_number'])) . "'>"  . stripcslashes(html_entity_decode($organisation['telephone_number'])) . "</a><br/>"; 
+				if(null !== $organisation['email_address']) echo "Email: <a target=_blank href='mailto:" . stripcslashes(html_entity_decode($organisation['email_address'])) . "'>" . stripcslashes(html_entity_decode($organisation['email_address'])) . "</a><br/>";
+				if(null !== $organisation['additional_email_address']) echo "2nd email: <a target=_blank href='mailto:" . stripcslashes(html_entity_decode($organisation['additional_email_address'])) . "'>" . stripcslashes(html_entity_decode($organisation['additional_email_address'])) . "</a><br/>";
+			}
+			if(null !== $organisation['charity_registration_number']) echo "Charity number: " . stripcslashes(html_entity_decode($organisation['charity_registration_number'])) . "<br/>";
+			if(null !== $organisation['company_registration_number']) echo "Company number: " . stripcslashes(html_entity_decode($organisation['company_registration_number'])) . "<br/>";
+			?>
+		</div>	
+		<?php if(null !== $organisation['about']){
+			echo "<div class='volplus-col-12'><strong>Organisation Information</strong><br/>";
+			echo stripslashes( html_entity_decode($organisation['about'])) . "</div>";
+		} ?>
+		<?php if(null !== $organisation['mission_statement']){
+			echo "<div class='volplus-col-12'><strong>Mission Statement</strong><br/>";
+			echo stripslashes( html_entity_decode($organisation['mission_statement'])) . "</div>";
+		} ?>
+	</div>
 				
 	<?php if($opportunity['interests']) { ?>
 	
@@ -147,9 +196,9 @@ function volplus_opportunity_detail_func($atts) {
 			case 3: case 4: case 5:
 				if($opportunity['location']['address']) {
 					if(count($opportunity['location']['address']) == 1) {
-						echo "<h2>Address</h2>";
+						echo "<h2>Opportunity Address</h2>";
 					} else {
-						echo "<h2>Addresses</h2>";
+						echo "<h2>Opportunity Addresses</h2>";
 					}
 				}
 				foreach($opportunity['location']['address'] as $address) {
@@ -319,7 +368,9 @@ function volplus_opportunity_detail_func($atts) {
 			<?php } ?>
 		<?php } ?>
 	</div>
-	<!-- <?php var_dump_safe($opportunity);?>-->
+	
+	<?php var_dump_safe($organisation);?><!-- -->
+	<?php var_dump_safe($opportunity);?><!-- -->
 	
 	<?php wp_nonce_field( 'ajax-enquiry-nonce', 'security' ); ?>
 </div>	

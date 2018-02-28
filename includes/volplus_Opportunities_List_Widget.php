@@ -30,7 +30,8 @@ parse_str($_SERVER['QUERY_STRING'],$querystring);
 
 $response_code = wp_remote_retrieve_response_code($opportunities);
 $opportunities = json_decode($opportunities['body'], true);
-$location = ["","No Location","Working from home","Organisational Address","Specific Address","Multiple Specific Addresses","Countrywide","Regional"];
+$location = ["","No Location","Working from home","Organisational Address","Specific Address","Multiple Specific Addresses","County-
+wide","Regional"];
 
 //get_header();
 

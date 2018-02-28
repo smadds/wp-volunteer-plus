@@ -19,7 +19,7 @@ function volplus_list_opportunities_func($atts = [], $content = null, $tag = '')
 	$opportunities = wp_remote_get(API_URL . 'opportunities?'.$_SERVER['QUERY_STRING'], array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
 	$response_code = wp_remote_retrieve_response_code($opportunities);
 	$opportunities = json_decode($opportunities['body'], true);
-	$location = ["","No Location","Working from home","Specific Address","Specific Address","Multiple Specific Addresses","Countrywide","Regional"];
+	$location = ["","No Location","Working from home","Specific Address","Specific Address","Multiple Specific Addresses","County-wide","Regional"];
 
 // split query string to array
 	parse_str($_SERVER['QUERY_STRING'],$querystring);
