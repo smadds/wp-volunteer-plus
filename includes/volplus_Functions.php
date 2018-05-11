@@ -1,7 +1,46 @@
 <?php
 
-// Display Organisation details
+// Create HTML table given array, optional class name and optional id name
+function html_table($data = array(),$tableclass="",$tableid="")
+{
+	$rows = array();
+	$headings = array();
+	$firstrow = $data['0'];
 
+	foreach ($firstrow as $label=>$cell) {
+		$headings[] = "<th>{$label}</th>";
+	}
+
+	foreach ($data as $key=>$row) {
+		$cells = array();
+		foreach ($row as $label=>$cell) {
+			$cells[] = "<td>{$cell}</td>";
+		}
+		$rows[] = "<tr>" . implode('', $cells) . "</tr>";
+	}
+	$html = "<table";
+	if($tableclass<>"") $html .= " class='" . $tableclass . "'";
+	if($tableid<>"") $html .= " id='" . $tableid . "'";
+	$html .= "><tr>" . implode('',$headings) . "</tr>" . implode('', $rows) . "</table>";
+	return  $html; 
+}
+
+
+// Get enquiry history from volunteer id
+function getEnqHistory($id) {
+	$enqhistory = wp_remote_get(API_URL . 'enquiries/'.$id, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+	$response_code = wp_remote_retrieve_response_code($enqhistory);
+	if($response_code == 200) {
+		$enqhistory = json_decode($enqhistory['body'], true);
+		return $enqhistory;
+	} else {
+		wp_redirect("/404");
+		exit;
+	}
+}
+
+
+// Get Organisation details from org id
 function getOrgDetails($id) {
 	$organisation = wp_remote_get(API_URL . 'organisations/'.$id, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
 	$response_code = wp_remote_retrieve_response_code($organisation);
@@ -12,6 +51,99 @@ function getOrgDetails($id) {
 		wp_redirect("/404");
 		exit;
 	}
+}
+
+// Get Opportunity details from opp id
+function get_opportunity_details($id) {
+	$opportunity = wp_remote_get(API_URL . 'opportunities/'.$id, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+	$response_code = wp_remote_retrieve_response_code($opportunity);
+	if($response_code == 200) {
+		$opportunity = json_decode($opportunity['body'], true);
+		return $opportunity;
+	} else {
+		setcookie('volplus_debug_getfailure', json_encode($opportunity), time()+(3600 * get_option('volplus_voltimeout',1)));
+		var_dump_safe($opportunity);
+//		wp_redirect("/404");
+		exit;
+	}
+}
+
+// Get Organisation opportunities from org id
+function getOrgOpportunities($id) {
+	$orgopportunities = wp_remote_get(API_URL . 'organisations/'.$id.'/opportunities', array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+	$response_code = wp_remote_retrieve_response_code($orgopportunities);
+	if($response_code == 200) {
+		$orgopportunities = json_decode($orgopportunities['body'], true);
+		return $orgopportunities;
+	} else {
+		wp_redirect("/404");
+		exit;
+	}
+}
+
+// Adjust Org Opportunities array for display
+function orgOppsForDisplay($data = array()){
+	$oppstatus = array("",'Draft','Active','Inactive','Expired');
+	$newrow = array();
+	$newdata = array();
+	foreach ($data as $key=>$row) {
+		$newrow['Opportunity'] = $row['opportunity'];
+		$newrow['Status'] = $oppstatus[$row['status']];
+		if($row['status']==2) {
+			$newrow['Manage'] = "<a class='button' href='/manage-opportunity/?opp-id=" . $row['id'] . "' >Edit</a>";
+		} else {
+			$newrow['Manage'] = " ";
+		}
+//		var_dump_safe($newrow);
+		$newdata[$key] = $newrow;
+	}
+	return  $newdata; 
+}
+
+// Adjust Org Contacts array for display
+function orgContactsForDisplay($data = array()){
+//	return $data;
+	$newrow = array();
+	$newdata = array();
+	foreach ($data as $key=>$row) {
+		$newrow['Name'] = $row['first_name'] . " " . $row['last_name'];
+		$newrow['Role'] = $row['role'];
+		$newrow['Email'] = "<a href='mailto:" . $row['email_address'] . "'>" . $row['email_address'] . "</a>";
+		$newrow['Telephone'] = "<a href='tel:" . $row['telephone_number'] . "'>" . $row['telephone_number'] . "</a>";
+		$newrow['Mobile'] = "<a href='tel:" . $row['mobile_number'] . "'>" . $row['mobile_number'] . "</a>";
+		$newdata[$key] = $newrow;
+	}
+	return  $newdata; 
+}
+
+// Get Organisation contacts from org id
+function getOrgContacts($id) {
+	$orgcontacts = wp_remote_get(API_URL . 'organisations/'.$id.'/contacts', array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+	$response_code = wp_remote_retrieve_response_code($orgcontacts);
+	if($response_code == 200) {
+		$orgcontacts = json_decode($orgcontacts['body'], true);
+		return $orgcontacts;
+	} else {
+		wp_redirect("/404");
+		exit;
+	}
+}
+
+function findSubIndex($items, $field, $value)
+{
+   foreach($items as $key => $item)
+   {
+      if ( $item[$field] === $value )
+         return $item;
+   }
+   return false;
+}
+
+// Get a single Organisation Contact  details from org id and contact id
+function getOrgContactDetails($orgid, $contactid) {
+	$contacts = getOrgContacts($orgid);
+	$contact = findSubIndex($contacts, 'id', $contactid);
+	return $contact;
 }
 
 
@@ -81,16 +213,22 @@ $response['body'] = json_encode($bodyobj);
 
 
 // check logged in cookie & reset the countdown if already set
+// returns 1 if volunteer logged in, 2 if org contact logged in or 0 if not logged in
 function is_volplus_user_logged_in(){
+	$loggedin=0;
 	if(isset($_COOKIE['volplus_user_first_name'])) setcookie('volplus_user_first_name', $_COOKIE['volplus_user_first_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 	if(isset($_COOKIE['volplus_user_last_name'])) setcookie('volplus_user_last_name', $_COOKIE['volplus_user_last_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 //	if(isset($_COOKIE['volplus_user'])) setcookie('volplus_user', $_COOKIE['volplus_user'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 	if(isset($_COOKIE['volplus_user_id'])){
 		setcookie('volplus_user_id', $_COOKIE['volplus_user_id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-		return true;
-	} else {
-		return false;
+		$loggedin += 1;
 	}
+	if(isset($_COOKIE['volplus_org_id'])){
+		setcookie('volplus_org_id', $_COOKIE['volplus_org_id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+		$loggedin += 1;
+	}
+	if(isset($_COOKIE['volplus_org_name'])) setcookie('volplus_org_name', $_COOKIE['volplus_org_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+	return $loggedin;
 }
 
 
@@ -111,7 +249,7 @@ function array_multi_search($needle,$haystack){
 //	echo_safe($needle);
 //	var_dump_safe($haystack);
 	foreach($haystack as $key=>$data){
-		if(in_array($needle,$data)) return $needle;
+		if(in_array($needle,$data)) return $data;
 	}
 return false;
 }
@@ -121,6 +259,29 @@ return false;
 function get($key,  $default_value = '')
 {
     return isset($_GET[$key]) ? esc_attr($_GET[$key]) : $default_value;
+}
+
+class volplus_opportunity {
+			var $opportunity;		// required
+			var $organisation;
+			var $description;
+			var $skills;
+			var $interests = array();
+			var $activities = array();
+			var $enquiries;
+			var $location;
+			var $address_line_1;
+			var $address_line_2;
+			var $address_line_3;
+			var $town;				// required
+			var $county;
+			var $postcode;			// required
+			var $start_date;
+			var $end_date;
+			var $availability = array();
+			var $availability_details;
+			var $quality_control = array();
+			var $quality_control_notes = array();
 }
 
 class volplus_volunteer {
@@ -162,6 +323,44 @@ class volplus_volunteer {
 			var $how_heard=0;		//required specific integer from Volunteer fields
 }
 
+class volplus_org_contact {
+			var $title;
+			var $first_name;		// required
+			var $last_name;		// required
+			var $address_line_1;	// required
+			var $address_line_2;
+			var $address_line_3;
+			var $town;				// required
+			var $county;			// required
+			var $postcode;			// required
+			var $telephone;		// required
+			var $mobile;
+			var $email_address;	// required
+			var $interests = array();		// required
+			var $activities = array();	// required
+//			var $mon_mor, $mon_aft, $mon_eve;
+//			var $tue_mor, $tue_aft, $tue_eve;
+//			var $wed_mor, $wed_aft, $wed_eve;
+//			var $thu_mor, $thu_aft, $thu_eve;
+//			var $fri_mor, $fri_aft, $fri_eve;
+//			var $sat_mor, $sat_aft, $sat_eve;
+//			var $sun_mor, $sun_aft, $sun_eve;
+			var $availability = array();
+			var $availability_details;
+			var $volunteering_experience;
+			var $reasons = array();
+			var $volunteering_reason_info;
+			var $date_birth;		// required unless prefer not say
+			var $date_birth_prefer_not_say=0;
+			var $gender=0;			// required 1:male, 2:female, 3:prefer not to say, 4:not known
+			var $employment=0;		//required specific integer from Volunteer fields
+			var $ethnicity=0;		//required specific integer from Volunteer fields
+			var $disability=0;		// required 1:yes, 2:no, 3:prefer not to say
+			var $disabilities = array();	// required if disability=1. list of objects that each represent a single disability. see volunteer fields
+			var $password;			// required
+			var $password_confirmation; // required
+			var $how_heard=0;		//required specific integer from Volunteer fields
+}
 
 // display disability types (multi-select)
 function disability_type($selected){
@@ -244,6 +443,7 @@ function ethnicity($selected) {
 	echo "</select>";
 }
 
+
 // display employment statuses
 function employment($selected) {
 	echo "<select id='employment' name='employment' required>";
@@ -254,6 +454,30 @@ function employment($selected) {
 			echo "<option value=" . $employment_status['id'];
 			if($employment_status['id'] == $selected) echo " selected";
 			echo ">" . $employment_status['value'] . "</option>";
+		}
+	echo "</select>";
+}
+
+
+// display location options
+function location($selected) {
+	$thelocations = array( 
+		['id'=>1, 'value'=> 'No Location'], 
+//		['id'=>2, 'value'=> 'Working from home'],
+		['id'=>3, 'value'=> 'Organisation address'],
+		['id'=>4, 'value'=> 'Specific Address'],
+		['id'=>5, 'value'=> 'Multiple Specific Addresses'],
+//		['id'=>6, 'value'=> 'Countywide'],
+		['id'=>7, 'value'=> 'District']
+	);
+	echo "<select id='location' name='location' required>";
+		echo "<option value='0' ";
+		if($selected=="") echo 'selected';
+		echo ">Select</option>";
+		foreach ($thelocations as $thelocation) {
+			echo "<option value=" . $thelocation['id'];
+			if($thelocation['id'] == $selected) echo " selected";
+			echo ">" . $thelocation['value'] . "</option>";
 		}
 	echo "</select>";
 }
@@ -272,22 +496,22 @@ function display_reasons($selected) {
 
 
 // display interests (multi-select)
-function display_interests($selected) {
+function display_interests(array $selected = [], $prefix) {
 	echo '<div class="colcontainer">';             
 	foreach($GLOBALS['volunteer_interests'] as $interest) {
 		if(in_array($interest['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='interests[]' value='".$interest['id']."' checked";
-		else echo"<label class='colitem'><input type='checkbox' id='interest-".$interest['id']."' name='interests[]' value='".$interest['id']."'";
+		else echo"<label class='colitem'><input type='checkbox' id='".$prefix."interest-".$interest['id']."' name='interests[]' value='".$interest['id']."'";
 		echo " onclick='return LimitInterests()'>".$interest['interest']."</label><br />";
 	}
 	echo '</div>';
 }
 
 //display activities (multi-select)
-function display_activities($selected){
+function display_activities($selected, $prefix){
 	echo '<div class="colcontainer">';             
 	foreach($GLOBALS['volunteer_activities'] as $activity) {
 		if(in_array($activity['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='activities[]' value='".$activity['id']."' checked";
-		else echo"<label class='colitem'><input type='checkbox' id='activity-".$activity['id']."' name='activities[]' value='".$activity['id']."'";
+		else echo"<label class='colitem'><input type='checkbox' id='".$prefix."activity-".$activity['id']."' name='activities[]' value='".$activity['id']."'";
 		echo " onclick='return LimitActivities()'>".$activity['activity']."</label><br />";
 	}
 	echo '</div>';
@@ -309,6 +533,52 @@ function display_availability_simple($selected) {
 	}
 	echo '</div>';
 }
+
+//display application process (multi-select)
+function applicationProcess(array $selected){
+//	var_dump_safe($selected);
+	echo '<div class="colcontainer">';             
+	foreach($GLOBALS['opportunity_fields']['application_process'] as $process) {
+		if(in_array($process['id'], $selected)) echo"<label class='colitem-selected'><input type='checkbox' name='application_process[]' value='".$process['id']."' checked";
+		else echo"<label class='colitem'><input type='checkbox' id='application_process-".$process['id']."' name='application_process[]' value='".$process['id']."'";
+		echo ">".$process['value']."</label><br />";
+	}
+	echo '</div>';
+}
+
+// search array for specific key = value
+function searchSubArray(Array $array, $key, $value) {   
+    foreach ($array as $subarray){  
+        if (isset($subarray[$key]) && $subarray[$key] == $value)
+          return $subarray;       
+    } 
+}
+
+//display quality control requirements (multi-select)
+function qualityControl(array $selected){
+//	var_dump_safe($selected);
+	echo '<div class="colcontainer" style="min-height:55em"><table>';
+	echo '<th>Item</th><th>Applies</th><th>Notes</th>';            
+	foreach($GLOBALS['opportunity_fields']['quality_control'] as $key=>$qc) {
+		$selitem=searchSubArray($selected, 'id', $qc['id']);
+		echo '<tr>';
+		echo '<td>'.$qc['value']."</td>";
+		echo "<td><input type='radio' name='quality_control[".$qc['id']."]' value=1 ";
+		if(isset($selitem['status'])) if($selitem['status']==1 ) echo 'CHECKED';echo '/>Yes</input>';
+		echo "<input type='radio' name='quality_control[".$qc['id']."]' value=2 ";
+		if(isset($selitem['status'])) if($selitem['status']==2 ) echo 'CHECKED';echo '/>No</input>';
+		echo "<input type='radio' name='quality_control[".$qc['id']."]' value=3 ";
+		if(isset($selitem['status'])) if($selitem['status']==3 ) echo 'CHECKED';echo '/>N/A</input>';
+		echo "<input type='radio' name='quality_control[".$qc['id']."]' value=0 >x</input></td>";
+		echo "<td><input type='text' name='quality_control_notes[".$qc['id']."]' value='";
+		if(isset($selitem['notes'])) echo $selitem['notes'];
+		echo "'></input><input type = hidden name='quality_control_id[".$qc['id']."]' value='".$qc['value']."'></input>";
+		echo "</td>";
+		echo "</tr></label>";
+	}
+	echo '</table></div>';
+}
+
 
 
 // display availability table
@@ -338,6 +608,7 @@ function display_availability_table($selected){
 // var_dump_safe($selected);
 			echo '<td><input type="checkbox" id="availability-'.$index.'" class="volplus-checkbox" name="'.$period.'"';
 			if(array_key_exists($period, $selected)) echo ' checked';
+//			if(array_key_exists($period, $selected)) if($selected[$period]) echo ' checked';
 			echo '/></td>';
 			$index++;
 		}
@@ -351,29 +622,37 @@ function display_availability_table($selected){
 // safe printing of array
 // needs to be in debug mode (WP_DEBUG = true in wp-config.php) AND logged in as an admin
 function print_r_safe ($a){
-	if(defined('WP_DEBUG') && WP_DEBUG === true && current_user_can('administrator')) {
-		echo "<pre style='white-space:pre-wrap'>";
-		print_r($a);
-		echo "</pre>";
+	if(defined('WP_DEBUG') && WP_DEBUG === true && is_user_logged_in()) {
+		if(current_user_can('administrator')) {
+			echo "<pre style='white-space:pre-wrap'>";
+			print_r($a);
+			echo "</pre>";
+		}
 	}
 }
 function var_dump_safe ($a){
-	if(defined('WP_DEBUG') && WP_DEBUG === true && current_user_can('administrator')) {
-		echo "<pre style='white-space:pre-wrap'>";
-		var_dump($a);
-		echo "</pre>";
+	if(defined('WP_DEBUG') && WP_DEBUG === true && is_user_logged_in()) {
+		if(current_user_can('administrator')) {
+			echo "<pre style='white-space:pre-wrap'>";
+			var_dump($a);
+			echo "</pre>";
+		}
 	}
 }
 
 function echo_safe ($a){
-	if(defined('WP_DEBUG') && WP_DEBUG === true && current_user_can('administrator')) {
-		echo $a;
+	if(defined('WP_DEBUG') && WP_DEBUG === true && is_user_logged_in()) {
+		if(current_user_can('administrator')) {
+			echo $a;
+		}
 	}
 }
 
 function alert_safe ($a){
-	if(defined('WP_DEBUG') && WP_DEBUG === true && current_user_can('administrator')) {
-		echo '<script type="text/javascript">window.alert("'.$a.'")</script>';
+	if(defined('WP_DEBUG') && WP_DEBUG === true && is_user_logged_in()) {
+		if(current_user_can('administrator')) {
+			echo '<script type="text/javascript">window.alert("'.$a.'")</script>';
+		}
 	}
 }
 	
@@ -471,6 +750,7 @@ function geocode($address){
     }
 }
 
+
 // AJAX FUNCTIONS***********************************************************
 
 // AJAX LOGIN ********************************
@@ -485,15 +765,18 @@ function ajax_login_init(){
     // Enable the user with no privileges to run ajax_login() in AJAX
 }
 
+//called by ajax when volunteer login button pressed
 function ajax_login(){
 	// First check the nonce, if it fails the function will break
-	check_ajax_referer( 'ajax-login-nonce', 'security' );
+//	check_ajax_referer( 'ajax-login-nonce', 'security' );
 	// Nonce is checked, get the POST data and sign user on
 	$volpluslogin = array(
 		'email_address' => $_POST['email_address'],
 		'password' => $_POST['password'],
-		'type' => 1 // 1=volunteer, 2=organisation
+		'type' => (int) $_POST['login_type'] // 1=volunteer, 2=organisation
 	);
+		setcookie('volplus_debug_volpluslogin',json_encode($volpluslogin), time()+60, COOKIEPATH, COOKIE_DOMAIN );
+
 	$response = wp_remote_post(API_URL . 'login', array(
 		'timeout' => 45,
 		'redirection' => 5,
@@ -504,6 +787,7 @@ function ajax_login(){
 		'cookies' => array()
 		)
 	);
+		setcookie('volplus_debug',json_encode($response), time()+60, COOKIEPATH, COOKIE_DOMAIN );
 			
 	$responsebody = (array) json_decode($response['body']);
 	if ( $response['response']['code'] !== 200) {
@@ -522,43 +806,73 @@ function ajax_login(){
 		setcookie('volplus_user_first_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
 		setcookie('volplus_user_last_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
 		setcookie('volplus_user',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+		setcookie('volplus_org_id', 0, time()-60, COOKIEPATH, COOKIE_DOMAIN );
+		setcookie('volplus_org_name', 0, time()-60, COOKIEPATH, COOKIE_DOMAIN );
 	} else {
 // get user details
-//		echo json_encode(array('loggedin'=>true, 'message'=>$body, 'volplus_id'=>$responsebody['id']));die();
-//		setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
-//		$response2 = get_volunteer_details($responsebody['id']);
-		$response2 = get_volunteer_details($responsebody['id']);
-		$volunteer = json_decode($response2['body']);
-		if ( $response2['response']['code'] !== 200) {
-			$error_message = $response2->response->message;
-//			echo "Something went wrong: <em>".$response['response']['message']." (Code ".$response['response']['code'].")</em>";
-			$body = "";
-			foreach($volunteer as $key=>$data){
-//				echo "<br/>".$key.": ";
-				foreach($data as $data2){
-					$body .= $data2;
+		setcookie('volplus_debug_post',json_encode($_POST), time()+60, COOKIEPATH, COOKIE_DOMAIN );
+		if($_POST['login_type'] == 1){
+			$response2 = get_volunteer_details($responsebody['id'],$_POST['login_type']);
+			$volunteer = json_decode($response2['body']);
+			if ( $response2['response']['code'] !== 200) {
+				$error_message = $response2->response->message;
+//				echo "Something went wrong: <em>".$response['response']['message']." (Code ".$response['response']['code'].")</em>";
+				$body = "";
+				foreach($volunteer as $key=>$data){
+//					echo "<br/>".$key.": ";
+					foreach($data as $data2){
+						$body .= $data2;
+					}
 				}
-			}
-			echo json_encode(array('loggedin'=>false, 'message'=>__($body)));
-			setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
-			setcookie('volplus_user_first_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
-			setcookie('volplus_user_last_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
-//			setcookie('volplus_user',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
-		}else{
-	 		setcookie('volplus_user_id', $responsebody['id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-			setcookie('volplus_user_first_name', $volunteer->first_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-			setcookie('volplus_user_last_name', $volunteer->last_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-//			setcookie('volplus_user', json_encode($volunteer), time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+				echo json_encode(array('loggedin'=>false, 'message'=>__($body)));
+				setcookie('volplus_user_id',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+				setcookie('volplus_user_first_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+				setcookie('volplus_user_last_name',0 , time()-60, COOKIEPATH, COOKIE_DOMAIN );
+				setcookie('volplus_org_id', 0, time()-60, COOKIEPATH, COOKIE_DOMAIN );
+				setcookie('volplus_org_name', 0, time()-60, COOKIEPATH, COOKIE_DOMAIN );
+			}else{
+		 		setcookie('volplus_user_id', $responsebody['id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+				setcookie('volplus_user_first_name', $volunteer->first_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+				setcookie('volplus_user_last_name', $volunteer->last_name, time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+				setcookie('volplus_org_id', 0, time()-60, COOKIEPATH, COOKIE_DOMAIN ); // non org contact
+				setcookie('volplus_org_name', 0, time()-60, COOKIEPATH, COOKIE_DOMAIN ); // non org contact
 
-			echo json_encode(array(
-				'loggedin'=>true,
-				'message'=>__('Login successful'),
-				'response'=> $response2,
-				'first_name'=> $volunteer->first_name,
-				'last_name'=> $volunteer->last_name,
-				'volplus_id'=> $responsebody['id']
-			));
+				echo json_encode(array(
+					'loggedin'=>true,
+					'message'=>__('Login successful'),
+					'response'=> $response2,
+					'first_name'=> $volunteer->first_name,
+					'last_name'=> $volunteer->last_name,
+					'organisation_name'=> '',
+					'volplus_id'=> $responsebody['id'],
+					'login_type'=> 1,
+					'volplus_url'=> VOLPLUS_URL,
+					'redirect'=> ''
+				));
+			}
+		} elseif($_POST['login_type'] == 2){ // type 2 = org contact
+			$orgDetails = GetOrgDetails($responsebody['organisation']);
+			$contactDetails = getOrgContactDetails($responsebody['organisation'],$responsebody['id']);
+//			$contactDetails = json_decode($response2['body']);
+			setcookie('volplus_org_id', $responsebody['organisation'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_org_name', $orgDetails['organisation'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+	 		setcookie('volplus_user_id', $responsebody['id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user_first_name', $contactDetails['first_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+			setcookie('volplus_user_last_name', $contactDetails['last_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+				echo json_encode(array(
+					'loggedin'=>true,
+					'message'=>__('Login successful'),
+					'response'=> "",
+					'first_name'=> $contactDetails['first_name'],
+					'last_name'=> $contactDetails['last_name'],
+					'organisation_name'=> $orgDetails['organisation'],
+					'volplus_id'=> $responsebody['id'],
+					'login_type'=> 2,
+					'volplus_url'=> VOLPLUS_URL,
+					'redirect'=> '/manage-organisation'
+				));
 		}
+		
 	}
 	die();
 }
@@ -647,7 +961,8 @@ function ajax_addvolunteer(){
 		'httpversion' => '1.0',
 		'blocking' => true,
 		'headers' => array('Authorization' => 'Bearer '.API_KEY),
-		'body' => (array) $volpluslogin,
+//		'body' => (array) $volpluslogin,
+		'body' => (array) $volplusaddvolunteer,
 		'cookies' => array()
 		)
 	);

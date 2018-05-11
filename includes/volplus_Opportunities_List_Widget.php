@@ -25,6 +25,9 @@ class volplus_Opportunities_List_Widget extends WP_Widget {
 //	volplus_list_opportunities_func();
 $opportunities = wp_remote_get(API_URL . 'opportunities?'.strtolower($_SERVER['QUERY_STRING']), array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
 
+var_dump_safe($opportunities);
+die;
+
 //echo $_SERVER['QUERY_STRING'].'<br/>';
 parse_str($_SERVER['QUERY_STRING'],$querystring);
 
@@ -32,15 +35,47 @@ $response_code = wp_remote_retrieve_response_code($opportunities);
 $opportunities = json_decode($opportunities['body'], true);
 $location = ["","No Location","Working from home","Organisational Address","Specific Address","Multiple Specific Addresses","County-
 wide","Regional"];
+$enqstatuses = ["", "Enquiry", "Referral", "Interview", "Placement", "Not Placed", "Closed"];
+$lcenqstatuses = ["", "enquiry", "referral", "interview", "placement", "not-placed", "closed"];
 
 //get_header();
+
+	if(is_volplus_user_logged_in()) {
+		$enqhistory = getEnqHistory($_COOKIE['volplus_user_id']);
+//		$revenqhistory = array_reverse ($enqhistory, true);
+//		var_dump_safe($revenqhistory);
+//		foreach($revenqhistory as $key=>$data){
+//			echo $data['opportunity']['id'] . "<br/>";
+//		}
+
+	}
+
 
 if($response_code == 200) {
 	
 		foreach($opportunities['data'] as $opportunity) {
-			$querystring['opp-id'] = $opportunity['id'];$returnstring = http_build_query($querystring,'', '&');?>			
-			<div class="volplus-list">
+			$querystring['opp-id'] = $opportunity['id'];$returnstring = http_build_query($querystring,'', '&');
+
+			$divclass = "volplus-list";
+			$enqstatus = null;
+			if(is_volplus_user_logged_in()) {
+				foreach($enqhistory as $key=>$data){
+					if($data['opportunity']['id'] == $opportunity['id']){
+						$divclass = "volplus-list-enquired-" . $lcenqstatuses[$data['status']];
+						$enqstatus = $enqstatuses[$data['status']];
+						$enqcreated = $data['created_at'];
+						$enqcreated = date_format(date_create_from_format('Y-m-d H:i:s', $data['created_at']), 'jS M Y, g:ia');
+						$enqupdated = date_format(date_create_from_format('Y-m-d H:i:s', $data['updated_at']), 'jS M Y, g:ia');
+					}
+				}
+			}
+			?>			
+			<div class= <?php echo $divclass; ?> >
 				<h2><a href="/opportunities/?<?php echo $returnstring; ?>"><?php echo remove_brackets($opportunity['opportunity']); ?></a></h2>
+				<?php if($enqstatus !== null){
+					echo "<div class=volplus-enqstatus>Status: <strong>" . $enqstatus;
+					echo "</strong><br/>Created: " . $enqcreated . "<br/>Updated: " . $enqupdated . "</div>";
+				}?>
 				
 				<?php if(isset($instance[ 'show_organisation' ])){if($instance[ 'show_organisation' ]){?>
 					<p class="organisation"><?php echo remove_brackets($opportunity['organisation']); ?></p>

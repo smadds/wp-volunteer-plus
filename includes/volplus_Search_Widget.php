@@ -97,7 +97,7 @@ class volplus_Search_Widget extends WP_Widget {
 			<label class="form-col">Interests
 				<?php $interests=array(); 
 				if(isset($_GET['interests'])) $interests = $_GET['interests']; 
-				display_interests($interests);?>
+				display_interests($interests,'search-');?>
 			</label>
 		<?php }}?>
 
@@ -111,7 +111,7 @@ class volplus_Search_Widget extends WP_Widget {
 						$_GET['activities'][$key] = intval($value);}
 					$activities = $_GET['activities'];}
 //var_dump($activities);
-				display_activities($activities);?>
+				display_activities($activities,'search-');?>
 			</label>
 		<?php }}?>
 

@@ -73,7 +73,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 		if(isset($_POST['disability']))$volunteer->disability = (int) $_POST['disability'];$_POST['disability'] = $volunteer->disability;
 		if(isset($_POST['disabilities'])){
 			foreach($_POST['disabilities'] as $key=>$value){
-				$_POST['interests'][$key] = intval($value);}
+				$_POST['disabilities'][$key] = intval($value);}
 			$volunteer->disabilities = $_POST['disabilities'];}
 		if(isset($_POST['how_heard']))$volunteer->how_heard = (int) $_POST['how_heard'];$_POST['how_heard'] = $volunteer->ethnicity;
 
@@ -316,9 +316,9 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 			<input type="text" id="mobile" name="mobile" placeholder="Mobile number" value="<?php echo $volunteer->mobile?>"/></label>
 		<h2 class="volplus-col-12"><br/>Interests & Activities</h2>
 		<label class="volplus-col-6">Interests
-			<?php display_interests($volunteer->interests);?></label>
+			<?php display_interests($volunteer->interests,'volreg-');?></label>
 		<label class="volplus-col-6">Activities
-			<?php display_activities($volunteer->activities);?></label>
+			<?php display_activities($volunteer->activities,'volreg-');?></label>
 		<h2 class="volplus-col-12"><br/>Availability</h2>
 		<label class="volplus-col-4">When are you available?
 			<?php display_availability_table($volunteer);?></label>

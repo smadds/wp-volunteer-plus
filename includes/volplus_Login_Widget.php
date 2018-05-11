@@ -15,13 +15,18 @@ class volplus_Login_Widget extends WP_Widget {
 // before and after widget arguments are defined by themes
     echo $args['before_widget'];
  
- 	$display_in = is_volplus_user_logged_in() ? 'inherit' : 'none';
- 	$display_out = is_volplus_user_logged_in() ? 'none' : 'inherit';
+ 	$display_in = (is_volplus_user_logged_in() == $instance['login_type']) ? 'inherit' : 'none';
+ 	$display_out = (is_volplus_user_logged_in() == $instance['login_type']) ? 'none' : 'inherit';
+
+
+//	$temp = getOrgContactDetails(1,1);
+	$temp = is_volplus_user_logged_in();
+//	var_dump_safe($temp);
+
 	?>
 
-
 	<div id="login_widget">
-   	<div id="logged_in" style="display:<?php echo $display_in ?>"><?php
+   	<div class="logged_in" style="display:<?php echo $display_in ?>"><?php
 	    	if ( ! empty( $loggedin_title )) echo $args['before_title'] . $loggedin_title . $args['after_title'];
 			if(isset($instance['loggedin_intro_text'])) {
 				$loggedin_intro_text = apply_filters('widget_title',$instance['loggedin_intro_text']);
@@ -31,7 +36,7 @@ class volplus_Login_Widget extends WP_Widget {
 			}?>
 		</div>
 
-    	<div id="not_logged_in" style="display:<?php	echo $display_out ?>"><?php
+    	<div class="not_logged_in" style="display:<?php	echo $display_out ?>"><?php
 	    	if ( ! empty( $title )) echo $args['before_title'] . $title . $args['after_title'];
 			if(isset($instance['intro_text'])) {
 				$intro_text = apply_filters('widget_title',$instance['intro_text']);
@@ -48,16 +53,19 @@ class volplus_Login_Widget extends WP_Widget {
 			<div id='welcome_name' class='volplus_welcome_name' style='display:inline'>
 				<?php if(isset($_COOKIE['volplus_user_id'])) echo " " . $_COOKIE['volplus_user_first_name'] . " " . $_COOKIE['volplus_user_last_name'];?>
 			</div>
+			<div id='welcome_org' class='volplus_welcome_org' style='display: <?php if(isset($_COOKIE["volplus_org_name"])){echo "inline'> of " . $_COOKIE["volplus_org_name"];} else {echo "none'>";} ?> 
+			</div>
 			<p><div id='logout' class='button'> Log Out </div></p>
 		</div>
 
 
-		<form id='login' action='login' method='post' style='display:<?php echo $display_out?>'>
+		<form id='login-vol-widget' action='login' method='post' style='display:<?php echo $display_out?>'>
 			<label for="email_address"><?php _e( 'Email', 'wp_volunteer-plus' )?></label>
 				<input id="email_address" type="email" name="email_address" placeholder="Your email address" onblur= "javascript:{this.value = this.value.toLowerCase();}" autocomplete="off" required>
 			<label for="password">Password</label>
 				<input id="password" type="password" name="password" placeholder="Your password" autocomplete="off" required />
 <!--			<a class="lost" href="<?php echo wp_lostpassword_url(); ?>">Lost your password?</a>-->
+			<input id="login_type" type="hidden" name="login_type" value=<?php echo $instance['login_type'] ?> >
 			<input class="button" type="submit" value="Login" name="submit">
 <!--			<a class="close" href="">(close)</a>-->
 			<?php wp_nonce_field( 'ajax-login-nonce', 'security' ); ?>
@@ -100,35 +108,43 @@ class volplus_Login_Widget extends WP_Widget {
   // Create the admin area widget settings form.--------------------------------------------------------------------------------------
 //  public function form( $instance ) {
   function form( $instance ) {
+	if(!isset($instance['login_type']) || $instance['login_type']=="") $instance['login_type']=1; // upgrade reverse compatibility
 // Check values 
+	$title='';$intro_text='';$loggedin_title='';$loggedin_intro_text=''; 
 	if( $instance ) { 
-		$title    = esc_attr( $instance['title'] ); 
-		$intro_text    = esc_attr( $instance['intro_text'] ); 
-		$loggedin_title    = esc_attr( $instance['loggedin_title'] ); 
-		$loggedin_intro_text    = esc_attr( $instance['loggedin_intro_text'] ); 
+		$login_type    = esc_attr( $instance['login_type'] ); 
+		if(isset($instance['title'])) $title    = esc_attr( $instance['title'] ); 
+		if(isset($instance['intro_text'])) $intro_text    = esc_attr( $instance['intro_text'] ); 
+		if(isset($instance['loggedin_title'])) $loggedin_title    = esc_attr( $instance['loggedin_title'] ); 
+		if(isset($instance['loggedin_intro_text'])) $loggedin_intro_text    = esc_attr( $instance['loggedin_intro_text'] ); 
 	} else { 
-		$title    = ''; 
-		$intro_text    = ''; 
-		$loggedin_title    = ''; 
-		$loggedin_intro_text    = ''; 
+		$login_type    = ''; 
 	} ?>
-	
+
+	<h2>Login Type</h2>
+	<p>Select if this form will log in volunteers or organisation contacts</p>
+
+<?//php var_dump_safe($instance)?>
+
+	<strong><input type="radio" name="<?php echo esc_attr( $this->get_field_name( 'login_type' ) ); ?>" value=1 <?php if($instance['login_type']==1) echo 'CHECKED'?>/>Volunteer
+	<input type="radio" name="<?php echo esc_attr( $this->get_field_name( 'login_type' ) ); ?>" value=2 <?php if($instance['login_type']==2 ) echo 'CHECKED'?>/>Organisation</strong>
+		
 	<h2>When not logged in</h2>
 	<p><label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php _e( 'Title', 'wp_volunteer-plus' ); ?></label>
-	<input class='widefat' id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
+	<input class='widefat' id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text" value="<?php echo $title; ?>" />
 	</p>
 	<p>
 	<label for="<?php echo esc_attr( $this->get_field_id( 'intro_text' ) ); ?>"><?php _e( 'Intro Text', 'wp_volunteer-plus' ); ?></label><br>
-	<textarea id="<?php echo esc_attr( $this->get_field_id( 'intro_text' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'intro_text' ) ); ?>" rows = "5" cols = "40"><?php echo esc_attr( $intro_text ); ?> </textarea>
+	<textarea id="<?php echo esc_attr( $this->get_field_id( 'intro_text' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'intro_text' ) ); ?>" rows = "5" cols = "30"><?php echo $intro_text; ?></textarea>
 	</p>
 
 	<h2>When logged in</h2>
 	<p><label for="<?php echo esc_attr( $this->get_field_id( 'loggedin_title' ) ); ?>"><?php _e( 'Logged in Title', 'wp_volunteer-plus' ); ?></label>
-	<input class='widefat' id="<?php echo esc_attr( $this->get_field_id( 'loggedin_title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'loggedin_title' ) ); ?>" type="text" value="<?php echo esc_attr( $loggedin_title ); ?>" />
+	<input class='widefat' id="<?php echo esc_attr( $this->get_field_id( 'loggedin_title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'loggedin_title' ) ); ?>" type="text" value="<?php echo $loggedin_title; ?>" />
 	</p>
 	<p>
 	<label for="<?php echo esc_attr( $this->get_field_id( 'loggedin_intro_text' ) ); ?>"><?php _e( 'Logged in Intro Text', 'wp_volunteer-plus' ); ?></label><br>
-	<textarea id="<?php echo esc_attr( $this->get_field_id( 'loggedin_intro_text' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'loggedin_intro_text' ) ); ?>" rows = "5" cols = "40"><?php echo esc_attr( $loggedin_intro_text ); ?> </textarea>
+	<textarea id="<?php echo esc_attr( $this->get_field_id( 'loggedin_intro_text' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'loggedin_intro_text' ) ); ?>" rows = "5" cols = "30"><?php echo $loggedin_intro_text; ?></textarea>
 	</p>
 
 	<?php
@@ -137,6 +153,7 @@ class volplus_Login_Widget extends WP_Widget {
 //  public function update( $new_instance, $old_instance ) {
 	function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
+		$instance[ 'login_type' ] = strip_tags( $new_instance[ 'login_type' ] );
 		$instance[ 'title' ] = strip_tags( $new_instance[ 'title' ] );
 		$instance[ 'intro_text' ] = strip_tags( $new_instance[ 'intro_text' ] );
 		$instance[ 'loggedin_title' ] = strip_tags( $new_instance[ 'loggedin_title' ] );

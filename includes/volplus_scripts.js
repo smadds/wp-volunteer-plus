@@ -40,40 +40,60 @@ jQuery(document).ready(function($) {
 		document.cookie = 'volplus_user_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
 		document.cookie = 'volplus_user_first_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
 		document.cookie = 'volplus_user_last_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+		document.cookie = 'volplus_org_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+		document.cookie = 'volplus_org_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
 //		document.cookie = 'volplus_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
 		document.location.href = '/';
 //		document.getElementById("not_logged_in").style.display = "inherit";
-//		document.getElementById("login").style.display = "inherit";
+//		document.getElementById("login-vol-widget").style.display = "inherit";
 //		document.getElementById("logged_in").style.display = "none";
 //		document.getElementById("welcome").style.display = "none";
-//		$('form#login p.status').text('');
+//		$('form#login-vol-widget p.status').text('');
 //		document.getElementById("vol_main_heading").innerHTML = "<h2>Create your account</h2>";
 	})
 
 //		Perform AJAX login on form submit
-	$('form#login').on('submit', function(e){
-		$('form#login p.status').show().text(ajax_login_object.loadingmessage);
-//console.log("V+ Ajax URL: ", ajax_login_object.ajaxurl);
+	$('form#login-vol-widget').on('submit', function(e){
+		$('form#login-vol-widget p.status').show().text(ajax_login_object.loadingmessage);
+console.log("V+ Ajax URL: ", ajax_login_object.ajaxurl);
 		$.ajax({
 			type: 'POST',
 			dataType: 'json',
 			url: ajax_login_object.ajaxurl,
 			data: { 
 				'action': 'volplusajaxlogin', //calls wp_ajax_nopriv_ajaxlogin
-				'email_address': $('form#login #email_address').val(), 
-				'password': $('form#login #password').val(), 
-				'security': $('form#login #security').val() },
+				'email_address': $('form#login-vol-widget #email_address').val(), 
+				'password': $('form#login-vol-widget #password').val(), 
+				'security': $('form#login-vol-widget #security').val(),
+				'login_type': $('form#login-vol-widget #login_type').val() },
 			success: function(data){
-				$('form#login p.status').text(data.message);
+				$('form#login-vol-widget p.status').text(data.message);
+console.log("login_type", $('form#login-vol-widget #login_type').val());
+console.log("email_address", $('form#login-vol-widget #email_address').val());
+console.log("password", $('form#login-vol-widget #password').val());
+console.log("security", $('form#login-vol-widget #security').val());
+console.log("ajax response data:", data);
 				if (data.loggedin == true){
-					var voldetails = JSON.parse(data.response.body);
-//console.log("success data:", voldetails);
-					document.getElementById("not_logged_in").style.display = "none";
-					document.getElementById("login").style.display = "none";
+//					var voldetails = JSON.parse(data.response.body);
+					$( "#volplus_response_loggedin" ).dialog( "open" );
+					$(".not_logged_in").each(function(index,element){element.style.display = "none";})
+					document.getElementById("login-vol-widget").style.display = "none";
+					if (data.login_type == 1) {
+						document.getElementById("welcome_org").style.display = "none";
+					} else {
+						document.getElementById("welcome_org").style.display = "inline";
+					}
 					if (!data.first_name) data.first_name = 'Private';
 					if (!data.last_name) data.last_name = 'Volunteer';
 					$('div#welcome_name').text(data.first_name + " " + data.last_name);
+					$('div#welcome_org').text("of " + data.organisation_name);
 					document.getElementById("welcome").style.display = "inherit";
+					$(".not_logged_in").each(function(index,element){element.style.display = "none";})
+					$(".logged_in").each(function(index,element){element.style.display = "inherit";})
+					if (data.login_type == 2) document.location.href = '/manage-organisation';
+//					$("#test").load(data.volplus_url + 'includes/volplus_OrgLoggedInHtml.php').fadeIn('slow');
+//					document.getElementById("logged_in").style.display = "inherit";
+
 					if (document.getElementById("user_registration")) document.getElementById("user_registration").value = "Update";
 					if(location.pathname == '/volunteer-details/'){
 						document.getElementById("vol_main_heading").innerHTML = "<h2>Update your details</h2>";
@@ -228,17 +248,21 @@ jQuery(document).ready(function($) {
 	$( ".volplus_respondButton" ).click(function() {
 		var loggedin = (document.cookie.indexOf("volplus_user_id") >= 0);
 		if(loggedin) {
-			document.getElementById("not_logged_in").style.display = "none";
-			document.getElementById("login").style.display = "none";
-			document.getElementById("logged_in").style.display = "inherit";
+//			document.getElementById("not_logged_in").style.display = "none";
+			$(".not_logged_in").each(function(index,element){element.style.display = "none";})
+			document.getElementById("login-vol-widget").style.display = "none";
+			$(".logged_in").each(function(index,element){element.style.display = "inherit";})
+//			document.getElementById("logged_in").style.display = "inherit";
 			document.getElementById("welcome").style.display = "inherit";
 			$( "#volplus_response_loggedin" ).dialog( "open" );				
 		}else {
 			document.getElementById("responseform").style.display = "none";
 			document.getElementById("responseintro").style.display = "inherit";
-			document.getElementById("not_logged_in").style.display = "inherit";
-			document.getElementById("login").style.display = "inherit";
-			document.getElementById("logged_in").style.display = "none";
+			$(".not_logged_in").each(function(index,element){element.style.display = "inherit";})
+//			document.getElementById("not_logged_in").style.display = "inherit";
+			document.getElementById("login-vol-widget").style.display = "inherit";
+//			document.getElementById("logged_in").style.display = "none";
+			$(".logged_in").each(function(index,element){element.style.display = "none";})
 			document.getElementById("welcome").style.display = "none";
 			$( "#volplus_response_notloggedin" ).dialog( "open" );
 		}

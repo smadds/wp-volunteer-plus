@@ -1,3 +1,8 @@
+@keyframes showNav {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
 [class*="volplus-col-"] {
 	padding: 0.2em!important;
 }
@@ -132,34 +137,43 @@ label + input[type=checkbox]:checked {
     }
 }
 
+div.volplus-enqstatus {
+	display: inline-block;
+	float: right;
+}
 
-.volplus-list {
+[class^="volplus-list"] {
 	margin-bottom: 1em;
 	border-bottom: 1px;
 	border-style: dashed;
 	border-color: #c0c0c0;
+	padding: 1em;
 }
 
-.volplus-list h2 {
+[class^="volplus-list-enquired"] {
+	background: #f0fff0;
+}
+
+[class^="volplus-list"] h2 {
 	font-size: 1.2em;
 }
 
-.volplus-list p a.button {
+[class^="volplus-list"] p a.button {
 	font-size: 0.9em;
 	padding: 0.2em 0.8em;
 }
 
-.volplus-list p {
+[class^="volplus-list"] p {
 	margin-bottom: 0.5em;
 	margin-left: 2em;
 	font-size:0.9em;
 }
 
-.volplus-list .organisation::before {
+[class^="volplus-list"] .organisation::before {
 	content: "Organisation: "
 }
 
-.volplus-list .location::before {
+[class^="volplus-list"] .location::before {
 	content: "Location: "
 }
 

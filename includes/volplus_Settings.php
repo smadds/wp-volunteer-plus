@@ -128,6 +128,11 @@ $age_band_message .= "<p>Please enter your date of birth and we will calculate t
 			<span class="description">Strips out text within brackets in Opportunity titles & Organisation names</span></td>
 		</tr>
 		<tr valign="top">
+			<th scope="row">Hide Activities & Interests</th>
+			<td><input type="checkbox" name="volplus_hideoppact" <?php if(get_option('volplus_hideoppact', null) == 'on') echo 'checked'; ?> />
+			<span class="description">on Opportunity details page</span></td>
+		</tr>
+		<tr valign="top">
 			<th scope="row">Hide Org Direct Contact fields</th>
 			<td><input type="checkbox" name="volplus_hideorgdirect" <?php if(get_option('volplus_hideorgdirect', 'on') == 'on') echo 'checked'; ?> />
 			<span class="description">Hides telephone & emails from Organisation details</span></td>
@@ -196,6 +201,7 @@ function volplus_plugin_settings() {
 	register_setting( 'volplus-plugin-settings-group', 'volplus_agebandmsg' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_compliancepage' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_hidebrackets' );	
+	register_setting( 'volplus-plugin-settings-group', 'volplus_hideoppact' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_hideorgdirect' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_hideqcdetails' );	
 	register_setting( 'volplus-plugin-settings-group', 'volplus_voltimeout' );	

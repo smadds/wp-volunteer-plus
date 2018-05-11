@@ -3,7 +3,7 @@
  * Plugin Name:   WP Volunteer Plus
  * Plugin URI:    https://maddox.co.uk/volunteer-plus
  * Description:   A selection of tools for interacting with the Volunteer Plus Database
- * Version:       1.0.7
+ * Version:       1.0.8
  * Author:        Simon Maddox
  * Author URI:    https://maddox.co.uk
  */
@@ -53,6 +53,8 @@ require_once VOLPLUS_PATH . 'includes/volplus_Opportunities_Returned_Shortcode.p
 require_once VOLPLUS_PATH . 'includes/volplus_Opportunity_Detail_Shortcode.php';
 require_once VOLPLUS_PATH . 'includes/volplus_Settings.php';
 require_once VOLPLUS_PATH . 'includes/volplus_Volunteer_Register_Shortcode.php';
+require_once VOLPLUS_PATH . 'includes/volplus_Manage_Organisation_Shortcode.php';
+require_once VOLPLUS_PATH . 'includes/volplus_Manage_Opportunity_Shortcode.php';
 require_once VOLPLUS_PATH . 'includes/volplus_Login_Widget.php';
 require_once VOLPLUS_PATH . 'includes/plugin-update-checker/plugin-update-checker.php';
 
@@ -75,7 +77,15 @@ $response_code = wp_remote_retrieve_response_code($volunteer_fields);
 if($response_code == 200) {
 	$GLOBALS['volunteer_fields'] = json_decode($volunteer_fields['body'], true);
 	setcookie('volplus_volunteer_fields', json_encode($GLOBALS['volunteer_fields']), 0, COOKIEPATH, COOKIE_DOMAIN );
-//var_dump_safe($volunteer_fields);
+} else {
+	alert_safe ('(Error code '.$response_code.')');
+}
+
+$opportunity_fields = wp_remote_get(API_URL . 'opportunity_fields', array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+$response_code = wp_remote_retrieve_response_code($opportunity_fields);
+if($response_code == 200) {
+	$GLOBALS['opportunity_fields'] = json_decode($opportunity_fields['body'], true);
+	setcookie('volplus_opportunity_fields', json_encode($GLOBALS['opportunity_fields']), 0, COOKIEPATH, COOKIE_DOMAIN );
 } else {
 	alert_safe ('(Error code '.$response_code.')');
 }
@@ -127,6 +137,26 @@ function volplus_activate() {
 			'post_title' => 'Opportunities',
 			'post_content' => '[volplus-opportunity-detail]',
 			'post_name' => 'opportunities',
+			'post_status' => 'publish',
+			'post_author' => 1,
+    ));
+	}
+	if( get_page_by_path('manage-organisation') === null ) { // page doesn't exist
+		wp_insert_post(array(
+			'post_type' => 'page',
+			'post_title' => 'Manage Organisation',
+			'post_content' => '[volplus-manage-organisation]',
+			'post_name' => 'manage-organisation',
+			'post_status' => 'publish',
+			'post_author' => 1,
+    ));
+	}
+	if( get_page_by_path('manage-opportunity') === null ) { // page doesn't exist
+		wp_insert_post(array(
+			'post_type' => 'page',
+			'post_title' => 'Manage Opportunity',
+			'post_content' => '[volplus-manage-opportunity]',
+			'post_name' => 'manage-opportunity',
 			'post_status' => 'publish',
 			'post_author' => 1,
     ));
