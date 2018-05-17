@@ -143,20 +143,21 @@ function volplus_manage_opportunity_func($atts = [], $content = null, $tag = '')
 			}
 		}
 
-		if(isset($_POST['email_address']))$opportunity->email_address = strtolower(sanitize_email( $_POST['email_address'] ));
-		if(isset($_POST['password']))$opportunity->password = esc_html( $_POST['password'] );
-		if(isset($_POST['password_confirmation']))$opportunity->password_confirmation = esc_html( $_POST['password_confirmation'] );
-		if(isset($_POST['telephone']))$opportunity->telephone = stripslashes(esc_html( $_POST['telephone']));
-		if(isset($_POST['mobile']))$opportunity->mobile = stripslashes(esc_html( $_POST['mobile']));
+		if(empty( $opportunity->interests )) {
+			$reg_errors->add('field', 'You need to select between 1 and 3 Interests'); }    
+		if(empty( $opportunity->activities )) {
+			$reg_errors->add('field', 'You need to select between 1 and 3 Interests'); }    
+
+		if (is_wp_error( $reg_errors )) { 
+			foreach ( $reg_errors->get_error_messages() as $key=>$data ) {
+				$signUpError='<p style="color:#FF0000; text-align:left;"><strong>We have a problem </strong>: '.$data . '<br /></p>';
+			} 
+		}
 
 
-        
-		
+
 //	var_dump_safe($opportunity);
-        
-    
-        
-    
+
 		if ( 1 > count( $reg_errors->get_error_messages() ) ) {
 			//add VolPlus account
 			print_r_safe($opportunity);

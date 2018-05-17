@@ -3,7 +3,7 @@
 require_once VOLPLUS_PATH . 'includes/volplus_Functions.php';
 
 	if(isset($_COOKIE['volplus_org_id'])){
-		echo "<h1>" . $_COOKIE['volplus_org_name'] . "</h1>";		
+		echo "<h2>" . $_COOKIE['volplus_org_name'] . "</h2>";		
 		$orgopportunities = getOrgOpportunities($_COOKIE['volplus_org_id']);
 		$orgopportunities  = orgOppsForDisplay($orgopportunities);
 		echo "<a href='/manage-opportunity'><button type='button' id='volplus_createOppButton' class='volplus_createOppButton button' style='float:right '>";
@@ -13,7 +13,7 @@ require_once VOLPLUS_PATH . 'includes/volplus_Functions.php';
 
 		$orgcontacts = getOrgContacts($_COOKIE['volplus_org_id']);
 		$orgcontacts  = orgContactsForDisplay($orgcontacts);
-		echo '<h3>Our Contacts</h3>';
+		echo '<br/><h3>Our Contacts</h3>';
 		echo html_table($orgcontacts);
 		
 

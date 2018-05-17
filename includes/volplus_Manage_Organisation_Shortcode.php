@@ -34,17 +34,18 @@ function volplus_manage_organisation_func($atts = [], $content = null, $tag = ''
 		include(VOLPLUS_PATH . 'includes/volplus_OrgLoggedInHtml.php');
 		echo "</div>";
 //	} 
-
 	
 	$wpuserid = null;
 	$organisation = new volplus_volunteer();
-		
+
+	var_dump_safe($_POST);
+ 		
 	if (isset($_POST['user_registration'])) {
 		$reg_errors = new WP_Error;
 		// sanitize user form input
 
 		unset($_POST['user_registration']);
-		if(isset($_POST['title']))$organisation->title = stripslashes(esc_html( $_POST['title']));
+		if(isset($_POST['title']))$organisation->organisation = stripslashes(esc_html( $_POST['organisation']));
 		if(isset($_POST['first_name']))$organisation->first_name = ucfirst(strtolower(sanitize_user( $_POST['first_name'] )));
 		if(isset($_POST['last_name']))$organisation->last_name = ucfirst(strtolower(sanitize_user( $_POST['last_name'] )));
 		$organisation->username = strtolower($organisation->first_name . '-' . $organisation->last_name);
@@ -58,102 +59,31 @@ function volplus_manage_organisation_func($atts = [], $content = null, $tag = ''
 		if(isset($_POST['county']))$organisation->county = stripslashes(esc_html( $_POST['county']));
 		if(isset($_POST['postcode']))$organisation->postcode = stripslashes(esc_html( $_POST['postcode']));
 		if(isset($_POST['telephone']))$organisation->telephone = stripslashes(esc_html( $_POST['telephone']));
+		if(isset($_POST['additional_telephone']))$organisation->additional_telephone = stripslashes(esc_html( $_POST['additional_telephone']));
+		if(isset($_POST['charity_registration_number']))$organisation->charity_registration_number = stripslashes(esc_html( $_POST['charity_registration_number']));
+		if(isset($_POST['company_registration_number']))$organisation->company_registration_number = stripslashes(esc_html( $_POST['company_registration_number']));
+		if(isset($_POST['website']))$organisation->website = stripslashes(esc_html( $_POST['website']));
+		if(isset($_POST['how_heard']))$organisation->how_heard = stripslashes(esc_html( $_POST['how_heard']));
+
 		if(isset($_POST['mobile']))$organisation->mobile = stripslashes(esc_html( $_POST['mobile']));
-		if(isset($_POST['interests'])){
-			foreach($_POST['interests'] as $key=>$value){
-				$_POST['interests'][$key] = intval($value);}
-			$organisation->interests = $_POST['interests'];}
-		if(isset($_POST['activities'])){
-			foreach($_POST['activities'] as $key=>$value){
-				$_POST['activities'][$key] = intval($value);}
-			$organisation->activities = $_POST['activities'];}
-		if(isset($_POST['availability_details']))$organisation->availability_details = stripslashes(esc_html( $_POST['availability_details']));
-		if(isset($_POST['volunteering_experience']))$organisation->volunteering_experience = stripslashes(esc_html($_POST['volunteering_experience']));
-		if(isset($_POST['reasons'])){
-			foreach($_POST['reasons'] as $key=>$value){
-				$_POST['reasons'][$key] = intval($value);}
-			$organisation->reasons = $_POST['reasons'];}
-		if(isset($_POST['volunteering_reason_info']))$organisation->volunteering_reason_info = stripslashes(esc_html($_POST['volunteering_reason_info']));
-		if(isset($_POST['date_birth']))$organisation->date_birth = esc_html( $_POST['date_birth']);
-		if(isset($_POST['gender']))$organisation->gender = (int) $_POST['gender'];$_POST['gender'] = $organisation->gender;
-		if(isset($_POST['employment']))$organisation->employment = (int) $_POST['employment'];$_POST['employment'] = $organisation->employment;
-		if(isset($_POST['ethnicity']))$organisation->ethnicity = (int) $_POST['ethnicity'];$_POST['ethnicity'] = $organisation->ethnicity;
-		if(isset($_POST['disability']))$organisation->disability = (int) $_POST['disability'];$_POST['disability'] = $organisation->disability;
-		if(isset($_POST['disabilities'])){
-			foreach($_POST['disabilities'] as $key=>$value){
-				$_POST['interests'][$key] = intval($value);}
-			$organisation->disabilities = $_POST['disabilities'];}
-		if(isset($_POST['how_heard']))$organisation->how_heard = (int) $_POST['how_heard'];$_POST['how_heard'] = $organisation->ethnicity;
-
-
-		$periods = array(
-			'mon_mor','mon_aft','mon_eve',
-			'tue_mor','tue_aft','tue_eve',
-			'wed_mor','wed_aft','wed_eve',
-			'thu_mor','thu_aft','thu_eve',
-			'fri_mor','fri_aft','fri_eve',
-			'sat_mor','sat_aft','sat_eve',
-			'sun_mor','sun_aft','sun_eve'
-		);
-		foreach($periods as $period){
-			if(isset($_POST[$period]) && $_POST[$period]=="on"){
-				$organisation->$period=1;
-				$_POST[$period]=1;
-			}		
-		}
-        
-		//change username if already exists
-		$vol = $organisation->username;
-		if(username_exists($vol)) {
-			$x = 1;
-			while(username_exists($vol . $x)) {
-				$x++;
-			}
-			$organisation->username .= $x;
-		}
 		
-		// flag if age not given
-		if(isset($_POST['date_birth']) && $_POST['date_birth']!==""){
-			$_POST['date_birth'] = implode('/', array_reverse(explode('-', $_POST['date_birth']))); // put into UK date order dd/MM/yyyy
-			$_POST['date_birth_prefer_not_say'] = NULL;
- 			$organisation->date_birth_prefer_not_say = NULL;
-			$organisation->date_birth = $_POST['date_birth'];
-		} else {
-			$organisation->date_birth_prefer_not_say = 1;
-			$_POST['date_birth_prefer_not_say'] = 1;
-		}
-		
-//	var_dump_safe($organisation);
-        
+       
     
     
-		if(empty( $organisation->first_name ) || empty( $organisation->last_name )) {
-			$reg_errors->add('field', 'We need your first & last names'); }    
-		if(empty( $organisation->email_address )) {
-			$reg_errors->add('field', 'We need an email address to create an account'); }    
-		if(empty(($organisation->password) || empty($organisation->password_confirmation)) && !is_volplus_user_logged_in) {
-			$reg_errors->add('field', 'An email field is missing'); }    
 		if ( !is_email( $organisation->email_address ) ) {
 			$reg_errors->add( 'email_invalid', 'We can\'t make out your email address. Please check it\'s correct' ); }
-		if ( $volplus_atts['wordpress-account'] && email_exists( $organisation->email_address ) ) {
-			$reg_errors->add( 'email', 'This email address is already in our system. Please use the Login panel' ); }
 		if(!is_volplus_user_logged_in()){
 			if ( 7 > strlen( $organisation->password ) ) {
 				$reg_errors->add( 'password', 'Your password too short. It must be at least 8 characters' ); }
 			if ( $organisation->password !== $organisation->password_confirmation ) {
 				$reg_errors->add( 'password_confirmation', 'Your passwords do not match' ); }}    
-		if (is_wp_error( $reg_errors )) { 
-			foreach ( $reg_errors->get_error_messages() as $key=>$data ) {
-				$signUpError='<p style="color:#FF0000; text-align:left;"><strong>We have a problem </strong>: '.$data . '<br /></p>';
-			} 
-		}
     
     
 		if ( 1 > count( $reg_errors->get_error_messages() ) ) {
 			//add VolPlus account
 //			print_r_safe($_POST);
-			$endpoint = 'volunteers';
-			if(isset($_COOKIE['volplus_user_id'])) $endpoint .= '/' . $_COOKIE['volplus_user_id'];
+			$endpoint = 'organisations';
+			if(isset($_COOKIE['volplus_org_id'])) $endpoint .= '/' . $_COOKIE['volplus_org_id'];
 			$response = wp_remote_post(API_URL . $endpoint, array(
 				'timeout' => 45,
 				'redirection' => 5,
@@ -256,13 +186,17 @@ function volplus_manage_organisation_func($atts = [], $content = null, $tag = ''
 		}
 	}
 
-	if(!is_volplus_user_logged_in()){
-		echo "<div id='vol_main_heading'><h2>Create an account for your Organisation</h2></div>";
+//};function nothing() {
+
+	if(!isset($_COOKIE['volplus_org_id'])){
+		echo "<div id='vol_main_heading'><br/><h3>Create an account for your Organisation</h3></div>";
 		$buttontext = "Register";
 	}else {
-		echo "<div id='vol_main_heading'><h2>Update your Organisation's details</h2></div>";
+		echo "<div id='vol_main_heading'><br/><h3>Update your Organisation details</h3></div>";
 		$buttontext = "Update Details";
-		$organisation = getOrgDetails($_COOKIE['volplus_user_id']);
+		$organisation = getOrgDetails($_COOKIE['volplus_org_id']);
+
+
 //		$responsebody = json_decode($response['body']);
 //		foreach($responsebody as $key=>$data){
 //			$organisation->$key = $data;
@@ -272,39 +206,40 @@ function volplus_manage_organisation_func($atts = [], $content = null, $tag = ''
 	
 	if(isset($signUpError)) echo '<div>'.$signUpError.'</div>'?>
 
-	<form id="user_registration" action="" method="post" name="user_registration">
+	<form id="org_registration" action="" method="post" name="org_registration">
 
-<!--		<p><label class="volplus-col-2">Title (optional)  
-			<select id="title" name="title" class="text">
-				<option value="" <?php if($organisation->title=="") echo 'selected';?> >Select</option>
-				<option value="Mr" <?php if($organisation->title=="Mr") echo 'selected';?> >Mr</option>
-				<option value="Master" <?php if($organisation->title=="Master") echo 'selected';?> >Master</option>
-				<option value="Mrs" <?php if($organisation->title=="Mrs") echo 'selected';?> >Mrs</option>
-				<option value="Miss" <?php if($organisation->title=="Miss") echo 'selected';?> >Miss</option>
-				<option value="Ms" <?php if($organisation->title=="Ms") echo 'selected';?> >Ms</option>
-				<option value="Dr" <?php if($organisation->title=="Dr") echo 'selected';?> >Dr</option>
-				<option value="Prof" <?php if($organisation->title=="Prof") echo 'selected';?> >Prof</option>
-			</select>
-		</label>
-
-		<h2 class="volplus-col-12"><br/>Main Contact Details</h2>
-		<label class="volplus-col-5">First name <span class="error">*</span>  
-			<input type="text" id="first_name" name="first_name" placeholder="Your First Name" required autofocus value="<?php echo $organisation->first_name?>"/></label>
-		<label class="volplus-col-5">Last name <span class="error">*</span>  
-			<input type="text" id="last_name" name="last_name" placeholder="Your Last Name" required value="<?php echo $organisation->last_name?>" /></label></p>
-		<label class="volplus-col-8">Job Title <span class="error">*</span>
-			<input type="text" id="job_title" name="job_title"  placeholder="Your Job Title" required value="<?php echo $organisation->job_title?>" /></label>
-		<label class="volplus-col-8">Email address <span class="error">*</span>
-			<input type="email" id="contact_email_address" name="contact_email_address"  placeholder="Your Email address" required value="<?php echo $organisation->contact_email_address?>" /></label>
-		<label class="volplus-col-6">Telephone <span class="error">*</span>  
-			<input type="text" id="contact_telephone" name="contact_telephone" placeholder="Your Main Telephone number" required value="<?php echo $organisation->contact_telephone?>"/></label>
-		<div id="passwords">
-			<p><label class="volplus-col-6">Password (8 characters or more) <span class="error">*</span>
-				<input type="password" id="contact_password" name="contact_password" placeholder="Password" required value="<?php echo $organisation->contact_password?>" /></label>
-			<label class="volplus-col-6">Password <span class="error">*</span>
-				<input type="password" name="contact_password_confirmation" placeholder="Repeat your password" required value="<?php echo $organisation->contact_password_confirmation?>" /></label></p>
-		</div>-->
-<!--		<h2 class="volplus-col-12"><br/>Organisation's Details</h2>-->
+		<?php	if(!isset($_COOKIE['volplus_org_id'])){?>
+			<h3 class="volplus-col-12"><br/>Main Contact Details</h3>
+				<label class="volplus-col-2">Title (optional)  
+					<select id="title" name="title" class="text">
+						<option value="" <?php if($organisation->title=="") echo 'selected';?> >Select</option>
+						<option value="Mr" <?php if($organisation->title=="Mr") echo 'selected';?> >Mr</option>
+						<option value="Master" <?php if($organisation->title=="Master") echo 'selected';?> >Master</option>
+						<option value="Mrs" <?php if($organisation->title=="Mrs") echo 'selected';?> >Mrs</option>
+						<option value="Miss" <?php if($organisation->title=="Miss") echo 'selected';?> >Miss</option>
+						<option value="Ms" <?php if($organisation->title=="Ms") echo 'selected';?> >Ms</option>
+						<option value="Dr" <?php if($organisation->title=="Dr") echo 'selected';?> >Dr</option>
+						<option value="Prof" <?php if($organisation->title=="Prof") echo 'selected';?> >Prof</option>
+					</select>
+				</label>
+			<label class="volplus-col-5">First name <span class="error">*</span>  
+				<input type="text" id="first_name" name="first_name" placeholder="Your First Name" required autofocus value="<?php if(isset($organisation['first_name'])) echo $organisation['first_name']?>"/></label>
+			<label class="volplus-col-5">Last name <span class="error">*</span>  
+				<input type="text" id="last_name" name="last_name" placeholder="Your Last Name" required value="<?php if(isset($organisation['last_name'])) echo $organisation['last_name']?>" /></label></p>
+			<label class="volplus-col-8">Job Title <span class="error">*</span>
+				<input type="text" id="job_title" name="job_title"  placeholder="Your Job Title" required value="<?php if(isset($organisation['job_title'])) echo $organisation['job_title']?>" /></label>
+			<label class="volplus-col-8">Email address <span class="error">*</span>
+				<input type="email" id="contact_email_address" name="contact_email_address"  placeholder="Your Email address" required value="<?php if(isset($organisation['contact_email_address'])) echo $organisation['contact_email_address']?>" /></label>
+			<label class="volplus-col-8">Telephone <span class="error">*</span>  
+				<input type="text" id="contact_telephone" name="contact_telephone" placeholder="Your Main Telephone number" required value="<?php if(isset($organisation['contact_telephone'])) echo $organisation['contact_telephone']?>"/></label>
+			<div id="passwords">
+				<p><label class="volplus-col-6">Password (8 characters or more) <span class="error">*</span>
+					<input type="password" id="contact_password" name="contact_password" placeholder="Password" required value="<?php if(isset($organisation['contact_password'])) echo $organisation['contact_password']?>" /></label>
+				<label class="volplus-col-6">Password <span class="error">*</span>
+					<input type="password" name="contact_password_confirmation" placeholder="Repeat your password" required value="<?php if(isset($organisation['contact_password_confirmation'])) echo $organisation['contact_password_confirmation']?>" /></label></p>
+			</div>
+			<?php } ?>
+			
 		<label class="volplus-col-12">Organisation Name <span class="error">*</span>  
 			<input type="text" id="organisation" name="organisation" placeholder="Your organisation's name" required value="<?php if(isset($organisation['organisation'])) echo $organisation['organisation']?>"/></label>
 		<label class="volplus-col-12">Address 1 <span class="error">*</span>  
@@ -319,10 +254,21 @@ function volplus_manage_organisation_func($atts = [], $content = null, $tag = ''
 			<input type="text" id="county" name="county" placeholder="County" value="<?php if(isset($organisation['county'])) echo $organisation['county']?>"/></label>
 		<label class="volplus-col-3">Postcode <span class="error">*</span>   
 			<input type="text" id="postcode" name="postcode" placeholder="Postcode" required value="<?php if(isset($organisation['postcode'])) echo $organisation['postcode']?>"/></label>
-
+		<label class="volplus-col-8">General email address <span class="error">*</span>
+			<input type="email" id="email_address" name="email_address"  placeholder="e.g. info@" required value="<?php if(isset($organisation['email_address'])) echo $organisation['email_address']?>" /></label>
+		<label class="volplus-col-6">Telephone <span class="error">*</span>  
+			<input type="text" id="telephone" name="telephone" placeholder="Your main office number" value="<?php if(isset($organisation['telephone'])) echo $organisation['telephone']?>"/></label>
+		<label class="volplus-col-6">Additional Telephone  
+			<input type="text" id="additional_telephone" name="additional_telephone" placeholder="Alternative office number" value="<?php if(isset($organisation['additional_telephone'])) echo $organisation['additional_telephone']?>"/></label>
+		<label class="volplus-col-6">Charity Number
+			<input type="text" id="charity_registration_number" name="charity_registration_number" placeholder="If a registered charity" value="<?php if(isset($organisation['charity_registration_number'])) echo $organisation['charity_registration_number']?>"/></label>
+		<label class="volplus-col-6">Company Number  
+			<input type="text" id="company_registration_number" name="company_registration_number" placeholder="Your company reg number" value="<?php if(isset($organisation['company_registration_number'])) echo $organisation['company_registration_number']?>"/></label>
+		<label class="volplus-col-4">How did you hear of us? <span class="error">*</span> 
+						<?php $how="";if(isset($organisation['how_heard'])) $loc=$organisation['how_heard']; how_heard($how);?></label>
 
 	<div class="volplus-col-12">
-			<input id="user_registration" class = "button" type="submit" name="user_registration" value="<?php echo $buttontext ?>" style="font-size:1.2em">
+			<input id="org_registration" class = "button" type="submit" name="org_registration" value="<?php echo $buttontext ?>" style="font-size:1.2em">
 		</div>
 	</form>
  	<div id="welcomeNewUser" hidden="hidden"><?php
@@ -355,148 +301,48 @@ function volplus_manage_organisation_func($atts = [], $content = null, $tag = ''
 			}
 		}
 		
+			
+//			$("#org_registration").submit(function(e){
+//				$.cookie("volplus_newuser", true,  { path: '/' });
+//			});
+			
+//			$(document).ready(function () {
+//				if($.cookie("volplus_newuser")){
+//					$.removeCookie("volplus_newuser", {path:'/'});
+//					$("#welcomeNewUser").dialog("open");
+//				}
+//			});
 
+//			$( "#welcomeNewUser" ).dialog({
+//				dialogClass: 'wp-dialog',
+//				modal: true,
+//				autoOpen: false,
+//				show: {effect: "fade", duration: 500},
+//				closeOnEscape: true,
+//				title: "You are registered",
+//				width: 400,
+//				buttons: [
+//		 			{
+//						text: 'Take me back',
+//						class: 'button',
+//						click: function() {
+//							$.cookie("volplus_iminterested", true,  { path: '/' });
+//							$(this).dialog('close');
+//							window.location.assign("opportunities/?opp-id=" + $.cookie('volplus_opp_id'));
+//						}
+//					},
+//		 			{
+//						text: 'Close',
+//						class: 'button',
+//						click: function() {
+//							$(this).dialog('close');
+//							window.location.reload();
+//						}
+//					}
+//				]
+//			});
 
-
-		jQuery(document).ready(function($) {
-
-			function getAge(dateString) {
-				var today = new Date();
-				var birthDate = new Date(dateString);
-				var age = today.getFullYear() - birthDate.getFullYear();
-				var m = today.getMonth() - birthDate.getMonth();
-				if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-					age--;
-				}
-				return age;
-			}
-			
-			$("#legalPopup").click(function () {
-				$("#legal").dialog("open");
-			})
-			
-			$("#legal").dialog({
-				dialogClass: 'wp-dialog',
-				modal: true,
-				autoOpen: false,
-				show: {effect: "fade", duration: 500},
-				closeOnEscape: true,
-				title: "Terms & Conditions",
-				width: ($(window).width()*0.8),
-				buttons: [
-		 			{
-						text: 'Close',
-						class: 'button',
-						click: function() {
-							$(this).dialog('close');
-						}
-					}
-				]
-				
-			})
-			
-			$("#agerangediv").click(function () {
-				$("#calcagerange").dialog("open");
-			})
-			
-			$("#calcagerange").dialog({
-				dialogClass: 'wp-dialog',
-				modal: true,
-				autoOpen: false,
-				show: {effect: "fade", duration: 500},
-				closeOnEscape: true,
-				title: "Calculate your age band",
-				width: 500,
-				buttons: [
-		 			{
-						text: 'I\'d rather not say',
-						class: 'button',
-						click: function() {
-							$("#date_birth_prefer_not_say").val("yes");
-								$("#date_birth").val(null);
-								$("#popup_date_birth").val(null);
-								$("#agerange").val("Not recorded");
-							$(this).dialog('close');
-						}
-					},
-		 			{
-						text: 'Cancel',
-						class: 'button',
-						click: function() {
-							$(this).dialog('close');
-						}
-					},
-		 			{
-						text: 'Calculate Band',
-						class: 'button',
-						click: function() {
-							var dob = $("#popup_date_birth").val();
-							if(dob){
-								$("#date_birth").val(dob);
-								$("#date_birth_prefer_not_say").val("no");
-								var age = getAge(dob);
-								if(age < 16){ $("#agerange").val("Under 15");
-								} else if(age <19){ $("#agerange").val("15-18");
-								} else if(age <26){ $("#agerange").val("19-25");
-								} else if(age <45){ $("#agerange").val("26-44");
-								} else if(age <65){ $("#agerange").val("45-64");
-								} else {$("#agerange").val("Over 65");
-								}								
-								$(this).dialog('close');
-							}
-						}
-					}
-				]
-				
-			})
-			
-			$('#calcagerange').live('keyup', function(e){
-				if (e.keyCode == 13) {
-					$(':button:contains("Calculate Band")').click();
-				}
-			});
-			
-			$("#user_registration").submit(function(e){
-				$.cookie("volplus_newuser", true,  { path: '/' });
-			});
-			
-			$(document).ready(function () {
-				if($.cookie("volplus_newuser")){
-					$.removeCookie("volplus_newuser", {path:'/'});
-					$("#welcomeNewUser").dialog("open");
-				}
-			});
-
-			$( "#welcomeNewUser" ).dialog({
-				dialogClass: 'wp-dialog',
-				modal: true,
-				autoOpen: false,
-				show: {effect: "fade", duration: 500},
-				closeOnEscape: true,
-				title: "You are registered",
-				width: 400,
-				buttons: [
-		 			{
-						text: 'Take me back',
-						class: 'button',
-						click: function() {
-							$.cookie("volplus_iminterested", true,  { path: '/' });
-							$(this).dialog('close');
-							window.location.assign("opportunities/?opp-id=" + $.cookie('volplus_opp_id'));
-						}
-					},
-		 			{
-						text: 'Close',
-						class: 'button',
-						click: function() {
-							$(this).dialog('close');
-							window.location.reload();
-						}
-					}
-				]
-			});
-
-		});
+//		});
 
 	
 

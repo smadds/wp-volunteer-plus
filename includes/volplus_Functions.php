@@ -3,25 +3,29 @@
 // Create HTML table given array, optional class name and optional id name
 function html_table($data = array(),$tableclass="",$tableid="")
 {
-	$rows = array();
-	$headings = array();
-	$firstrow = $data['0'];
-
-	foreach ($firstrow as $label=>$cell) {
-		$headings[] = "<th>{$label}</th>";
-	}
-
-	foreach ($data as $key=>$row) {
-		$cells = array();
-		foreach ($row as $label=>$cell) {
-			$cells[] = "<td>{$cell}</td>";
+	if($data) {
+		$rows = array();
+		$headings = array();
+		$firstrow = $data['0'];
+	
+		foreach ($firstrow as $label=>$cell) {
+			$headings[] = "<th>{$label}</th>";
 		}
-		$rows[] = "<tr>" . implode('', $cells) . "</tr>";
+	
+		foreach ($data as $key=>$row) {
+			$cells = array();
+			foreach ($row as $label=>$cell) {
+				$cells[] = "<td>{$cell}</td>";
+			}
+			$rows[] = "<tr>" . implode('', $cells) . "</tr>";
+		}
+		$html = "<table";
+		if($tableclass<>"") $html .= " class='" . $tableclass . "'";
+		if($tableid<>"") $html .= " id='" . $tableid . "'";
+		$html .= "><tr>" . implode('',$headings) . "</tr>" . implode('', $rows) . "</table>";
+	} else {
+		$html = "<p>Nothing to show</p>";
 	}
-	$html = "<table";
-	if($tableclass<>"") $html .= " class='" . $tableclass . "'";
-	if($tableid<>"") $html .= " id='" . $tableid . "'";
-	$html .= "><tr>" . implode('',$headings) . "</tr>" . implode('', $rows) . "</table>";
 	return  $html; 
 }
 
@@ -43,12 +47,13 @@ function getEnqHistory($id) {
 // Get Organisation details from org id
 function getOrgDetails($id) {
 	$organisation = wp_remote_get(API_URL . 'organisations/'.$id, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+		var_dump_safe($organisation);
 	$response_code = wp_remote_retrieve_response_code($organisation);
 	if($response_code == 200) {
 		$organisation = json_decode($organisation['body'], true);
 		return $organisation;
 	} else {
-		wp_redirect("/404");
+		wp_redirect("/404?err=getOrgDetails");
 		exit;
 	}
 }
@@ -72,7 +77,7 @@ function get_opportunity_details($id) {
 function getOrgOpportunities($id) {
 	$orgopportunities = wp_remote_get(API_URL . 'organisations/'.$id.'/opportunities', array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
 	$response_code = wp_remote_retrieve_response_code($orgopportunities);
-	if($response_code == 200) {
+	if($response_code == 200 || $response_code == 204) {
 		$orgopportunities = json_decode($orgopportunities['body'], true);
 		return $orgopportunities;
 	} else {
@@ -83,21 +88,25 @@ function getOrgOpportunities($id) {
 
 // Adjust Org Opportunities array for display
 function orgOppsForDisplay($data = array()){
-	$oppstatus = array("",'Draft','Active','Inactive','Expired');
-	$newrow = array();
-	$newdata = array();
-	foreach ($data as $key=>$row) {
-		$newrow['Opportunity'] = $row['opportunity'];
-		$newrow['Status'] = $oppstatus[$row['status']];
-		if($row['status']==2) {
-			$newrow['Manage'] = "<a class='button' href='/manage-opportunity/?opp-id=" . $row['id'] . "' >Edit</a>";
+	if($data){
+		$oppstatus = array("",'Draft','Active','Inactive','Expired');
+		$newrow = array();
+		$newdata = array();
+		foreach ($data as $key=>$row) {
+			$newrow['Opportunity'] = $row['opportunity'];
+			$newrow['Status'] = $oppstatus[$row['status']];
+//			if($row['status']==2) {
+				$newrow['Manage'] = "<a class='button' href='/manage-opportunity/?opp-id=" . $row['id'] . "' >Edit</a>";
+//				} else {
+//					$newrow['Manage'] = " ";
+//				}
+	//		var_dump_safe($newrow);
+			$newdata[$key] = $newrow;
+			}
 		} else {
-			$newrow['Manage'] = " ";
-		}
-//		var_dump_safe($newrow);
-		$newdata[$key] = $newrow;
-	}
+		$newdata = "";
 	return  $newdata; 
+	}
 }
 
 // Adjust Org Contacts array for display
@@ -568,9 +577,9 @@ function qualityControl(array $selected){
 		echo "<input type='radio' name='quality_control[".$qc['id']."]' value=2 ";
 		if(isset($selitem['status'])) if($selitem['status']==2 ) echo 'CHECKED';echo '/>No</input>';
 		echo "<input type='radio' name='quality_control[".$qc['id']."]' value=3 ";
-		if(isset($selitem['status'])) if($selitem['status']==3 ) echo 'CHECKED';echo '/>N/A</input>';
-		echo "<input type='radio' name='quality_control[".$qc['id']."]' value=0 >x</input></td>";
-		echo "<td><input type='text' name='quality_control_notes[".$qc['id']."]' value='";
+		if(isset($selitem['status'])) if($selitem['status']==3 ) echo 'CHECKED';echo '/>n/a</input>';
+//		echo "<input type='radio' name='quality_control[".$qc['id']."]' value=0 >x</input>";
+		echo "</td><td><input type='text' name='quality_control_notes[".$qc['id']."]' value='";
 		if(isset($selitem['notes'])) echo $selitem['notes'];
 		echo "'></input><input type = hidden name='quality_control_id[".$qc['id']."]' value='".$qc['value']."'></input>";
 		echo "</td>";
