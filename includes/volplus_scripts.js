@@ -55,24 +55,24 @@ jQuery(document).ready(function($) {
 //		Perform AJAX login on form submit
 	$('form#login-vol-widget').on('submit', function(e){
 		$('form#login-vol-widget p.status').show().text(ajax_login_object.loadingmessage);
-console.log("V+ Ajax URL: ", ajax_login_object.ajaxurl);
+//console.log("V+ Ajax URL: ", ajax_login_object.ajaxurl);
 		$.ajax({
 			type: 'POST',
 			dataType: 'json',
 			url: ajax_login_object.ajaxurl,
 			data: { 
 				'action': 'volplusajaxlogin', //calls wp_ajax_nopriv_ajaxlogin
-				'email_address': $('form#login-vol-widget #email_address').val(), 
-				'password': $('form#login-vol-widget #password').val(), 
+				'email_address': $('#widget_email_address').val(), 
+				'password': $('#widget_password').val(), 
 				'security': $('form#login-vol-widget #security').val(),
-				'login_type': $('form#login-vol-widget #login_type').val() },
+				'login_type': $('#widget_login_type').val() },
 			success: function(data){
 				$('form#login-vol-widget p.status').text(data.message);
-console.log("login_type", $('form#login-vol-widget #login_type').val());
-console.log("email_address", $('form#login-vol-widget #email_address').val());
-console.log("password", $('form#login-vol-widget #password').val());
-console.log("security", $('form#login-vol-widget #security').val());
-console.log("ajax response data:", data);
+//console.log("login_type", $('#widget_login_type').val());
+//console.log("email_address", $('#widget_email_address').val());
+//console.log("password", $('#widget_password').val());
+//console.log("security", $('form#login-vol-widget #widget_security').val());
+//console.log("ajax response data:", data);
 				if (data.loggedin == true){
 //					var voldetails = JSON.parse(data.response.body);
 					$( "#volplus_response_loggedin" ).dialog( "open" );

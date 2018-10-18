@@ -18,6 +18,7 @@ class volplus_Login_Widget extends WP_Widget {
  	$display_in = (is_volplus_user_logged_in() == $instance['login_type']) ? 'inherit' : 'none';
  	$display_out = (is_volplus_user_logged_in() == $instance['login_type']) ? 'none' : 'inherit';
 
+//print_r_safe("Logged in status: " . is_volplus_user_logged_in());
 
 //	$temp = getOrgContactDetails(1,1);
 	$temp = is_volplus_user_logged_in();
@@ -53,19 +54,19 @@ class volplus_Login_Widget extends WP_Widget {
 			<div id='welcome_name' class='volplus_welcome_name' style='display:inline'>
 				<?php if(isset($_COOKIE['volplus_user_id'])) echo " " . $_COOKIE['volplus_user_first_name'] . " " . $_COOKIE['volplus_user_last_name'];?>
 			</div>
-			<div id='welcome_org' class='volplus_welcome_org' style='display: <?php if(isset($_COOKIE["volplus_org_name"])){echo "inline'> of " . $_COOKIE["volplus_org_name"];} else {echo "none'>";} ?> 
+			<div id='welcome_org' class='volplus_welcome_org' style='display: <?php if(isset($_COOKIE["volplus_org_name"])){echo "inline'> of " . stripslashes(esc_html($_COOKIE["volplus_org_name"]));} else {echo "none'>";} ?> 
 			</div>
 			<p><div id='logout' class='button'> Log Out </div></p>
 		</div>
 
 
 		<form id='login-vol-widget' action='login' method='post' style='display:<?php echo $display_out?>'>
-			<label for="email_address"><?php _e( 'Email', 'wp_volunteer-plus' )?></label>
-				<input id="email_address" type="email" name="email_address" placeholder="Your email address" onblur= "javascript:{this.value = this.value.toLowerCase();}" autocomplete="off" required>
-			<label for="password">Password</label>
-				<input id="password" type="password" name="password" placeholder="Your password" autocomplete="off" required />
+			<label for="widget_email_address"><?php _e( 'Email', 'wp_volunteer-plus' )?></label>
+				<input id="widget_email_address" type="email" name="widget_email_address" placeholder="Your email address" onblur= "javascript:{this.value = this.value.toLowerCase();}" autocomplete="off" required>
+			<label for="widget_password">Password</label>
+				<input id="widget_password" type="password" name="widget_password" placeholder="Your password" autocomplete="off" required />
 <!--			<a class="lost" href="<?php echo wp_lostpassword_url(); ?>">Lost your password?</a>-->
-			<input id="login_type" type="hidden" name="login_type" value=<?php echo $instance['login_type'] ?> >
+			<input id="widget_login_type" type="hidden" name="widget_login_type" value=<?php echo $instance['login_type'] ?> >
 			<input class="button" type="submit" value="Login" name="submit">
 <!--			<a class="close" href="">(close)</a>-->
 			<?php wp_nonce_field( 'ajax-login-nonce', 'security' ); ?>

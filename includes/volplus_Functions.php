@@ -47,10 +47,18 @@ function getEnqHistory($id) {
 // Get Organisation details from org id
 function getOrgDetails($id) {
 	$organisation = wp_remote_get(API_URL . 'organisations/'.$id, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
-		var_dump_safe($organisation);
+//		var_dump_safe($organisation);
 	$response_code = wp_remote_retrieve_response_code($organisation);
 	if($response_code == 200) {
 		$organisation = json_decode($organisation['body'], true);
+		
+// *******FIX GET>POST VARIATIONS BY ADJUSTING GET ARRAY
+
+	$organisation['additional_telephone'] = $organisation['additional_telephone_number'];unset($organisation['additional_telephone_number']);	//different name 
+	$organisation['telephone'] = $organisation['telephone_number'];unset($organisation['telephone_number']);	//different name 
+		
+// *******
+		
 		return $organisation;
 	} else {
 		wp_redirect("/404?err=getOrgDetails");
@@ -60,7 +68,8 @@ function getOrgDetails($id) {
 
 // Get Opportunity details from opp id
 function get_opportunity_details($id) {
-	$opportunity = wp_remote_get(API_URL . 'opportunities/'.$id, array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+	$opportunity = wp_remote_get(API_URL . 'opportunities/'.$id . '?edit=true', array('headers' => array('Authorization' => 'Bearer '.API_KEY)));
+	// 2018-05-17 added the edit=true to override lock on only editing active opportunities.
 	$response_code = wp_remote_retrieve_response_code($opportunity);
 	if($response_code == 200) {
 		$opportunity = json_decode($opportunity['body'], true);
@@ -88,7 +97,7 @@ function getOrgOpportunities($id) {
 
 // Adjust Org Opportunities array for display
 function orgOppsForDisplay($data = array()){
-	if($data){
+	if($data<>""){
 		$oppstatus = array("",'Draft','Active','Inactive','Expired');
 		$newrow = array();
 		$newdata = array();
@@ -105,8 +114,8 @@ function orgOppsForDisplay($data = array()){
 			}
 		} else {
 		$newdata = "";
-	return  $newdata; 
 	}
+	return  $newdata; 
 }
 
 // Adjust Org Contacts array for display
@@ -169,7 +178,7 @@ function get_volunteer_details($id) {
 		'cookies' => array()
 		)
 	);
-// ******************** FIX /volunteers GET to match PUSH ************************
+// ******************** FIX /volunteers GET to match POST ************************
 
 	$bodyobj = json_decode($response['body']);
 //var_dump_safe($bodyobj);		
@@ -222,7 +231,7 @@ $response['body'] = json_encode($bodyobj);
 
 
 // check logged in cookie & reset the countdown if already set
-// returns 1 if volunteer logged in, 2 if org contact logged in or 0 if not logged in
+// returns 1 if volunteer, 2 if org contact logged in or 0 if not logged in
 function is_volplus_user_logged_in(){
 	$loggedin=0;
 	if(isset($_COOKIE['volplus_user_first_name'])) setcookie('volplus_user_first_name', $_COOKIE['volplus_user_first_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
@@ -230,11 +239,11 @@ function is_volplus_user_logged_in(){
 //	if(isset($_COOKIE['volplus_user'])) setcookie('volplus_user', $_COOKIE['volplus_user'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 	if(isset($_COOKIE['volplus_user_id'])){
 		setcookie('volplus_user_id', $_COOKIE['volplus_user_id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-		$loggedin += 1;
+		$loggedin = 1;
 	}
 	if(isset($_COOKIE['volplus_org_id'])){
 		setcookie('volplus_org_id', $_COOKIE['volplus_org_id'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-		$loggedin += 1;
+		$loggedin = 2;
 	}
 	if(isset($_COOKIE['volplus_org_name'])) setcookie('volplus_org_name', $_COOKIE['volplus_org_name'], time()+(3600 * get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 	return $loggedin;
@@ -366,8 +375,42 @@ class volplus_org_contact {
 			var $ethnicity=0;		//required specific integer from Volunteer fields
 			var $disability=0;		// required 1:yes, 2:no, 3:prefer not to say
 			var $disabilities = array();	// required if disability=1. list of objects that each represent a single disability. see volunteer fields
-			var $password;			// required
-			var $password_confirmation; // required
+			var $contact_email_address;
+			var $contact_password;			// required
+			var $contact_password_confirmation; // required
+			var $contact_telephone;
+			var $job_title;
+			var $how_heard=0;		//required specific integer from Volunteer fields
+}
+
+class volplus_new_org {
+			var $organisation;		// required
+			var $address_line_1;	// required
+			var $address_line_2;
+			var $address_line_3;
+			var $town;				// required
+			var $county;			// required
+			var $postcode;			// required
+			var $telephone;		// required
+			var $additional_telephone;
+			var $email_address;	// required
+			var $status;			//required
+			var $charity_registration_number;
+			var $company_registration_number;
+			var $website;
+			var $twitter;
+			var $facebook;
+			var $about;
+			var $mission_statement;
+			var $directions;
+			var $title;
+			var $first_name;		// required
+			var $last_name;		// required
+			var $job_title;
+			var $contact_telephone;
+			var $contact_email_address;
+			var $contact_password;			// required
+			var $contact_password_confirmation; // required
 			var $how_heard=0;		//required specific integer from Volunteer fields
 }
 
@@ -426,16 +469,16 @@ function disability($selected) {
 
 // display how_heard options
 function how_heard($selected) {
-	echo "<select id='how_heard' name='how_heard' required>";
-		echo "<option value='' ";
-		if($selected=="") echo 'selected';
-		echo ">Select</option>";
+	echo '<select id="how_heard" name="how_heard" required>';
+		echo '<option value="" ';
+		if($selected=='') echo ' selected';
+		echo '>Select</option>';
 		foreach ($GLOBALS['volunteer_fields']['how_heard'] as $how_heard) {
-			echo "<option value=" . $how_heard['id'];
-			if($how_heard['id'] == $selected) echo " selected";
-			echo ">" . $how_heard['value'] . "</option>";
+			echo '<option value="' . $how_heard['id'].'"';
+			if($how_heard['id'] == $selected) echo ' selected';
+			echo '>' . $how_heard['value'] . '</option>';
 		}
-	echo "</select>";
+	echo '</select>';
 }
 
 // display ethnicity options
@@ -784,7 +827,8 @@ function ajax_login(){
 		'password' => $_POST['password'],
 		'type' => (int) $_POST['login_type'] // 1=volunteer, 2=organisation
 	);
-		setcookie('volplus_debug_volpluslogin',json_encode($volpluslogin), time()+60, COOKIEPATH, COOKIE_DOMAIN );
+//setcookie('volplus_debug_volpluslogin_post',json_encode($_POST), time()+60, COOKIEPATH, COOKIE_DOMAIN );
+//setcookie('volplus_debug_volpluslogin',json_encode($volpluslogin), time()+60, COOKIEPATH, COOKIE_DOMAIN );
 
 	$response = wp_remote_post(API_URL . 'login', array(
 		'timeout' => 45,
@@ -796,7 +840,7 @@ function ajax_login(){
 		'cookies' => array()
 		)
 	);
-		setcookie('volplus_debug',json_encode($response), time()+60, COOKIEPATH, COOKIE_DOMAIN );
+//setcookie('volplus_debug',json_encode($response), time()+60, COOKIEPATH, COOKIE_DOMAIN );
 			
 	$responsebody = (array) json_decode($response['body']);
 	if ( $response['response']['code'] !== 200) {
@@ -819,7 +863,7 @@ function ajax_login(){
 		setcookie('volplus_org_name', 0, time()-60, COOKIEPATH, COOKIE_DOMAIN );
 	} else {
 // get user details
-		setcookie('volplus_debug_post',json_encode($_POST), time()+60, COOKIEPATH, COOKIE_DOMAIN );
+//setcookie('volplus_debug_post',json_encode($_POST), time()+60, COOKIEPATH, COOKIE_DOMAIN );
 		if($_POST['login_type'] == 1){
 			$response2 = get_volunteer_details($responsebody['id'],$_POST['login_type']);
 			$volunteer = json_decode($response2['body']);

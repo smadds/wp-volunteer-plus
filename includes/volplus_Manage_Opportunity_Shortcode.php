@@ -162,7 +162,7 @@ function volplus_manage_opportunity_func($atts = [], $content = null, $tag = '')
 			//add VolPlus account
 			print_r_safe($opportunity);
 			$endpoint = 'opportunities';
-			if(isset($opp)) $endpoint .= '/' . $opp;
+			if(isset($opp)) $endpoint .= '/' . $opp;// . '?edit=true';
 			$response = wp_remote_post(API_URL . $endpoint, array(
 				'timeout' => 45,
 				'redirection' => 5,
@@ -175,12 +175,12 @@ function volplus_manage_opportunity_func($atts = [], $content = null, $tag = '')
 				)
 			);
 
-					setcookie('volplus_debug_body', json_encode($opportunity), time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
-					setcookie('volplus_debug_endpoint', $endpoint, time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+//setcookie('volplus_debug_body', json_encode($opportunity), time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
+//setcookie('volplus_debug_endpoint', $endpoint, time()+(3600* get_option('volplus_voltimeout',1)), COOKIEPATH, COOKIE_DOMAIN );
 
 
 			$responsebody = (array) json_decode($response['body']);
-//			var_dump_safe( $response );
+//var_dump_safe( $response );
 
 			if ( !($response['response']['code'] == 201 || $response['response']['code'] ==  200)) {
 				$error_message = $response['response']['message'];
@@ -235,6 +235,7 @@ function volplus_manage_opportunity_func($atts = [], $content = null, $tag = '')
 	
 	if(isset($signUpError)) echo '<div>'.$signUpError.'</div>'?>
 
+	<div id="volplus-col-12">
 	<form id="manage_opportunity" action="" method="post" name="manage_opportunity">
 		<h2 class="volplus-col-12"><br/>Main Opportunity Details</h2>
 		<label class="volplus-col-12">Opportunity Title <span class="error">*</span>  
@@ -290,177 +291,15 @@ function volplus_manage_opportunity_func($atts = [], $content = null, $tag = '')
 			<input id="update_opportunity" class = "button" type="submit" name="update_opportunity" value="<?php echo $buttontext ?>" style="font-size:1.2em">
 		</div>
 	</form>
- 	<div id="welcomeNewUser" hidden="hidden"><?php
-		echo stripslashes(html_entity_decode(get_option('volplus_welcomenewusermsg')))?>
+
+
+
+	</div>
+	<div class="volplus-col-12">
+		<div class="volplus-col-5"><?php var_dump_safe($_POST) ?></div>
+		<div class="volplus-col-5"><?php var_dump_safe($opportunity) ?></div>
 	</div>
 
-
-
-<!--		</div>-->
-	<?php// }; ?>
-<div class="volplus-col-12">
-
-<!-- <?php echo "POST:<br/>" . json_encode($_POST, JSON_UNESCAPED_SLASHES)?><br/>
-<?php echo "volunteer:<br/>" . json_encode($opportunity, JSON_UNESCAPED_SLASHES)?><br/>
-<?php// var_dump_safe($GLOBALS['volunteer_fields']);?>-->
-<div class="volplus-col-5"><?php var_dump_safe($_POST) ?></div//<div class="volplus-col-5"><?php var_dump_safe($opportunity) ?></div>
-</div>
-
-	<script type="text/javascript" >
-		document.getElementById('disability').onchange = function() {
-			if (document.getElementById("disability").value == 1 && document.getElementById("disability-type").length > 1) {
-	 			document.getElementById("display-details-label").style.display = "block";
-			} else {
-				document.getElementById("display-details-label").style.display = "none";
-			}
-		}
-		
-
-
-
-		jQuery(document).ready(function($) {
-
-			function getAge(dateString) {
-				var today = new Date();
-				var birthDate = new Date(dateString);
-				var age = today.getFullYear() - birthDate.getFullYear();
-				var m = today.getMonth() - birthDate.getMonth();
-				if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-					age--;
-				}
-				return age;
-			}
-			
-			$("#legalPopup").click(function () {
-				$("#legal").dialog("open");
-			})
-			
-			$("#legal").dialog({
-				dialogClass: 'wp-dialog',
-				modal: true,
-				autoOpen: false,
-				show: {effect: "fade", duration: 500},
-				closeOnEscape: true,
-				title: "Terms & Conditions",
-				width: ($(window).width()*0.8),
-				buttons: [
-		 			{
-						text: 'Close',
-						class: 'button',
-						click: function() {
-							$(this).dialog('close');
-						}
-					}
-				]
-				
-			})
-			
-			$("#agerangediv").click(function () {
-				$("#calcagerange").dialog("open");
-			})
-			
-			$("#calcagerange").dialog({
-				dialogClass: 'wp-dialog',
-				modal: true,
-				autoOpen: false,
-				show: {effect: "fade", duration: 500},
-				closeOnEscape: true,
-				title: "Calculate your age band",
-				width: 500,
-				buttons: [
-		 			{
-						text: 'I\'d rather not say',
-						class: 'button',
-						click: function() {
-							$("#date_birth_prefer_not_say").val("yes");
-								$("#date_birth").val(null);
-								$("#popup_date_birth").val(null);
-								$("#agerange").val("Not recorded");
-							$(this).dialog('close');
-						}
-					},
-		 			{
-						text: 'Cancel',
-						class: 'button',
-						click: function() {
-							$(this).dialog('close');
-						}
-					},
-		 			{
-						text: 'Calculate Band',
-						class: 'button',
-						click: function() {
-							var dob = $("#popup_date_birth").val();
-							if(dob){
-								$("#date_birth").val(dob);
-								$("#date_birth_prefer_not_say").val("no");
-								var age = getAge(dob);
-								if(age < 16){ $("#agerange").val("Under 15");
-								} else if(age <19){ $("#agerange").val("15-18");
-								} else if(age <26){ $("#agerange").val("19-25");
-								} else if(age <45){ $("#agerange").val("26-44");
-								} else if(age <65){ $("#agerange").val("45-64");
-								} else {$("#agerange").val("Over 65");
-								}								
-								$(this).dialog('close');
-							}
-						}
-					}
-				]
-				
-			})
-			
-			$('#calcagerange').live('keyup', function(e){
-				if (e.keyCode == 13) {
-					$(':button:contains("Calculate Band")').click();
-				}
-			});
-			
-			$("#user_registration").submit(function(e){
-				$.cookie("volplus_newuser", true,  { path: '/' });
-			});
-			
-			$(document).ready(function () {
-				if($.cookie("volplus_newuser")){
-					$.removeCookie("volplus_newuser", {path:'/'});
-					$("#welcomeNewUser").dialog("open");
-				}
-			});
-
-			$( "#welcomeNewUser" ).dialog({
-				dialogClass: 'wp-dialog',
-				modal: true,
-				autoOpen: false,
-				show: {effect: "fade", duration: 500},
-				closeOnEscape: true,
-				title: "You are registered",
-				width: 400,
-				buttons: [
-		 			{
-						text: 'Take me back',
-						class: 'button',
-						click: function() {
-							$.cookie("volplus_iminterested", true,  { path: '/' });
-							$(this).dialog('close');
-							window.location.assign("opportunities/?opp-id=" + $.cookie('volplus_opp_id'));
-						}
-					},
-		 			{
-						text: 'Close',
-						class: 'button',
-						click: function() {
-							$(this).dialog('close');
-							window.location.reload();
-						}
-					}
-				]
-			});
-
-		});
-
-	
-
-	</script>
 
 <?php
 };

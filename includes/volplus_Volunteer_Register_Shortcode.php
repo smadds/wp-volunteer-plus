@@ -75,7 +75,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 			foreach($_POST['disabilities'] as $key=>$value){
 				$_POST['disabilities'][$key] = intval($value);}
 			$volunteer->disabilities = $_POST['disabilities'];}
-		if(isset($_POST['how_heard']))$volunteer->how_heard = (int) $_POST['how_heard'];$_POST['how_heard'] = $volunteer->ethnicity;
+		if(isset($_POST['how_heard']))$volunteer->how_heard = (int) $_POST['how_heard'];$_POST['how_heard'] = $volunteer->how_heard;
 
 
 		$periods = array(
@@ -360,7 +360,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 <!--				<label class="volplus-col-8">I accept the <a href="/<?php echo get_post_field( 'post_name', get_option('volplus_compliancepage'))?>" target=_blank>Terms & Conditions</a>-->
 					<input type="checkbox" name="accept_terms" required></label>
 			<?php }?>
-			<input id="user_registration" class = "button" type="submit" name="user_registration" value="<?php echo $buttontext ?>" style="font-size:1.2em">
+			<input id="button_user_registration" class = "button" type="submit" name="user_registration" value="<?php echo $buttontext ?>" style="font-size:1.2em">
 			<p id='compliancemsg'><?php echo stripslashes(get_option('volplus_enquirycompliancemsg'));?></p>
 		</div>
 	</form>
@@ -489,7 +489,7 @@ function volplus_volunteer_register_func($atts = [], $content = null, $tag = '')
 				
 			})
 			
-			$('#calcagerange').live('keyup', function(e){
+			$('#calcagerange').on('keyup', function(e){
 				if (e.keyCode == 13) {
 					$(':button:contains("Calculate Band")').click();
 				}
