@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="Layer_1"
+   data-name="Layer 1"
+   viewBox="0 0 100 99.999995"
+   version="1.1"
+   sodipodi:docname="v-plus-roundel.svg"
+   width="100"
+   height="100"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   inkscape:export-filename="/home/simon/Downloads/v-plus-roundel-256.png"
+   inkscape:export-xdpi="245.75999"
+   inkscape:export-ydpi="245.75999">
+  <metadata
+     id="metadata49">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>v-plus-logo</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="2045"
+     inkscape:window-height="1004"
+     id="namedview47"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="8.3"
+     inkscape:cx="50"
+     inkscape:cy="50"
+     inkscape:window-x="1640"
+     inkscape:window-y="1012"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="Layer_1" />
+  <defs
+     id="defs4">
+    <style
+       id="style2">.cls-1{fill:#e50046;}.cls-2{fill:#c30046;}.cls-3{fill:#e28e02;}.cls-4{fill:#c55e9c;}.cls-5{fill:#00a8d4;}.cls-6{fill:#00aca0;}</style>
+  </defs>
+  <title
+     id="title6">v-plus-logo</title>
+  <g
+     id="g865"
+     transform="matrix(3.0121637,0,0,3.0111219,5.0000003,4.9999996)"
+     style="stroke-width:0.33204472">
+    <path
+       sodipodi:nodetypes="cccccccccccccccccc"
+       inkscape:connector-curvature="0"
+       style="fill:#c55e9c;fill-opacity:1;stroke-width:0.33204472"
+       class="cls-4"
+       d="m 0.10885448,12.573449 c 0.25046,-0.10409 0.51878,-0.15843 0.79,-0.16 0.98422002,-2.4e-4 1.78825002,0.78602 1.81000002,1.77 0.14776,1.35281 0.56605,2.6621 1.23,3.85 l 0.05,0.09 c 0.38,0.66 1.16,2 1.88,2.22 0.13065,0.0574 0.27935,0.0574 0.41,0 0.24641,-0.21846 0.31605,-0.57485 0.17,-0.87 -1.03746,-1.73887 -1.60918,-3.7158 -1.66,-5.74 -0.0141,-1.76124 0.46007,-3.49195 1.37,-4.9999999 -0.0492,-0.25046 -0.0759,-0.50479 -0.08,-0.76 -0.004,-3.09409 3.1453,-5.19333 5.9999995,-4 1.70975,-0.71059 3.5387,-1.09063 5.39,-1.12 1.53107,-0.0265 3.04956,0.2806 4.45,0.9 l 0.27,0.11 c 0.37416,0.13476 0.79154,-0.0113 1,-0.35 0.16691,-0.36396 0.12084,-0.79013 -0.12,-1.11 -8.45753,-5.46946 -21.1428595,-1.40535 -22.95999952,10.1699999 z"
+       id="path856" />
+    <path
+       style="fill:#c30046;stroke-width:0.33204472"
+       inkscape:connector-curvature="0"
+       id="path24"
+       d="M 6.4088545,20.503449 Z"
+       class="cls-2" />
+    <path
+       style="fill:#e28e02;stroke-width:0.33204472"
+       inkscape:connector-curvature="0"
+       id="path26"
+       d="m 26.178854,16.253449 a 3.43,3.43 0 1 0 -3,1.72 3.44,3.44 0 0 0 3,-1.72"
+       class="cls-3" />
+    <path
+       style="fill:#c55e9c;stroke-width:0.33204472"
+       inkscape:connector-curvature="0"
+       id="path28"
+       d="m 13.848854,7.9234491 a 3.44,3.44 0 1 0 -3.43,3.4399999 3.44,3.44 0 0 0 3.43,-3.4399999"
+       class="cls-4" />
+    <path
+       style="fill:#00a8d4;stroke-width:0.33204472"
+       inkscape:connector-curvature="0"
+       id="path30"
+       d="m 12.798854,25.273449 a 3.43,3.43 0 1 0 -1.72,0.46 3.42,3.42 0 0 0 1.72,-0.46"
+       class="cls-5" />
+    <path
+       style="fill:#e28e02;stroke-width:0.33204472"
+       inkscape:connector-curvature="0"
+       id="path32"
+       d="m 29.878854,14.913449 a 15,15 0 0 0 -5.55,-11.6399999 2.15,2.15 0 0 1 -0.26,0.76 1.82,1.82 0 0 1 -2.44,0.68 10.14,10.14 0 0 0 -3.95,-0.86 h -0.1 c -0.76,0 -2.33,0 -2.86,0.52 a 0.51,0.51 0 0 0 -0.16,0.37 0.73,0.73 0 0 0 0.67,0.58 11.81,11.81 0 0 1 5.8,1.43 9.54,9.54 0 0 1 3.65,3.6799999 4.32,4.32 0 0 1 1.19,7.49 14.65,14.65 0 0 1 -1.73,5.23 10.54,10.54 0 0 1 -3,3.4 l -0.23,0.18 a 0.84,0.84 0 0 0 -0.2,1 1.08,1.08 0 0 0 1,0.45 15,15 0 0 0 8.16,-13.33"
+       class="cls-3" />
+    <path
+       style="fill:#00a8d4;stroke-width:0.33204472"
+       inkscape:connector-curvature="0"
+       id="path36"
+       d="m 7.4088545,27.893449 a 15,15 0 0 0 12.8499995,1 2.13,2.13 0 0 1 -0.53,-0.61 1.81,1.81 0 0 1 0.63,-2.45 10.15,10.15 0 0 0 2.72,-3 l 0.05,-0.09 c 0.38,-0.65 1.17,-2 1,-2.74 a 0.51,0.51 0 0 0 -0.24,-0.33 0.73,0.73 0 0 0 -0.84,0.29 11.8,11.8 0 0 1 -4.14,4.31 9.54,9.54 0 0 1 -5,1.32 4.26,4.26 0 0 1 -0.62,0.44 4.33,4.33 0 0 1 -6.4699995,-3.15 14.63,14.63 0 0 1 -3.66,-4.11 10.54,10.54 0 0 1 -1.44,-4.31 c 0,-0.12 0,-0.22 0,-0.29 a 0.84,0.84 0 0 0 -0.80000002,-0.69 1.09,1.09 0 0 0 -0.9,0.66 15,15 0 0 0 7.46000002,13.73"
+       class="cls-5" />
+  </g>
+</svg>

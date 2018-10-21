@@ -82,7 +82,7 @@ function volplus_manage_organisation_func($atts = [], $content = null, $tag = ''
     
 		if ( !is_email( $organisation['email_address'] ) ) {
 			$reg_errors->add( 'email_invalid', 'We can\'t make out your email address. Please check it\'s correct' ); }
-		if(!is_volplus_user_logged_in()){
+		if(!is_volplus_user_logged_in()==2){
 			if ( 7 > strlen( $organisation['contact_password'] ) ) {
 				$reg_errors->add( 'contact_password', 'Your password too short. It must be at least 8 characters' ); }
 			if ( $organisation['contact_password'] !== $organisation['contact_password_confirmation'] ) {
@@ -123,7 +123,7 @@ function volplus_manage_organisation_func($atts = [], $content = null, $tag = ''
 				$organisation['volplus_id'] = $responsebody['id'];
 //				echo "Your Volunteer Plus ID number is: ".$organisation['volplus_id'];
 
-				if(! is_volplus_user_logged_in()) {
+				if(! is_volplus_user_logged_in()==2) {
 					//VolPlus Org Contact Login
 					$volpluslogin = array(
 						'email_address' => $organisation['contact_email_address'],

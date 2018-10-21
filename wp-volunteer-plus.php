@@ -3,7 +3,7 @@
  * Plugin Name:   WP Volunteer Plus
  * Plugin URI:    https://maddox.co.uk/volunteer-plus
  * Description:   A selection of tools for interacting with the Volunteer Plus Database
- * Version:       1.1.0
+ * Version:       1.1.1
  * Author:        Simon Maddox
  * Author URI:    https://maddox.co.uk
  */
@@ -58,7 +58,7 @@ require_once VOLPLUS_PATH . 'includes/volplus_Manage_Opportunity_Shortcode.php';
 require_once VOLPLUS_PATH . 'includes/volplus_Login_Widget.php';
 require_once VOLPLUS_PATH . 'includes/plugin-update-checker/plugin-update-checker.php';
 
-$myUpdateChecker = Puc_v4p3_Factory::buildUpdateChecker(
+$myUpdateChecker = Puc_v4p4_Factory::buildUpdateChecker(
 	'https://github.com/smadds/wp-volunteer-plus',
 	__FILE__,
 	'wp-volunteer-plus'

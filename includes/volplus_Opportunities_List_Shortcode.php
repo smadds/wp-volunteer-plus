@@ -26,7 +26,7 @@ function volplus_list_opportunities_func($atts = [], $content = null, $tag = '')
 // split query string to array
 	parse_str($_SERVER['QUERY_STRING'],$querystring);
 	
-	if(is_volplus_user_logged_in()) {
+	if(is_volplus_user_logged_in()==1) { //volunteer user
 		$enqhistory = getEnqHistory($_COOKIE['volplus_user_id']);
 
 	}
@@ -38,7 +38,7 @@ function volplus_list_opportunities_func($atts = [], $content = null, $tag = '')
 	
 				$divclass = "volplus-list";
 				$enqstatus = null;
-				if(is_volplus_user_logged_in()) {
+				if(is_volplus_user_logged_in()== 1) {
 					foreach($enqhistory as $key=>$data){
 						if($data['opportunity']['id'] == $opportunity['id']){
 							$divclass = "volplus-list-enquired-" . $lcenqstatuses[$data['status']];
